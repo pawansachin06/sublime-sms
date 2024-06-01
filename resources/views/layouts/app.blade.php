@@ -7,13 +7,28 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
-
         <!-- Scripts -->
         @vite(['resources/css/app.scss', 'resources/js/app.js'])
 
         <!-- Styles -->
         @livewireStyles
+
+        @php
+        $version = date('Y-m-d-h-i-s');
+        $stylesArr = [
+            'reboot' => '/css/reboot.css?v=1',
+            'global' => '/css/global.css?v=' . $version,
+            'toastify' => '/css/lib/toastify.min.css?v=1.12.0',
+            'inter' => 'https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&display=swap',
+            'widMadeForDisplay' => 'https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;600;700;800&display=swap',
+        ];
+        @endphp
+        @foreach($stylesArr as $stylePath)
+            @if( !empty($stylePath) )
+                <link rel="preload" as="style" href="{{ $stylePath }}" />
+                <link rel="stylesheet" href="{{ $stylePath }}" />
+            @endif
+        @endforeach
     </head>
     <body class="antialiased">
         <x-banner />

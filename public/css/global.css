@@ -1,0 +1,16 @@
+@font-face {
+    font-family: "SF Compact Display";
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/SF-Compact-Display-Regular.otf") format("opentype");
+}
+@font-face {
+    font-family: "SF Compact Display";
+    font-style: normal;
+    font-weight: 700;
+    src: url("../fonts/SF-Compact-Display-Semibold.otf") format("opentype");
+}
+
+.font-title {
+    font-family: "Wix Madefor Display", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}

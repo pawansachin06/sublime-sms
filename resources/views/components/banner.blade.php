@@ -9,10 +9,10 @@
                 message = event.detail.message;
                 show = true;
             ">
-    <div class="max-w-screen-xl mx-auto py-2 px-3 sm:px-6 lg:px-8">
+    <div class="max-w-screen-xl mx-auto py-1 px-3">
         <div class="flex items-center justify-between flex-wrap">
             <div class="w-0 flex-1 flex items-center min-w-0">
-                <span class="flex p-2 rounded-lg" :class="{ 'bg-indigo-600': style == 'success', 'bg-red-600': style == 'danger', 'bg-yellow-600': style == 'warning' }">
+                <span class="flex px-1 py-1 rounded-lg" :class="{ 'bg-indigo-600': style == 'success', 'bg-red-600': style == 'danger', 'bg-yellow-600': style == 'warning' }">
                     <svg x-show="style == 'success'" class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -28,13 +28,13 @@
                     </svg>
                 </span>
 
-                <p class="ms-3 font-medium text-sm text-white truncate" x-text="message"></p>
+                <p class="ms-3 mb-0 font-medium text-sm text-white truncate" x-text="message"></p>
             </div>
 
             <div class="shrink-0 sm:ms-3">
                 <button
                     type="button"
-                    class="-me-1 flex p-2 rounded-md focus:outline-none sm:-me-2 transition"
+                    class="-me-1 flex px-1 py-1 rounded-md focus:outline-none sm:-me-2 transition bg-transparent border-solid border-0"
                     :class="{ 'hover:bg-indigo-600 focus:bg-indigo-600': style == 'success', 'hover:bg-red-600 focus:bg-red-600': style == 'danger', 'hover:bg-yellow-600 focus:bg-yellow-600': style == 'warning'}"
                     aria-label="Dismiss"
                     x-on:click="show = false">

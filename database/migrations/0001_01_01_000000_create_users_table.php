@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->unique()->primary;
             $table->string('name');
+            $table->string('lastname')->nullable();
+            $table->string('username')->unique()->nullable();
             $table->string('email')->unique();
+            $table->string('phone')->nullable();
+            $table->string('password')->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
             $table->rememberToken();
             $table->foreignUuid('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
