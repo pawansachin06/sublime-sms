@@ -18,6 +18,11 @@ export default {
             },
         },
     },
-
-    plugins: [forms, typography],
+    corePlugins: {
+        preflight: false,
+    },
+    plugins: [
+        forms,
+        // typography
+    ],
 };
