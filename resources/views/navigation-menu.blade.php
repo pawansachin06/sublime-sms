@@ -15,7 +15,7 @@
             <div class="inline-flex items-center gap-2">
                 <a href="#!" class="inline-flex gap-2 items-center font-title text-black no-underline">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"><path fill="#000" fill-rule="evenodd" d="M7.085 7.63c-1.68 0-2.794-1.723-3.043-3.815C3.775 1.567 4.82 0 7.085 0c2.266 0 3.31 1.523 3.043 3.815-.244 2.092-1.362 3.814-3.043 3.814Zm7.086 5.352c0 1.782-3.172 2.018-7.086 2.018C3.172 15 0 14.764 0 12.982c0-2.21 1.383-4.946 4.757-5.814a3.029 3.029 0 0 0 4.66.001c3.371.869 4.754 3.605 4.754 5.813Z" clip-rule="evenodd"/></svg>
-                    <span>Simon Torsellini</span>
+                    <span class="max-w-40 inline-block truncate">{{ auth()->user()->name }}</span>
                 </a>
                 <form method="POST" action="{{ route('logout') }}" class="inline-flex">
                     @csrf
