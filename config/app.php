@@ -123,4 +123,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'sms_service'=> [
+        'key'=> 'd90398b840c7c294b1bc46d5a7d98c53',
+        'secret'=> env('SMS_SERVICE_SECRET'),
+    ],
+
 ];
