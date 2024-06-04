@@ -16,12 +16,17 @@
             </div>
         @endsession
 
+        <div class="mb-6 rounded text-center border border-solid border-red-500">
+            username: admin<br>
+            password: password
+        </div>
+
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
             <div>
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                <x-label for="email" value="{{ __('Username or Email') }}" />
+                <x-input id="email" class="block mt-1 w-full" type="text" name="email" :value="old('email')" required autofocus autocomplete="username" />
             </div>
 
             <div class="mt-4">

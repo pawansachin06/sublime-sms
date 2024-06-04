@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ContactGroupController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SocialLoginController;
+use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', function () {
     return view('pages.index');
@@ -29,5 +33,16 @@ Route::middleware([
     Route::get('/dashboard', [
         PageController::class, 'dashboard'
     ])->name('dashboard');
+
+    Route::resource('contact-groups', ContactGroupController::class, [
+        'name' => 'contact-groups'
+    ]);
+    Route::resource('contacts', ContactController::class, [
+        'name' => 'contacts'
+    ]);
+    Route::resource('templates', TemplateController::class, [
+        'name' => 'templates'
+    ]);
+
 
 });

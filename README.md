@@ -1,6 +1,6 @@
 ## Installation
 
-Create symlink for public_html folder
+### Create symlink for public_html folder
 
 ```sh
 ln -s /var/www/sites/bgc-sms/public /var/www/sites/bgc-sms/public_html
@@ -10,6 +10,12 @@ Create symlink for storage folder
 
 ```sh
 ln -s /var/www/sites/bgc-sms/storage/app/public /var/www/sites/bgc-sms/public_html/storage
+```
+
+### Create dynamic tables
+
+```sh
+php artisan app:create-tables
 ```
 
 

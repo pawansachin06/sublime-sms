@@ -1,11 +1,12 @@
 <x-admin-layout>
     <div class="max-w-screen-xl mx-auto px-4 mb-8">
+
         <div class="flex flex-wrap justify-between gap-3 mt-4 mb-3">
             <div class="inline-flex flex-wrap gap-3">
                 <x-header.nav-btn active="1">ACTIVITY</x-header.nav-btn>
-                <x-header.nav-btn>GROUPS</x-header.nav-btn>
-                <x-header.nav-btn>CONTACTS</x-header.nav-btn>
-                <x-header.nav-btn>TEMPLATES</x-header.nav-btn>
+                <x-header.nav-btn :href="route('contact-groups.index')">GROUPS</x-header.nav-btn>
+                <x-header.nav-btn :href="route('contacts.index')">CONTACTS</x-header.nav-btn>
+                <x-header.nav-btn :href="route('templates.index')">TEMPLATES</x-header.nav-btn>
                 <x-header.add-btn>NEW SMS</x-header.add-btn>
             </div>
             <div class="">
@@ -19,7 +20,7 @@
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 my-3">
+        <div class="flex flex-wrap items-center gap-2 my-3">
             <div class="inline-block relative">
                 <input type="text" placeholder="User/group" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
                 <span class="absolute left-0 top-0 bottom-0 pointer-events-none px-3 inline-flex items-center justify-center">
