@@ -70,12 +70,19 @@ class ContactGroupController extends Controller
         if(!empty($id)){
             $is_updating = true;
             $item = ContactGroup::where('id', $id)->first();
+        } else {
+            $duplicateItem = ContactGroup::where('name', $input['name'])->where('user_id', $user->id)->first();
+            if(!empty($duplicateItem)){
+                return response()->json(['message'=> 'Name already exists'], 422);
+            }
         }
+        $msg = 'Created new group';
 
         try {
             if($is_updating && !empty($item)){
                 $item->name = $input['name'];
                 $item->update();
+                $msg = 'Updated group';
             } else {
                 $item = ContactGroup::create($input);
             }
@@ -86,10 +93,10 @@ class ContactGroupController extends Controller
                     'name'=> $item->name,
                     'createdBy'=> 'Created by '. $user->name .' '. $user->lastname,
                     'createdOn'=> 'Created on '. $item->created_at->format('jS \of F Y'),
-                    'profile'=> 'BGCG Fixed Income Solutions',
+                    'profile'=> '',
                 ],
                 'reset'=> true,
-                'message'=> 'Created new group'
+                'message'=> $msg,
             ]);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);

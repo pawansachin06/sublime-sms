@@ -35,6 +35,8 @@ document.addEventListener('alpine:init', function () {
             },
             handleDeleteContactGroup(){
                 var self = this;
+                self.isOpenEditContactGroupForm = false;
+                self.$refs.newGroupNameInputRef.value = '';
                 if(this.isOpenDeleteContactGroupForm) {
                     self.isDeletingContactGroup = true;
                     axios.post(contactGroupsRouteDelete, {
@@ -65,7 +67,7 @@ document.addEventListener('alpine:init', function () {
                         self.isDeletingContactGroup = false;
                     });
                 } else {
-                    this.isOpenDeleteContactGroupForm = true;
+                    self.isOpenDeleteContactGroupForm = true;
                 }
             },
             handleCloseDeleteContactGroupForm(){
