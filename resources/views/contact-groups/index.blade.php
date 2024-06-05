@@ -8,7 +8,6 @@
                 <x-header.nav-btn :href="route('contacts.index')">CONTACTS</x-header.nav-btn>
                 <x-header.nav-btn :href="route('templates.index')">TEMPLATES</x-header.nav-btn>
                 <x-header.add-btn x-show="mounted" @click="handleOpenNewContactGroupForm()" style="display:none">NEW GROUP</x-header.add-btn>
-                <!-- data-bs-toggle="modal" data-bs-target="#newGroupModal" -->
             </div>
             <div class="">
                 <select name="" title="Company" class="font-title py-2 leading-tight rounded border-gray-400 focus:border-primary-500 focus:ring-primary-400">
@@ -89,7 +88,7 @@
                         <div x-show="currentContactGroup.id?.length" x-cloak x-text="currentContactGroup.createdOn"></div>
                         <div x-show="currentContactGroup.id?.length" x-cloak x-text="currentContactGroup.profile"></div>
                         <div class="flex gap-2 justify-end items-center mt-3">
-                            <button x-show="isOpenNewContactGroupForm" x-cloak type="button" class="inline-flex gap-2 font-title text-sm font-semibold rounded px-4 py-2 justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500">
+                            <button x-show="currentContactGroup.id?.length > 1" x-cloak type="button" data-bs-toggle="modal" data-bs-target="#importContactGroupsModal" class="inline-flex gap-2 font-title text-sm font-semibold rounded px-4 py-2 justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" width="24" height="24" fill="currentColor" viewBox="0 -960 960 960"><path d="M440-367v127q0 17 11.5 28.5T480-200q17 0 28.5-11.5T520-240v-127l36 36q6 6 13.5 9t15 2.5q7.5-.5 14.5-3.5t13-9q11-12 11.5-28T612-388L508-492q-6-6-13-8.5t-15-2.5q-8 0-15 2.5t-13 8.5L348-388q-12 12-11.5 28t12.5 28q12 11 28 11.5t28-11.5l35-35ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h287q16 0 30.5 6t25.5 17l194 194q11 11 17 25.5t6 30.5v447q0 33-23.5 56.5T720-80H240Zm280-560v-160H240v640h480v-440H560q-17 0-28.5-11.5T520-640ZM240-800v200-200 640-640Z"/></svg>
                                 <span>IMPORT GROUP LIST</span>
                             </button>
@@ -156,11 +155,11 @@
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="newGroupModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="newGroupModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <form @submit.prevent="handleCreateContactGroup($el)" action="{{ route('contact-groups.store') }}" class="modal-content">
+        <div class="modal fade" id="importContactGroupsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="importContactGroupsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <form @submit.prevent="handleImportContactsForm($event)" action="{{ route('contacts.import.upload') }}" class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title text-2xl" id="newGroupModalLabel" x-text="isCreatingContactGroup ? 'Creating New Group..' : 'New Group'">New Group</h4>
+                        <h4 class="modal-title text-lg mt-3 font-title font-semibold" id="importContactGroupsModalLabel">Import Contacts <span x-show="currentContactGroup.id?.length" x-text="'in ' + currentContactGroup.name"></span></h4>
                         <button type="button" title="Close" data-bs-dismiss="modal" aria-label="Close" class="absolute -top-2 -right-1 w-7 h-7 px-0 py-0 border text-gray-500 border-solid border-gray-400 inline-flex items-center justify-center rounded-full bg-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
                                 <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
@@ -168,15 +167,20 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="relative">
-                            <div>Name</div>
-                            <input type="text" name="name" required placeholder="Enter Group Name" class="w-full w-full text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
-                        </div>
+                        <input type="file" id="import_contacts_file" @change="handleImportContactsFile($event)" class="hidden" />
+                        <label for="import_contacts_file" class="cursor-pointer inline-flex w-full mb-1 gap-3 font-title text font-semibold rounded px-4 py-3 justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" width="24" height="24" fill="currentColor" viewBox="0 -960 960 960"><path d="M440-367v127q0 17 11.5 28.5T480-200q17 0 28.5-11.5T520-240v-127l36 36q6 6 13.5 9t15 2.5q7.5-.5 14.5-3.5t13-9q11-12 11.5-28T612-388L508-492q-6-6-13-8.5t-15-2.5q-8 0-15 2.5t-13 8.5L348-388q-12 12-11.5 28t12.5 28q12 11 28 11.5t28-11.5l35-35ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h287q16 0 30.5 6t25.5 17l194 194q11 11 17 25.5t6 30.5v447q0 33-23.5 56.5T720-80H240Zm280-560v-160H240v640h480v-440H560q-17 0-28.5-11.5T520-640ZM240-800v200-200 640-640Z"/></svg>
+                            <span>UPLOAD CONTACTS</span>
+                        </label>
+                        <p class="mb-8 text-center text-sm text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mx-1" fill="currentColor" viewBox="0 0 448 512"><path d="M364.2 83.8c-24.4-24.4-64-24.4-88.4 0l-184 184c-42.1 42.1-42.1 110.3 0 152.4s110.3 42.1 152.4 0l152-152c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-152 152c-64 64-167.6 64-231.6 0s-64-167.6 0-231.6l184-184c46.3-46.3 121.3-46.3 167.6 0s46.3 121.3 0 167.6l-176 176c-28.6 28.6-75 28.6-103.6 0s-28.6-75 0-103.6l144-144c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-144 144c-6.7 6.7-6.7 17.7 0 24.4s17.7 6.7 24.4 0l176-176c24.4-24.4 24.4-64 0-88.4z"/></svg>
+                            <span x-text="importContactsFilename.length ? importContactsFilename : 'No file uploaded'">No file uploaded</span>
+                        </p>
+                        <button type="submit" :disabled="importContactsDisabled" class="w-full my-2 py-2 font-medium rounded text-center border border-solid border-black bg-black text-white disabled:text-black disabled:bg-white">
+                            <span>CREATE CONTACTS & ADD TO GROUP</span>
+                        </button>
                     </div>
-                    <div class="modal-footer gap-1">
-                        <button type="button" class="inline-flex px-4 py-3 rounded justify-center items-center leading-none no-underline border border-solid border-gray-400 text-white bg-gray-400" data-bs-dismiss="modal">CANCEL</button>
-                        <button type="submit" class="inline-flex px-4 py-3 rounded justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500" :disabled="isCreatingContactGroup" x-text="isCreatingContactGroup ? 'SAVING...' : 'SAVE'"></button>
-                    </div>
+                    <!-- <div class="modal-footer"></div> -->
                 </form>
             </div>
         </div>

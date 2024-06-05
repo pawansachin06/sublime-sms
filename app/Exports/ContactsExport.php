@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Illuminate\Contracts\Database\Query\Builder;
 
-class ContactGroupsExport implements FromQuery, WithMapping, WithHeadings
+class ContactsExport implements FromQuery, WithMapping, WithHeadings
 {
     use Exportable;
 
@@ -29,11 +29,8 @@ class ContactGroupsExport implements FromQuery, WithMapping, WithHeadings
     {
         return [
             'id',
-            'uid',
             'name',
-            'username',
-            'status',
-            'deleted_at',
+            'lastname',
             'created_at',
             'updated_at',
         ];
@@ -43,11 +40,8 @@ class ContactGroupsExport implements FromQuery, WithMapping, WithHeadings
     {
         return [
             $item->id,
-            $item->uid,
             $item->name,
-            $item->author->username,
-            strtolower($item->status),
-            $item->deleted_at,
+            $item->lastname,
             $item->created_at,
             $item->updated_at,
         ];

@@ -44,9 +44,18 @@ Route::middleware([
         ContactGroupController::class, 'exportDownload'
     ])->name('contact-groups.export.download');
 
+
     Route::resource('contacts', ContactController::class, [
         'name' => 'contacts'
     ]);
+    Route::get('contacts/export/download', [
+        ContactController::class, 'exportDownload'
+    ])->name('contacts.export.download');
+    Route::post('contacts/import/upload', [
+        ContactController::class, 'importUpload'
+    ])->name('contacts.import.upload');
+
+
     Route::resource('templates', TemplateController::class, [
         'name' => 'templates'
     ]);

@@ -1,5 +1,5 @@
 document.addEventListener('alpine:init', function () {
-    const newGroupModal = new bsModal('#newGroupModal');
+    const newGroupModal = new bsModal('#importContactGroupsModal');
     var contactGroupsRouteIndex = CONTACT_GROUPS_ROUTE_INDEX;
     var contactGroupsRouteDelete = CONTACT_GROUPS_ROUTE_DELETE;
     var contactRouteIndexRoute = CONTACT_ROUTE_INDEX;
@@ -19,6 +19,9 @@ document.addEventListener('alpine:init', function () {
 
             currentContactGroup: {id:'', name: '', createdBy:'', createdOn: '', profile:''},
 
+            importContactsFilename: '',
+            importContactsDisabled: true,
+
             showContactGroupSearchClearBtn: false,
             contactGroupSearchKeyword: '',
             contactGroups: [],
@@ -30,9 +33,26 @@ document.addEventListener('alpine:init', function () {
             contacts: [],
 
 
+            handleImportContactsFile(e){
+                var self = this;
+                if(e.target.files?.length){
+                    let file = e.target.files[0];
+                    self.importContactsFilename = file.name;
+                    self.importContactsDisabled = false;
+                } else {
+                    self.importContactsDisabled = true;
+                    self.importContactsFilename = '';
+                }
+            },
+
+            handleImportContactsForm(e){
+                console.log(e);
+            },
+
             clearSelectedContactGroup(){
                 this.currentContactGroup = {id:'', name: '', createdBy:'', createdOn: '', profile:''}
             },
+
             handleDeleteContactGroup(){
                 var self = this;
                 self.isOpenEditContactGroupForm = false;

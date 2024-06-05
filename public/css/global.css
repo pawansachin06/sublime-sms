@@ -20,6 +20,12 @@
     --bs-modal-border-color: #9ca3af;
     --bs-modal-header-padding: 0.25rem 1rem;
 }
+.modal-sm {
+    --bs-modal-width: 360px;
+}
+.modal-header {
+    --bs-modal-header-border-color: transparent;
+}
 .modal-footer {
     padding: 0.5rem 1rem;
 }
