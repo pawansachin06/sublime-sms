@@ -1,11 +1,20 @@
-<!DOCTYPE html>
+@props([
+    'aos' => 0,
+    'tippy' => 0,
+    'swiper' => 0,
+    'toastify' => 0,
+    'sweetalert' => 0,
+    'contactGroups' => 0,
+    'title' => config('app.name', 'Laravel'),
+    'description' => 'Lyceuma',
+])<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'BGC SMS Portal') }}</title>
+        <title>{{ $title }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,9 +29,9 @@
         @php
         $version = date('Y-m-d-h-i-s');
         $stylesArr = [
-            'reboot' => '/css/reboot.css?v=1',
+            'reboot' => '/css/reboot.css?v=2',
             'global' => '/css/global.css?v=' . $version,
-            'toastify' => '/css/lib/toastify.min.css?v=1.12.0',
+            'toastify' => !empty($toastify) ? '/css/lib/toastify.min.css?v=1.12.0' : '',
             'inter' => 'https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&display=swap',
             'widMadeForDisplay' => 'https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;600;700;800&display=swap',
         ];
@@ -34,6 +43,11 @@
             @endif
         @endforeach
 
+        <script defer src="/js/lib/axios.min.js?v=1.6.8"></script>
+        <script defer src="/js/base.js?v={{ $version }}"></script>
+        @if(!empty($headScript))
+            {{ $headScript }}
+        @endif
     </head>
     <body class="antialiased bg-gray-100">
         <x-banner />
@@ -42,6 +56,24 @@
             {{ $slot }}
         </main>
         @stack('modals')
+
+        @php
+        $scriptsArr = [
+            'toastify' => !empty($toastify) ? '/js/lib/toastify.min.js?v=1.12.0' : '',
+            'sweetalert' => !empty($sweetalert) ? '/js/lib/sweetalert2.min.js?v=11.9.0' : '',
+            'popper' => !empty($tippy) ? '/js/lib/popper.min.js?v=2.11.8' : '',
+            'tippy' => !empty($tippy) ? '/js/lib/tippy-bundle.umd.min.js?v=6.3.7' : '',
+            'global' => '/js/global.js?v='. $version,
+            'contactGroups' => !empty($contactGroups) ? '/js/contact-groups.js?v='. $version : '',
+        ];
+        @endphp
+
+        @foreach($scriptsArr as $scriptPath)
+            @if( !empty($scriptPath) )
+                <script defer src="{{ $scriptPath }}"></script>
+            @endif
+        @endforeach
+
         @livewireScripts
     </body>
 </html>

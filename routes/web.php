@@ -37,6 +37,9 @@ Route::middleware([
     Route::resource('contact-groups', ContactGroupController::class, [
         'name' => 'contact-groups'
     ]);
+    Route::post('contact-groups/delete', [
+        ContactGroupController::class, 'delete'
+    ])->name('contact-groups.delete');
     Route::resource('contacts', ContactController::class, [
         'name' => 'contacts'
     ]);

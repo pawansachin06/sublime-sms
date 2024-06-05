@@ -16,7 +16,7 @@
         @php
         $version = date('Y-m-d-h-i-s');
         $stylesArr = [
-            'reboot' => '/css/reboot.css?v=1',
+            'reboot' => '/css/reboot.css?v=2',
             'global' => '/css/global.css?v=' . $version,
             'toastify' => '/css/lib/toastify.min.css?v=1.12.0',
             'inter' => 'https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&display=swap',

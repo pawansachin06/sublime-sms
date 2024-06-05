@@ -11,6 +11,19 @@
     src: url("../fonts/SF-Compact-Display-Semibold.otf") format("opentype");
 }
 
+[x-cloak] {
+    display: none;
+}
+
+.modal {
+    --bs-modal-footer-gap: 0.25rem;
+    --bs-modal-border-color: #9ca3af;
+    --bs-modal-header-padding: 0.25rem 1rem;
+}
+.modal-footer {
+    padding: 0.5rem 1rem;
+}
+
 input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0 450px white inset;
     /* -webkit-text-fill-color: transparent; */
