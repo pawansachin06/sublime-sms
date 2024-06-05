@@ -40,6 +40,10 @@ Route::middleware([
     Route::post('contact-groups/delete', [
         ContactGroupController::class, 'delete'
     ])->name('contact-groups.delete');
+    Route::get('contact-groups/export/download', [
+        ContactGroupController::class, 'exportDownload'
+    ])->name('contact-groups.export.download');
+
     Route::resource('contacts', ContactController::class, [
         'name' => 'contacts'
     ]);

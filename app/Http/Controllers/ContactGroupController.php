@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ModelStatusEnum;
+use App\Exports\ContactGroupsExport;
 use App\Models\ContactGroup;
 use Exception;
 use Illuminate\Http\Request;
@@ -125,6 +126,15 @@ class ContactGroupController extends Controller
     public function update(Request $request, ContactGroup $contatGroup)
     {
         //
+    }
+
+    public function exportDownload(Request $req)
+    {
+        $user = $req->user();
+        $filename = 'contact-groups-' . date('Y-m-d-H-i-s') . '.xlsx';
+        $query = ContactGroup::query();
+        $query = $query->withTrashed()->with('author:id,username')->orderBy('uid');
+        return (new ContactGroupsExport($query))->download($filename);
     }
 
     public function delete(Request $req)
