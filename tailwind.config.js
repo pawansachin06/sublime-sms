@@ -31,6 +31,9 @@ export default {
                     950: '#172554',
                 },
             },
+            backdropBlur: {
+                xs: '2px',
+            },
             zIndex: {
                 '1': 1,
             }

@@ -48,6 +48,9 @@ Route::middleware([
     Route::resource('contacts', ContactController::class, [
         'name' => 'contacts'
     ]);
+    Route::post('contacts/delete', [
+        ContactController::class, 'delete'
+    ])->name('contacts.delete');
     Route::get('contacts/export/download', [
         ContactController::class, 'exportDownload'
     ])->name('contacts.export.download');

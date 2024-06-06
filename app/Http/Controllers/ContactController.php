@@ -18,9 +18,24 @@ class ContactController extends Controller
     public function index(Request $req)
     {
         if ($req->ajax()) {
-            $data = Contact::latest()->with('groups:id,name')->paginate(2, [
-                'id', 'name', 'lastname', 'company', 'phone', 'country'
-            ])->withQueryString();
+            $keyword = $req->keyword;
+            $phone = $req->phone;
+            $query = Contact::query();
+
+            if (!empty($phone)) {
+                $query = $query->where('phone', 'like', '%' . $phone . '%');
+            }
+            if (!empty($keyword)) {
+                $query = $query->where(function ($q) use ($keyword) {
+                    $q->where('name', 'like', '%' . $keyword . '%')
+                        ->orWhere('lastname', 'like', '%' . $keyword . '%')
+                        ->orWhere('company', 'like', '%' . $keyword . '%');
+                });
+            }
+
+            $data = $query->latest()->with('groups:id,name')->paginate(10, [
+                'id', 'name', 'lastname', 'company', 'phone', 'country','comments',
+            ]);
             return response()->json([
                 'success' => true,
                 'data' => $data,
@@ -47,6 +62,7 @@ class ContactController extends Controller
     public function store(Request $req)
     {
         $input = $req->validate([
+            'id' => ['nullable', 'string', Rule::exists(Contact::class, 'id')],
             'name' => ['required', 'string', 'max:255'],
             'lastname' => ['nullable', 'string', 'max:255'],
             'phone' => ['required', 'numeric',],
@@ -60,15 +76,28 @@ class ContactController extends Controller
         ]);
 
         $input['status'] = ModelStatusEnum::PUBLISHED;
+        $message = 'Saved new contact successfully';
+        $is_updating = false;
 
         try {
-            $item = Contact::create($input);
-            $item->groups()->sync($input['contact_group_id']);
+
+            if(!empty($input['id'])){
+                $is_updating = true;
+                $item = Contact::findOrFail($input['id']);
+                $item->update($input);
+                $item->groups()->sync($input['contact_group_id']);
+                $message = 'Updated contact successfully';
+            } else {
+                $item = Contact::create($input);
+                $item->groups()->sync($input['contact_group_id']);
+            }
+
             return response()->json([
                 'success' => true,
-                'reset' => true,
-                'close' => true,
-                'message' => 'Saved contact successfully'
+                'reload'=> !$is_updating,
+                'reset' =>  !$is_updating,
+                'close' => !$is_updating,
+                'message' => $message,
             ]);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -113,6 +142,27 @@ class ContactController extends Controller
         $query = Contact::query();
         $query = $query->withTrashed()->orderBy('name');
         return (new ContactsExport($query))->download($filename);
+    }
+
+    public function delete(Request $req)
+    {
+        $user = $req->user();
+        $id = $req->id;
+        if (empty($id)) {
+            return response()->json([
+                'message' => 'Contact ID is missing'
+            ], 422);
+        }
+        $item = Contact::findOrFail($id);
+        try {
+            $item->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Deleted contact',
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     /**
