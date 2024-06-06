@@ -15,4 +15,12 @@ class Contact extends Model
 
     public static $pivot_table = 'contact_pivot_contact_group';
 
+    protected $fillable = [
+        'name', 'lastname', 'phone', 'company', 'country', 'status', 'comments', 'meta'
+    ];
+
+    public function groups()
+    {
+        return $this->belongsToMany(ContactGroup::class, $this::$pivot_table, 'contact_id', 'contact_group_id');
+    }
 }

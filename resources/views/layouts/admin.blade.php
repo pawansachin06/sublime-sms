@@ -4,6 +4,7 @@
     'swiper' => 0,
     'toastify' => 0,
     'sweetalert' => 0,
+    'contacts' => 0,
     'contactGroups' => 0,
     'title' => config('app.name', 'Laravel'),
     'description' => 'Lyceuma',
@@ -64,6 +65,7 @@
             'popper' => !empty($tippy) ? '/js/lib/popper.min.js?v=2.11.8' : '',
             'tippy' => !empty($tippy) ? '/js/lib/tippy-bundle.umd.min.js?v=6.3.7' : '',
             'global' => '/js/global.js?v='. $version,
+            'contacts' => !empty($contacts) ? '/js/contacts.js?v='. $version : '',
             'contactGroups' => !empty($contactGroups) ? '/js/contact-groups.js?v='. $version : '',
         ];
         @endphp

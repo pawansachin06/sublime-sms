@@ -2,19 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ModelStatusEnum;
 use App\Models\Contact;
 use App\Models\ContactGroup;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Exports\ContactsExport;
+use Exception;
 
 class ContactController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $req)
     {
-        return view('contacts.index');
+        if ($req->ajax()) {
+            $data = Contact::latest()->with('groups:id,name')->paginate(2, [
+                'id', 'name', 'lastname', 'company', 'phone', 'country'
+            ])->withQueryString();
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+            ]);
+        } else {
+            $countries = config('countries');
+            return view('contacts.index', [
+                'countries' => $countries,
+            ]);
+        }
     }
 
     /**
@@ -30,7 +46,33 @@ class ContactController extends Controller
      */
     public function store(Request $req)
     {
-        //
+        $input = $req->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'lastname' => ['nullable', 'string', 'max:255'],
+            'phone' => ['required', 'numeric',],
+            'country' => ['required', 'string', 'max:255'],
+            'company' => ['nullable', 'string', 'max:255'],
+            'comments' => ['nullable', 'string'],
+            'contact_group_id' => ['required'],
+            'contact_group_id.*' => ['required', Rule::exists(ContactGroup::class, 'id')],
+        ], [
+            'contact_group_id.required' => 'Select at least one Group to save'
+        ]);
+
+        $input['status'] = ModelStatusEnum::PUBLISHED;
+
+        try {
+            $item = Contact::create($input);
+            $item->groups()->sync($input['contact_group_id']);
+            return response()->json([
+                'success' => true,
+                'reset' => true,
+                'close' => true,
+                'message' => 'Saved contact successfully'
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     /**

@@ -31,6 +31,9 @@ export default {
                     950: '#172554',
                 },
             },
+            zIndex: {
+                '1': 1,
+            }
         },
     },
     corePlugins: {

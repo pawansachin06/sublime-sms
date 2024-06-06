@@ -23,4 +23,8 @@ class ContactGroup extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function contacts()
+    {
+        return $this->belongsToMany(ContactGroup::class, Contact::$pivot_table, 'contact_group_id', 'contact_id');
+    }
 }

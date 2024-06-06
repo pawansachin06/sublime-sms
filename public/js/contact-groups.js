@@ -25,6 +25,7 @@ document.addEventListener('alpine:init', function () {
             showContactGroupSearchClearBtn: false,
             contactGroupSearchKeyword: '',
             contactGroups: [],
+            isFirstTimeContactGroupsLoaded: true,
 
             contactPage: 1,
             contactPerPage: 10,
@@ -167,6 +168,16 @@ document.addEventListener('alpine:init', function () {
                     dev && console.log(res.data);
                     if(res.data?.success){
                         self.contactGroups = res.data.items;
+                        if(self.isFirstTimeContactGroupsLoaded && res.data.items.length){
+                            self.currentContactGroup = {
+                                id: res.data.items[0].id,
+                                name: res.data.items[0].name,
+                                createdBy: res.data.items[0].createdBy,
+                                createdOn: res.data.items[0].createdOn,
+                                profile: res.data.items[0].profile,
+                            }
+                            self.isFirstTimeContactGroupsLoaded = false;
+                        }
                     } else {
                         let msg = (res.data?.message) ? res.data.message : 'No response from server';
                         Toastify({

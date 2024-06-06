@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'GB' => 'United Kingdom',
+
     'AS' => 'American Samoa',
     'AO' => 'Angola',
     'AR' => 'Argentina',
@@ -107,7 +109,6 @@ return [
     'UG' => 'Uganda',
     'UA' => 'Ukraine',
     'AE' => 'United Arab Emirates',
-    'GB' => 'United Kingdom',
     'US' => 'United States',
     'UY' => 'Uruguay',
     'VU' => 'Vanuatu',
