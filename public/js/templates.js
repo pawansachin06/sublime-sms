@@ -122,6 +122,8 @@ document.addEventListener('alpine:init', function(){
                         dev && console.log(res.data);
                         if(res.data.success){
                             self.loadTemplates(1);
+                            self.isEditing = false;
+                            self.showEditExitForm = false;
                             self.isOpenDeleteTemplateForm = false;
                             self.handleClearSelectedTemplate();
                         }
