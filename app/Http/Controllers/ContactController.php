@@ -88,6 +88,16 @@ class ContactController extends Controller
                 $item->groups()->sync($input['contact_group_id']);
                 $message = 'Updated contact successfully';
             } else {
+
+                $duplicate_item = Contact::where('country', $input['country'])
+                                    ->where('phone', $input['phone'])->first();
+                if(!empty($duplicate_item)){
+                    return response()->json([
+                        'success'=> false,
+                        'message'=> 'Contact with same phone number already exists',
+                    ]);
+                }
+
                 $item = Contact::create($input);
                 $item->groups()->sync($input['contact_group_id']);
             }

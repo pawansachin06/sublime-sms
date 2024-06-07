@@ -1,4 +1,4 @@
-<x-admin-layout contacts="1" toastify="1">
+<x-admin-layout contacts="1" toastify="1" flags="1">
     <div x-data="contacts" class="max-w-screen-xl mx-auto px-4 mb-8">
 
         <div class="flex flex-wrap justify-between gap-3 mt-4 mb-3">
@@ -89,6 +89,7 @@
                                     <span x-text="contact.company"></span>
                                 </td>
                                 <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                    <span :class="'fi-' + contact?.country?.toLowerCase()" class="country-flag fi mr-1"></span>
                                     <span x-text="contact.phone"></span>
                                 </td>
                                 <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
