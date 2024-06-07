@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\ModelStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Models\User;
+use App\Models\Profile;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -22,5 +24,6 @@ class DatabaseSeeder extends Seeder
             'role'=> UserRoleEnum::SUPERADMIN,
             'email' => 'admin@example.com',
         ]);
+
     }
 }

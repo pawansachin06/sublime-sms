@@ -23,7 +23,7 @@
         <div class="flex flex-wrap items-center justify-between gap-2 my-3">
             <div class="flex-none flex flex-wrap gap-2">
                 <div class="inline-block relative">
-                    <input type="text" x-model="searchKeywordName" @input.debounce.750ms="handleSearchKeywordName()" placeholder="User" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
+                    <input type="text" x-model="searchKeywordName" @input.debounce.750ms="handleSearchKeywordName()" placeholder="User" spellcheck="false" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
                     <button type="button" x-show="showSearchKeywordNameClearBtn" x-cloak x-transition @click="handleClearSearchKeywordName()" title="Clear" class="absolute end-0 top-0 bottom-0 inline-flex items-center justify-center py-2 border-0 text-gray-500 bg-transparent">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
                             <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
@@ -41,7 +41,7 @@
                     <option value="">Failed</option>
                 </select>
                 <div class="inline-block relative">
-                    <input type="text" x-model="searchKeywordPhone" @input.debounce.750ms="handleSearchKeywordPhone()" placeholder="Phone Number" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
+                    <input type="text" x-model="searchKeywordPhone" @input.debounce.750ms="handleSearchKeywordPhone()" placeholder="Phone Number" spellcheck="false" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
                     <button type="button" x-show="showSearchKeywordPhoneClearBtn" x-cloak x-transition @click="handleClearSearchKeywordPhone()" title="Clear" class="absolute end-0 top-0 bottom-0 inline-flex items-center justify-center py-2 border-0 text-gray-500 bg-transparent">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
                             <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
@@ -122,12 +122,12 @@
                                                 <button type="button" @click="handleEditContactBtn(contact)" class="w-6 h-6 px-0 py-0 inline-flex items-center justify-center rounded-full border-0 text-white bg-gray-400 group-hover:bg-primary-500">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="currentColor" viewBox="0 0 512 512"><path d="m362.7 19.3-48.4 48.4 130 130 48.4-48.4c25-25 25-65.5 0-90.5l-39.4-39.5c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2c-2.5 8.5-.2 17.6 6 23.8s15.3 8.5 23.7 6.1L151 475.7c14.1-4.2 27-11.8 37.4-22.2l233.3-233.2-130-130z"/></svg>
                                                 </button>
-                                                <div class="hidden z-1 group-hover:inline-flex left-7 top-0 bottom-0 px-2 pb-1 bg-gray-200 absolute font-medium text-sm leading-none text-primary-500 items-center justify-center">
+                                                <div class="pointer-events-none select-none hidden z-1 group-hover:inline-flex left-7 top-0 bottom-0 px-2 pb-1 bg-gray-200 absolute font-medium text-sm leading-none text-primary-500 items-center justify-center">
                                                     <span>Edit</span>
                                                 </div>
                                             </div>
                                             <div class="relative group py-1">
-                                                <div class="hidden group-hover:inline-flex right-7 top-0 bottom-0 px-2 pb-1 bg-gray-200 absolute font-medium text-sm leading-none text-primary-500 items-center justify-center">
+                                                <div class="pointer-events-none select-none hidden group-hover:inline-flex right-7 top-0 bottom-0 px-2 pb-1 bg-gray-200 absolute font-medium text-sm leading-none text-primary-500 items-center justify-center">
                                                     <span>Delete</span>
                                                 </div>
                                                 <button @click="handleDeleteContact(contact)" type="button" class="w-6 h-6 px-0 py-0 inline-flex items-center justify-center rounded-full border-0 text-white bg-gray-400 group-hover:bg-primary-500">

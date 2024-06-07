@@ -3,9 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Enums\ModelStatusEnum;
+use App\Enums\UserRoleEnum;
 use App\Models\Contact;
 use App\Models\ContactGroup;
 use App\Models\Profile;
+use App\Models\Template;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -52,6 +55,28 @@ class CreateTables extends Command
         } else {
             $this->error(' '. $table_name .' table already exist ');
         }
+
+
+        /**
+         * Create SMS Template table
+         */
+        $table_name = app(Template::class)->getTable();
+        if(!Schema::hasTable($table_name)){
+            Schema::create($table_name, function (Blueprint $table) {
+                $table->uuid('id')->unique()->primary;
+                $table->string('name');
+                $table->uuid('profile_id')->nullable();
+                $table->string('status')->default(ModelStatusEnum::DRAFT);
+                $table->text('message')->nullable();
+                $table->text('meta')->nullable();
+                $table->softDeletes();
+                $table->timestamps();
+            });
+            $this->info($table_name .' table created');
+        } else {
+            $this->error(' '. $table_name .' table already exist ');
+        }
+
 
 
         /**
@@ -126,6 +151,20 @@ class CreateTables extends Command
         } else {
             $this->error(' '. $table_name .' table already exist ');
         }
+
+
+        $user = User::factory()->create([
+            'name'=> 'BGC',
+            'username'=> 'bgc',
+            'role'=> UserRoleEnum::ADMIN,
+            'email'=> 'bgc@example.com',
+        ]);
+
+        Profile::factory()->create([
+            'name'=> 'BGCG Fixed Income Solutions',
+            'author_id'=> $user->id,
+            'status'=> ModelStatusEnum::PUBLISHED,
+        ]);
 
 
         $this->newLine();

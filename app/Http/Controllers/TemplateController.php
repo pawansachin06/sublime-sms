@@ -2,17 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ModelStatusEnum;
+use App\Models\Profile;
 use App\Models\Template;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TemplateController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $req)
     {
-        return view('templates.index');
+        if($req->ajax()){
+            $keyword = $req->keyword;
+            $query = Template::query();
+            if(!empty($keyword)){
+                $query = $query->where('name', 'like', '%'. $keyword . '%');
+            }
+            $items = $query->get(['id', 'name', 'profile_id', 'message']);
+            return response()->json([
+                'success'=> true,
+                'items'=> $items,
+                'message'=> 'Success'
+            ]);
+        } else {
+            $profiles = Profile::get(['id', 'name']);
+            return view('templates.index', [
+                'profiles' => $profiles,
+            ]);
+        }
     }
 
     /**
@@ -26,9 +47,42 @@ class TemplateController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $req)
     {
-        //
+        $input = $req->validate([
+            'id' => ['nullable', 'string', Rule::exists(Template::class, 'id')],
+            'profile_id' => ['required', 'string', Rule::exists(Profile::class, 'id')],
+            'name' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string', 'max:255'],
+        ], [
+            'profile_id.required' => 'Please select a profile for this template'
+        ]);
+
+        $input['status'] = ModelStatusEnum::PUBLISHED;
+        $message = 'Saved new template successfully';
+        $is_updating = false;
+
+        try {
+
+            if(!empty($input['id'])){
+                $is_updating = true;
+                $item = Template::findOrFail($input['id']);
+                $item->update($input);
+                $message = 'Updated template successfully';
+            } else {
+                $item = Template::create($input);
+            }
+
+            return response()->json([
+                'success' => true,
+                'id' => $item->id,
+                'reload'=> true,
+                'updating'=> $is_updating,
+                'message' => $message,
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -53,6 +107,27 @@ class TemplateController extends Controller
     public function update(Request $request, Template $template)
     {
         //
+    }
+
+    public function delete(Request $req)
+    {
+        $user = $req->user();
+        $id = $req->id;
+        if (empty($id)) {
+            return response()->json([
+                'message' => 'Template ID is missing'
+            ], 422);
+        }
+        $item = Template::findOrFail($id);
+        try {
+            $item->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Deleted template',
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     /**

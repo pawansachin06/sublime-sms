@@ -62,6 +62,9 @@ Route::middleware([
     Route::resource('templates', TemplateController::class, [
         'name' => 'templates'
     ]);
+    Route::post('templates/delete', [
+        TemplateController::class, 'delete'
+    ])->name('templates.delete');
 
 
 });

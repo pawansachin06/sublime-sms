@@ -39,7 +39,7 @@
                     </div>
                 </div>
                 <div class="relative min-h-40 h-full grow">
-                    <div class="absolute w-full h-full overflow-y-auto">
+                    <div class="absolute w-full h-full overflow-y-auto scrollbar-thin">
                         <div x-show="isLoadingContactGroups" class="absolute left-0 top-0 bottom-0 backdrop-blur-sm right-0 text-center text-primary-500 py-3">
                             <x-loader class="w-7 h-7" />
                         </div>

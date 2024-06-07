@@ -3,8 +3,10 @@
     'tippy' => 0,
     'swiper' => 0,
     'toastify' => 0,
+    'autosize' => 0,
     'sweetalert' => 0,
     'contacts' => 0,
+    'templates' => 0,
     'contactGroups' => 0,
     'title' => config('app.name', 'Laravel'),
     'description' => 'Lyceuma',
@@ -63,9 +65,11 @@
             'toastify' => !empty($toastify) ? '/js/lib/toastify.min.js?v=1.12.0' : '',
             'sweetalert' => !empty($sweetalert) ? '/js/lib/sweetalert2.min.js?v=11.9.0' : '',
             'popper' => !empty($tippy) ? '/js/lib/popper.min.js?v=2.11.8' : '',
+            'autosize' => !empty($autosize) ? '/js/lib/autosize.min.js?v=6.0.1' : '',
             'tippy' => !empty($tippy) ? '/js/lib/tippy-bundle.umd.min.js?v=6.3.7' : '',
             'global' => '/js/global.js?v='. $version,
             'contacts' => !empty($contacts) ? '/js/contacts.js?v='. $version : '',
+            'templates' => !empty($templates) ? '/js/templates.js?v='. $version : '',
             'contactGroups' => !empty($contactGroups) ? '/js/contact-groups.js?v='. $version : '',
         ];
         @endphp
