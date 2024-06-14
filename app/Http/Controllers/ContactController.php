@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ModelStatusEnum;
 use App\Models\Contact;
 use App\Models\ContactGroup;
+use App\Services\SMSApi;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Exports\ContactsExport;
@@ -12,6 +13,13 @@ use Exception;
 
 class ContactController extends Controller
 {
+    protected $smsApi;
+
+    function __construct(SMSApi $smsApi)
+    {
+        $this->smsApi = $smsApi;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -33,7 +41,7 @@ class ContactController extends Controller
                 });
             }
 
-            $data = $query->latest()->with('groups:id,name')->paginate(10, [
+            $data = $query->latest()->with('groups:id,uid,name')->paginate(10, [
                 'id', 'name', 'lastname', 'company', 'phone', 'country','comments',
             ]);
             return response()->json([
@@ -69,10 +77,10 @@ class ContactController extends Controller
             'country' => ['required', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
             'comments' => ['nullable', 'string'],
-            'contact_group_id' => ['required'],
-            'contact_group_id.*' => ['required', Rule::exists(ContactGroup::class, 'id')],
+            'contact_group_uid' => ['required'],
+            'contact_group_uid.*' => ['required', Rule::exists(ContactGroup::class, 'uid')],
         ], [
-            'contact_group_id.required' => 'Select at least one Group to save'
+            'contact_group_uid.required' => 'Select at least one Group to save'
         ]);
 
         $input['status'] = ModelStatusEnum::PUBLISHED;
@@ -84,9 +92,63 @@ class ContactController extends Controller
             if(!empty($input['id'])){
                 $is_updating = true;
                 $item = Contact::findOrFail($input['id']);
+
+                $old_uids = $item->groups->pluck('uid')->toArray();
+                $new_uids = $input['contact_group_uid'];
+
+                $update_uids = array_intersect($new_uids, $old_uids);
+                $delete_uids = array_diff($old_uids, $new_uids);
+                $create_uids = array_diff($new_uids, $old_uids);
+
+                if(!empty($update_uids)){
+                    foreach ($update_uids as $update_uid) {
+                        $res = $this->smsApi->edit_list_member($update_uid, [
+                            'phone'=> $input['phone'],
+                            'countrycode'=> $input['country'],
+                            'name'=> $input['name'],
+                            'lastname'=> $input['lastname'],
+                            'company'=> $input['company'],
+                            'comments'=> $input['comments'],
+                        ]);
+                    }
+                    if(!empty($res['msisdn'])){
+                        $input['phone'] = $res['msisdn'];
+                    }
+                }
+
+                if(!empty($delete_uids)){
+                    foreach ($delete_uids as $delete_uid) {
+                        $res = $this->smsApi->delete_from_list($delete_uid, [
+                            'phone'=> $item->phone,
+                            'country'=> $item->country
+                        ]);
+                    }
+                    if(!empty($res['msisdn'])){
+                        $input['phone'] = $res['msisdn'];
+                    }
+                }
+
+                if(!empty($create_uids)){
+                    foreach ($create_uids as $create_uid) {
+                        $res = $this->smsApi->add_to_list($create_uid, [
+                            'phone'=> $input['phone'],
+                            'countrycode'=> $input['country'],
+                            'name'=> $input['name'],
+                            'lastname'=> $input['lastname'],
+                            'company'=> $input['company'],
+                            'comments'=> $input['comments'],
+                        ]);
+                    }
+                    if(!empty($res['msisdn'])){
+                        $input['phone'] = $res['msisdn'];
+                    }
+                }
+
                 $item->update($input);
-                $item->groups()->sync($input['contact_group_id']);
+                $item->groups()->sync($input['contact_group_uid']);
                 $message = 'Updated contact successfully';
+
+
             } else {
 
                 $duplicate_item = Contact::where('country', $input['country'])
@@ -98,8 +160,24 @@ class ContactController extends Controller
                     ]);
                 }
 
+                // add contact to api list
+                $uids = $input['contact_group_uid'];
+                foreach ($uids as $uid) {
+                    $res = $this->smsApi->add_to_list($uid, [
+                        'phone'=> $input['phone'],
+                        'countrycode'=> $input['country'],
+                        'name'=> $input['name'],
+                        'lastname'=> $input['lastname'],
+                        'company'=> $input['company'],
+                        'comments'=> $input['comments'],
+                    ]);
+                    if(!empty($res['msisdn'])){
+                        $input['phone'] = $res['msisdn'];
+                    }
+                }
+
                 $item = Contact::create($input);
-                $item->groups()->sync($input['contact_group_id']);
+                $item->groups()->sync($input['contact_group_uid']);
             }
 
             return response()->json([
@@ -165,6 +243,18 @@ class ContactController extends Controller
         }
         $item = Contact::findOrFail($id);
         try {
+
+            $res = $this->smsApi->delete_from_list(0, [
+                'phone'=> $item->phone,
+                'country'=> $item->country
+            ]);
+            if(!empty($res['error']) && !empty($res['code']) && $res['code'] !== 'SUCCESS'){
+                $msg = $res['error'];
+                return response()->json([
+                    'message' => !empty($msg['description']) ? $msg['description'] : 'Something went wrong',
+                ], 500);
+            }
+
             $item->delete();
             return response()->json([
                 'success' => true,

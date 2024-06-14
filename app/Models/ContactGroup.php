@@ -16,7 +16,7 @@ class ContactGroup extends Model
     protected $table = 'contact_groups';
 
     protected $fillable = [
-        'uid', 'name', 'user_id', 'status', 'meta'
+        'id', 'uid', 'name', 'user_id', 'status', 'meta'
     ];
 
     public function author(){

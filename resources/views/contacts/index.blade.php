@@ -248,7 +248,7 @@
                                 <div class="flex flex-wrap gap-2">
                                     <template x-for="selectedContactGroup in selectedContactGroups" :key="selectedContactGroup.id">
                                         <div class="inline-flex max-w-56 truncate rounded pl-3 text-sm leading-tight text-gray-600 border border-solid border-gray-200 bg-gray-100">
-                                            <input type="hidden" name="contact_group_id[]" :value="selectedContactGroup.id" />
+                                            <input type="hidden" name="contact_group_uid[]" :value="selectedContactGroup.uid" />
                                             <span class="self-center truncate" x-text="selectedContactGroup.name"></span>
                                             <button type="button" @click="handleRemoveSelectedContactGroup(selectedContactGroup)" title="Clear" class="px-2 py-2 text-gray-600 border-0 bg-transparent">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-4 h-4" fill="currentColor" viewBox="0 -960 960 960">

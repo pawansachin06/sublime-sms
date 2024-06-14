@@ -101,7 +101,7 @@ class CreateTables extends Command
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
                 $table->uuid('id')->unique()->primary;
-                $table->bigInteger('uid')->unsigned()->autoIncrement();
+                $table->string('uid')->nullable();
                 $table->string('name');
                 $table->uuid('user_id')->nullable();
                 $table->string('status')->default(ModelStatusEnum::DRAFT);
@@ -153,18 +153,21 @@ class CreateTables extends Command
         }
 
 
-        $user = User::factory()->create([
-            'name'=> 'BGC',
-            'username'=> 'bgc',
-            'role'=> UserRoleEnum::ADMIN,
-            'email'=> 'bgc@example.com',
-        ]);
+        $existing_user = User::where('username', 'bgc')->first(['id']);
+        if(empty($existing_user)){
+            $user = User::factory()->create([
+                'name'=> 'BGC',
+                'username'=> 'bgc',
+                'role'=> UserRoleEnum::ADMIN,
+                'email'=> 'bgc@example.com',
+            ]);
 
-        Profile::factory()->create([
-            'name'=> 'BGCG Fixed Income Solutions',
-            'author_id'=> $user->id,
-            'status'=> ModelStatusEnum::PUBLISHED,
-        ]);
+            Profile::factory()->create([
+                'name'=> 'BGCG Fixed Income Solutions',
+                'author_id'=> $user->id,
+                'status'=> ModelStatusEnum::PUBLISHED,
+            ]);
+        }
 
 
         $this->newLine();

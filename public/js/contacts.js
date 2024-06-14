@@ -8,8 +8,8 @@ document.addEventListener('alpine:init', function () {
     var contactGroupAbortController = null;
     var contactAbortController = null;
 
-    if(newContactsModalEl){
-        newContactsModalEl.addEventListener('shown.bs.modal', function(){
+    if (newContactsModalEl) {
+        newContactsModalEl.addEventListener('shown.bs.modal', function () {
             document.getElementById('new-contact-modal-first-input')?.focus();
         });
     }
@@ -50,10 +50,10 @@ document.addEventListener('alpine:init', function () {
             isContactGroupDropdownOpen: false,
             isLoadingContactGroups: false,
 
-            handleCloseModalBtn(){
+            handleCloseModalBtn() {
                 newContactsModal.hide();
                 var self = this;
-                if(self.modalInputId?.length){
+                if (self.modalInputId?.length) {
                     self.loadContacts();
                 }
                 self.modalInputId = '';
@@ -67,7 +67,7 @@ document.addEventListener('alpine:init', function () {
                 self.handleDuplicateContactGroupMarking();
             },
 
-            handleEditContactBtn(contact){
+            handleEditContactBtn(contact) {
                 newContactsModal.show();
                 var self = this;
                 self.modalInputId = contact.id;
@@ -77,7 +77,7 @@ document.addEventListener('alpine:init', function () {
                 self.modalInputCountry = contact.country;
                 self.modalInputCompany = contact.company;
                 self.modalInputComments = contact.comments;
-                if(contact?.groups?.length){
+                if (contact?.groups?.length) {
                     self.selectedContactGroups = contact.groups;
                 } else {
                     self.selectedContactGroups = [];
@@ -85,43 +85,43 @@ document.addEventListener('alpine:init', function () {
                 self.handleDuplicateContactGroupMarking();
             },
 
-            handleSearchKeywordName(){
-                if(this.searchKeywordName.trim().length){
+            handleSearchKeywordName() {
+                if (this.searchKeywordName.trim().length) {
                     this.showSearchKeywordNameClearBtn = true;
                 } else {
                     this.showSearchKeywordNameClearBtn = false;
                 }
                 this.loadContacts(1);
             },
-            handleSearchKeywordPhone(){
-                if(this.searchKeywordPhone.trim().length){
+            handleSearchKeywordPhone() {
+                if (this.searchKeywordPhone.trim().length) {
                     this.showSearchKeywordPhoneClearBtn = true;
                 } else {
                     this.showSearchKeywordPhoneClearBtn = false;
                 }
                 this.loadContacts(1);
             },
-            handleClearSearchKeywordName(){
+            handleClearSearchKeywordName() {
                 this.searchKeywordName = '';
                 this.showSearchKeywordNameClearBtn = false;
                 this.loadContacts(1);
             },
-            handleClearSearchKeywordPhone(){
+            handleClearSearchKeywordPhone() {
                 this.searchKeywordPhone = '';
                 this.showSearchKeywordPhoneClearBtn = false;
                 this.loadContacts(1);
             },
 
-            handleDeleteContact(contact){
+            handleDeleteContact(contact) {
                 this.currentDeleteContact = contact;
             },
-            handleConfirmedDeleteContact(contact){
+            handleConfirmedDeleteContact(contact) {
                 var self = this;
                 self.isDeletingContact = true;
                 axios.post(contactsRouteDelete, {
                     id: contact.id
-                }).then(function(res){
-                    if(res.data.success){
+                }).then(function (res) {
+                    if (res.data.success) {
                         self.loadContacts();
                         self.currentDeleteContact = null;
                     }
@@ -131,7 +131,7 @@ document.addEventListener('alpine:init', function () {
                         className: (res.data?.success) ? 'toast-success' : 'toast-error',
                         position: 'center',
                     }).showToast();
-                }).catch(function(err){
+                }).catch(function (err) {
                     dev && console.error(err);
                     let msg = getAxiosError(err);
                     Toastify({
@@ -139,11 +139,11 @@ document.addEventListener('alpine:init', function () {
                         className: 'toast-error',
                         position: 'center',
                     }).showToast();
-                }).finally(function(){
+                }).finally(function () {
                     self.isDeletingContact = false;
                 });
             },
-            handleCancelDeleteContact(){
+            handleCancelDeleteContact() {
                 this.currentDeleteContact = null;
             },
 
@@ -154,15 +154,15 @@ document.addEventListener('alpine:init', function () {
                 var url = form.getAttribute('action');
                 axios.post(url, data).then(function (res) {
                     dev && console.log(res.data);
-                    if(res.data?.reset){
+                    if (res.data?.reset) {
                         form.reset();
                     }
-                    if(res.data?.close){
+                    if (res.data?.close) {
                         newContactsModal.hide();
                         self.selectedContactGroups = [];
                         self.handleDuplicateContactGroupMarking();
                     }
-                    if(res.data?.reload){
+                    if (res.data?.reload) {
                         self.loadContacts();
                     }
                     let msg = (res.data?.message) ? res.data.message : 'No response from server';
@@ -244,7 +244,7 @@ document.addEventListener('alpine:init', function () {
                     }
                 });
             },
-            handleRemoveSelectedContactGroup(group){
+            handleRemoveSelectedContactGroup(group) {
                 var self = this;
                 // iterate backward to avoid index shifting
                 for (let i = self.selectedContactGroups.length - 1; i >= 0; i--) {
@@ -268,6 +268,7 @@ document.addEventListener('alpine:init', function () {
                 if (!isDuplicate) {
                     self.selectedContactGroups.push({
                         id: group.id,
+                        uid: group.uid,
                         name: group.name,
                     });
                 } else {
@@ -275,9 +276,9 @@ document.addEventListener('alpine:init', function () {
                 }
                 self.handleDuplicateContactGroupMarking();
             },
-            loadContacts(page){
+            loadContacts(page) {
                 var self = this;
-                if(contactAbortController){
+                if (contactAbortController) {
                     contactAbortController.abort();
                 }
                 contactAbortController = new AbortController();
@@ -291,9 +292,9 @@ document.addEventListener('alpine:init', function () {
                         keyword: self.searchKeywordName,
                     },
                     signal: contactAbortController.signal,
-                }).then(function(res){
+                }).then(function (res) {
                     dev && console.log(res.data);
-                    if(res.data?.success){
+                    if (res.data?.success) {
                         self.contacts = res.data.data.data;
                         self.page = res.data.data.current_page;
                         self.totalContacts = res.data.data.total;
@@ -316,7 +317,7 @@ document.addEventListener('alpine:init', function () {
                         }).showToast();
                     }
                     self.isLoadingContacts = false;
-                }).catch(function(err){
+                }).catch(function (err) {
                     if (err.code === 'ERR_CANCELED') {
                     } else {
                         dev && console.error(err);
@@ -333,6 +334,13 @@ document.addEventListener('alpine:init', function () {
             init() {
                 this.loadContacts();
                 this.mounted = true;
+                var self = this;
+                window.addEventListener('scroll', function (e) {
+                    const { clientHeight, scrollTop, scrollHeight } = e.target.documentElement;
+                    if( (clientHeight + scrollTop + 50) >=  scrollHeight && !self.isLoadingContacts){
+                        console.log('loaing..');
+                    }
+                });
             }
         }
     });

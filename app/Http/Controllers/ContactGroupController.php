@@ -5,43 +5,53 @@ namespace App\Http\Controllers;
 use App\Enums\ModelStatusEnum;
 use App\Exports\ContactGroupsExport;
 use App\Models\ContactGroup;
-use Exception;
+use App\Services\SMSApi;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class ContactGroupController extends Controller
 {
+    protected $smsApi;
+
+    function __construct(SMSApi $smsApi)
+    {
+        $this->smsApi = $smsApi;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $req)
     {
-        if($req->ajax()){
+        if ($req->ajax()) {
             $keyword = $req->keyword;
             $query = ContactGroup::query();
-            if(!empty($keyword)){
+            if (!empty($keyword)) {
                 $query = $query->where('name', 'like', '%' . $keyword . '%');
             }
-            $data = $query->with('author:id,name')->orderBy('name', 'asc')->get(['id', 'user_id', 'name', 'created_at']);
+            $data = $query->with('author:id,name')->orderBy('name', 'asc')->get(['id', 'uid', 'user_id', 'name', 'created_at']);
             $items = [];
-            if(!empty($data) && count($data)){
+            if (!empty($data) && count($data)) {
                 foreach ($data as $item) {
                     $items[] = [
-                        'id'=> $item->id,
-                        'name'=> $item->name,
-                        'createdBy'=> 'Created by '. $item->author->name .' '. $item->author->lastname,
-                        'createdOn'=> 'Created on '. $item->created_at->format('jS \of F Y'),
-                        'profile'=> '',
+                        'id' => $item->id,
+                        'uid' => $item->uid,
+                        'name' => $item->name,
+                        'createdBy' => 'Created by ' . $item->author->name . ' ' . $item->author->lastname,
+                        'createdOn' => 'Created on ' . $item->created_at->format('jS \of F Y'),
+                        'profile' => '',
                     ];
                 }
             }
             return response()->json([
-                'success'=> true,
-                'items'=> $items,
+                'success' => true,
+                'items' => $items,
             ]);
         } else {
             return view('contact-groups.index', []);
         }
-
     }
 
     /**
@@ -59,45 +69,61 @@ class ContactGroupController extends Controller
     {
         $user = $req->user();
         $input = $req->validate([
-            'name'=> ['required', 'string', 'max:255']
+            'name' => ['required', 'string', 'max:255']
         ], [
-            'name.required'=> 'Group name is required'
+            'name.required' => 'Group name is required'
         ]);
         $input['user_id'] = $user->id;
         $input['status'] = ModelStatusEnum::PUBLISHED;
         $id = $req->id;
+        $name = $input['name'];
         $is_updating = false;
         $item = null;
-        if(!empty($id)){
+        if (!empty($id)) {
             $is_updating = true;
             $item = ContactGroup::where('id', $id)->first();
         } else {
-            $duplicateItem = ContactGroup::where('name', $input['name'])->where('user_id', $user->id)->first();
-            if(!empty($duplicateItem)){
-                return response()->json(['message'=> 'Name already exists'], 422);
+            $duplicateItem = ContactGroup::where('name', $name)->first();
+            if (!empty($duplicateItem)) {
+                return response()->json(['message' => 'Name already exists'], 422);
             }
         }
         $msg = 'Created new group';
 
         try {
-            if($is_updating && !empty($item)){
-                $item->name = $input['name'];
+            if ($is_updating && !empty($item)) {
+                $item->name = $name;
                 $item->update();
                 $msg = 'Updated group';
             } else {
-                $item = ContactGroup::create($input);
+                // add contact group to SMS API
+                $res = $this->smsApi->add_list($name);
+                if (!empty($res['id'])) {
+                    $input['id'] = $res['id'];
+                    $input['uid'] = $res['id'];
+                    $item = ContactGroup::create($input);
+                } else {
+                    if(!empty($res['error']['description'])){
+                        return response()->json([
+                            'message' => $res['error']['description'],
+                        ], 500);
+                    } else {
+                        return response()->json(['message'=> 'Something went wrong'], 500);
+                    }
+                }
             }
             return response()->json([
-                'success'=> true,
-                'item'=> [
-                    'id'=> $item->id,
-                    'name'=> $item->name,
-                    'createdBy'=> 'Created by '. $user->name .' '. $user->lastname,
-                    'createdOn'=> 'Created on '. $item->created_at->format('jS \of F Y'),
-                    'profile'=> '',
+                'success' => true,
+                'item' => [
+                    'id' => $item->id,
+                    'uid'=> $item->uid,
+                    'name' => $item->name,
+                    'createdBy' => 'Created by ' . $user->name . ' ' . $user->lastname,
+                    'createdOn' => 'Created on ' . $item->created_at->format('jS \of F Y'),
+                    'profile' => '',
                 ],
-                'reset'=> true,
-                'message'=> $msg,
+                'reset' => true,
+                'message' => $msg,
             ]);
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -142,14 +168,21 @@ class ContactGroupController extends Controller
         $id = $req->id;
         try {
             $item = ContactGroup::where('id', $id)->first();
-            if($item) {
-                $item->delete();
+            if ($item) {
+                $res = $this->smsApi->remove_list($item->uid);
+                if(!empty($res['error']) && !empty($res['code']) && $res['code'] !== 'SUCCESS'){
+                    $msg = $res['error'];
+                    return response()->json([
+                        'message' => !empty($msg['description']) ? $msg['description'] : 'Something went wrong',
+                    ], 500);
+                }
+                $item->forceDelete();
             }
             return response()->json([
-                'success'=> true,
-                'message'=> 'Deleted Contact Group',
+                'success' => true,
+                'message' => 'Deleted Contact Group',
             ]);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
