@@ -223,7 +223,7 @@
                                         </span>
                                     </div>
                                     <div class="relative mb-2">
-                                        <div x-show="isContactGroupDropdownOpen" x-transition.scale.top class="absolute min-h-12 w-full max-w-sm overflow-y-auto bg-white rounded border border-solid border-gray-200 shadow-lg">
+                                        <div x-show="isContactGroupDropdownOpen" x-transition.scale.top class="absolute min-h-12 max-h-40 w-full max-w-sm overflow-y-auto bg-white rounded border border-solid border-gray-200 shadow-lg">
                                             <div x-show="isLoadingContactGroups" class="absolute text-center py-2 top-0 bottom-0 left-0 right-0 backdrop-blur-sm">
                                                 <x-loader />
                                             </div>

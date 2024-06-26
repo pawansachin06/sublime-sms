@@ -88,10 +88,10 @@
                                             </div>
                                             <div class="relative px-1">
                                                 <div x-show="isPersonalizeDropdownOpen" x-cloak x-transition.scale.origin.top.left class="absolute my-1 max-w-56 rounded border border-solid border-gray-200 text-sm bg-white shadow-lg">
-                                                    <button type="button" class="w-full px-2 py-1 border-b border-gray-200 border-solid text-left text-gray-500 border-0 bg-transparent" @click="handlePersonalizeItemClick('name')">First Name {name}</button>
-                                                    <button type="button" class="w-full px-2 py-1 border-b border-gray-200 border-solid text-left text-gray-500 border-0 bg-transparent" @click="handlePersonalizeItemClick('lastname')">Last Name {lastname}</button>
-                                                    <button type="button" class="w-full px-2 py-1 border-b border-gray-200 border-solid text-left text-gray-500 border-0 bg-transparent" @click="handlePersonalizeItemClick('phone')">Phone {phone}</button>
-                                                    <button type="button" class="w-full px-2 py-1 border-gray-200 border-solid text-left text-gray-500 border-0 bg-transparent" @click="handlePersonalizeItemClick('company')">Company {company}</button>
+                                                    <button type="button" class="w-full px-2 py-1 border-b border-gray-200 border-solid text-left text-gray-500 border-0 bg-transparent" @click="handlePersonalizeItemClick('Firstname')">First Name [Firstname]</button>
+                                                    <button type="button" class="w-full px-2 py-1 border-b border-gray-200 border-solid text-left text-gray-500 border-0 bg-transparent" @click="handlePersonalizeItemClick('Lastname')">Last Name [Lastname]</button>
+                                                    <button type="button" class="w-full px-2 py-1 border-b border-gray-200 border-solid text-left text-gray-500 border-0 bg-transparent" @click="handlePersonalizeItemClick('Mobile')">Phone [Mobile]</button>
+                                                    <button type="button" class="w-full px-2 py-1 border-gray-200 border-solid text-left text-gray-500 border-0 bg-transparent" @click="handlePersonalizeItemClick('Company')">Company [Company]</button>
                                                 </div>
                                             </div>
                                         </div>

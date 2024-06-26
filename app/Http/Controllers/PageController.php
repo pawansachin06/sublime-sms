@@ -16,11 +16,13 @@ class PageController extends Controller
 
     public function dashboard(Request $req)
     {
-        session()->flash('flash.banner', 'Website Under Active Development');
-        session()->flash('flash.bannerStyle', 'danger');
+        // session()->flash('flash.banner', 'Website Under Active Development');
+        // session()->flash('flash.bannerStyle', 'danger');
 
         // dd($this->smsApi->get_balance());
-        return view('dashboard');
+
+        return view('dashboard', [
+        ]);
     }
 
 }

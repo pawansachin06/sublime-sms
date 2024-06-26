@@ -96,7 +96,7 @@ document.addEventListener('alpine:init', function(){
 
             handlePersonalizeItemClick(word){
                 var self = this;
-                word = '{' + word + '}';
+                word = '[' + word + ']';
                 self.isPersonalizeDropdownOpen = false;
                 var startPos = currentTemplateMessageInput.selectionStart;
                 var endPos = currentTemplateMessageInput.selectionEnd;

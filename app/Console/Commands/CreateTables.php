@@ -9,6 +9,8 @@ use App\Models\ContactGroup;
 use App\Models\Profile;
 use App\Models\Template;
 use App\Models\User;
+use App\Models\Sms;
+use App\Models\SmsJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -167,6 +169,73 @@ class CreateTables extends Command
                 'author_id'=> $user->id,
                 'status'=> ModelStatusEnum::PUBLISHED,
             ]);
+        }
+
+        /**
+         * SMS CronJob table
+         */
+        $table_name = app(SmsJob::class)->getTable();
+        if(!Schema::hasTable($table_name)){
+            Schema::create($table_name, function (Blueprint $table) {
+                $table->uuid('id')->unique()->primary;
+                $table->string('name')->nullable();
+                $table->uuid('profile_id')->nullable();
+                $table->dateTime('send_at')->nullable();
+                $table->uuid('template_id')->nullable();
+                $table->mediumText('list_uids')->nullable();
+                $table->mediumText('numbers')->nullable();
+                $table->text('message');
+
+                $table->string('user_id')->nullable();
+                $table->string('from')->nullable();
+                $table->string('validity')->nullable();
+                $table->string('replies_to_email')->nullable();
+
+                $table->string('tracked_link_url')->nullable();
+                $table->string('link_hits_callback')->nullable();
+                $table->string('dlr_callback')->nullable();
+                $table->string('reply_callback')->nullable();
+
+                $table->boolean('scheduled')->default(false);
+                $table->string('status')->default('DRAFT');
+                $table->text('meta')->nullable();
+                $table->timestamps();
+            });
+            $this->info($table_name .' table created');
+        } else {
+            $this->error(' '. $table_name .' table already exist ');
+        }
+
+        /**
+         * SMS table
+         */
+        $table_name = app(Sms::class)->getTable();
+        if(!Schema::hasTable($table_name)){
+            Schema::create($table_name, function (Blueprint $table) {
+                $table->id();
+                $table->uuid('sms_job_id')->nullable();
+                $table->string('sms_id')->nullable();
+                $table->string('user_id')->nullable();
+                $table->text('message');
+                $table->string('to')->nullable();
+                $table->string('list_id')->nullable();
+                $table->string('countrycode')->nullable();
+                $table->string('from')->nullable();
+                $table->dateTime('send_at')->nullable();
+                $table->string('validity')->nullable();
+                $table->string('replies_to_email')->nullable();
+                $table->string('tracked_link_url')->nullable();
+                $table->string('link_hits_callback')->nullable();
+                $table->string('dlr_callback')->nullable();
+                $table->string('reply_callback')->nullable();
+                $table->string('status')->nullable();
+                $table->dateTime('delivered_at')->nullable();
+                $table->string('local_status')->default('DRAFT');
+                $table->timestamps();
+            });
+            $this->info($table_name .' table created');
+        } else {
+            $this->error(' '. $table_name .' table already exist ');
         }
 
 
