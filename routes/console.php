@@ -4,7 +4,7 @@
 // use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::command('app:send-sms')->everyThirtySeconds()->withoutOverlapping(1);
+Schedule::command('send-sms')->everyThirtySeconds()->withoutOverlapping(1);
 
 // Artisan::command('inspire', function () {
 //     $this->comment(Inspiring::quote());

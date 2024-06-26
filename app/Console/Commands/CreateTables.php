@@ -228,6 +228,7 @@ class CreateTables extends Command
                 $table->string('link_hits_callback')->nullable();
                 $table->string('dlr_callback')->nullable();
                 $table->string('reply_callback')->nullable();
+                $table->string('cost')->nullable();
                 $table->string('status')->nullable();
                 $table->dateTime('delivered_at')->nullable();
                 $table->string('local_status')->default('DRAFT');
