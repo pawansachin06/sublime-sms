@@ -85,12 +85,19 @@ class SendSms extends Command
                                         $this->info($formatted_msg);
                                         // send to api
                                         // $is_scheduled if false then keep send_at empty
-                                        $api_res = [];
+                                        // $api_res = $smsApi->send_sms([
+                                        //     'to' => $to,
+                                        //     'message' => $formatted_msg,
+                                        //     'send_at' => !empty($is_scheduled) ? $send_at : '',
+                                        //     'dlr_callback'=> $dlr_callback,
+                                        // ]);
+                                        $api_res = '';
+
+                                        Log::info(json_encode($api_res));
 
                                         $sms = Sms::create([
                                             'sms_job_id' => $job->id,
-                                            'sms_id' => '',
-                                            'user_id' => '',
+                                            'sms_id' => !empty($api_res['message_id']) ? $api_res['message_id'] : '',
                                             'message' => $formatted_msg,
                                             'to' => $to,
                                             'list_id' => '',
@@ -98,9 +105,9 @@ class SendSms extends Command
                                             'from' => '',
                                             'send_at'=> $send_at,
                                             'dlr_callback'=> $dlr_callback,
-                                            'cost'=> '',
-                                            'status'=> '',
-                                            'local_status'=> '',
+                                            'cost'=> !empty($api_res['cost']) ? $api_res['cost'] : '',
+                                            'status'=> 'SENT',
+                                            'local_status'=> 'SENT',
                                         ]);
                                         if($show_msg){
                                             $this->info(json_encode($api_res));
@@ -132,6 +139,8 @@ class SendSms extends Command
                             }
                         }
                     }
+                    $job->status = 'COMPLETE';
+                    $job->save();
                 } else {
                     $job->status = 'COMPLETE';
                     $job->save();

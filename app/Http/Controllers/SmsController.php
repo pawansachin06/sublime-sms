@@ -9,6 +9,7 @@ use App\Models\Template;
 use Exception;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 
@@ -50,7 +51,7 @@ class SmsController extends Controller
             return response()->json(['message' => 'Please select recipient'], 422);
         }
 
-        $send_at = '';
+        $send_at = date('Y-m-d H:i:s');
         $list_uids = [];
         $numbers = [];
         $scheduled = false;
@@ -68,8 +69,6 @@ class SmsController extends Controller
             if (!empty($input['numbers'])) {
                 $numbers = $input['numbers'];
             }
-
-            $send_at = date('Y-m-d H:i:s');
 
             SmsJob::create([
                 'name' => $input['title'],
@@ -140,6 +139,15 @@ class SmsController extends Controller
         $sms_status       = $req->status;
         $sms_user_id      = $req->user_id;
 
-        dd($sms_id, $sms_phone, $sms_delivered_at, $sms_status, $sms_user_id);
+        $inputs = $req->all();
+
+        Log::info('sms_id' . $sms_id);
+        Log::info('sms_phone' . $sms_phone);
+        Log::info('sms_delivered_at' . $sms_delivered_at);
+        Log::info('sms_status' . $sms_status);
+        Log::info('sms_user_id' . $sms_user_id);
+
+        // dd($sms_id, $sms_phone, $sms_delivered_at, $sms_status, $sms_user_id);
+        Log::info(json_encode($inputs));
     }
 }
