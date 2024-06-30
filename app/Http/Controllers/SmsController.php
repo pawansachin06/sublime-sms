@@ -18,9 +18,67 @@ class SmsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $req)
     {
-        //
+        if ($req->ajax()) {
+            $keyword = $req->keyword;
+            $keywordRecipient = $req->keywordRecipient;
+            $filterStatus = $req->filterStatus;
+            $filterStartDate = $req->filterStartDate;
+            $filterEndDate = $req->filterEndDate;
+
+            $query = Sms::query()->select([
+                'id',
+                'message',
+                'to',
+                'send_at',
+                'cost',
+                'status'
+            ]);
+            if (!empty($keyword)) {
+                $query = $query->where('message', 'like', '%' . $keyword . '%');
+            }
+            if(!empty($filterStatus)) {
+                $query = $query->where('status', $filterStatus);
+            }
+            if (!empty($keywordRecipient)) {
+                // $query = $query->where('recipient', $keywordRecipient);
+            }
+            if(!empty($filterStartDate)) {
+                $query = $query->where('created_at', '>=', $filterStartDate);
+            }
+            if(!empty($filterEndDate)) {
+                $query = $query->where('created_at', '<=', $filterEndDate);
+            }
+            $data = $query->latest()->paginate(20);
+            $items = [];
+            $perPage = $data->perPage();
+            $totalPages = $data->lastPage();
+            $totalRows = $data->total();
+            $page = $data->currentPage();
+            if ($page > $totalPages) {
+                $page = $totalPages;
+            }
+            if (!empty($data->items())) {
+                foreach ($data->items() as $row) {
+                    $items[] = [
+                        'id' => $row->id,
+                        'message' => $row->message,
+                        'to' => $row->to,
+                        'send_at' => $row->send_at->format('d/m/Y h:i A'),
+                        'cost' => $row->cost,
+                        'status' => $row->status,
+                    ];
+                }
+            }
+            return response()->json([
+                'items' => $items,
+                'page' => $page,
+                'perPage' => $perPage,
+                'totalPages' => $totalPages,
+                'totalRows' => $totalRows,
+            ]);
+        }
     }
 
     /**
@@ -83,13 +141,13 @@ class SmsController extends Controller
             ]);
             if (!empty($send_at) && !empty($send_at_obj)) {
                 return response()->json([
-                    'scheduled'=> true,
+                    'scheduled' => true,
                     'message' => 'Horray! Your SMS has been scheduled for',
                     'message2' => $send_at_obj->format('D M j g:i A Y'),
                 ]);
             } else {
                 return response()->json([
-                    'scheduled'=> false,
+                    'scheduled' => false,
                     'message' => 'Your Message has been Sent',
                     'message2' => date('D M j g:i A Y'),
                 ]);

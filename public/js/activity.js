@@ -13,10 +13,25 @@ document.addEventListener('alpine:init', function () {
 
     var templatesRouteIndex = TEMPLATES_ROUTE_INDEX;
     var contactGroupsRouteIndex = CONTACT_GROUPS_ROUTE_INDEX;
+    var smsRouteIndex = SMS_ROUTE_INDEX;
 
+    var self = {};
     Alpine.data('activityData', function () {
         return {
             isLoadingContactGroups: false,
+
+            // written "sms" as "items" for better naming
+            items: [],
+            page: 1,
+            keyword: '',
+            totalItems: 0,
+            totalPages: 1,
+            keywordRecipient: '',
+            isLoadingItems: false,
+            canAutoLoadItems: true,
+            filterStatus: '',
+            filterStartDate: '',
+            filterEndDate: '',
 
             isPersonalizeDropdownOpen: false,
             currentTemplateMsg: '',
@@ -44,7 +59,6 @@ document.addEventListener('alpine:init', function () {
             isSavingSms: false,
 
             handleNewSmsForm(form) {
-                var self = this;
                 let formData = new FormData(form);
                 let url = form.getAttribute('action');
                 self.isSavingSms = true;
@@ -70,7 +84,6 @@ document.addEventListener('alpine:init', function () {
                 });
             },
             handleCloseModalBtn() {
-                var self = this;
                 if (self.isFormEdited) {
                     self.showSmsEditExitForm = true;
                 } else {
@@ -83,7 +96,6 @@ document.addEventListener('alpine:init', function () {
                 }
             },
             loadTemplates() {
-                var self = this;
                 if (templatesAbortController) {
                     templatesAbortController.abort();
                 }
@@ -123,7 +135,6 @@ document.addEventListener('alpine:init', function () {
                 autosize.update(iphoneSmsTextarea)
             },
             handlePersonalizeItemClick(word) {
-                var self = this;
                 word = '[' + word + ']';
                 self.isPersonalizeDropdownOpen = false;
                 var startPos = currentTemplateMessageInput.selectionStart;
@@ -138,7 +149,6 @@ document.addEventListener('alpine:init', function () {
                 });
             },
             handleContactGroupKeywordChange() {
-                var self = this;
                 if (contactGroupAbortController) {
                     contactGroupAbortController.abort();
                 }
@@ -182,7 +192,6 @@ document.addEventListener('alpine:init', function () {
                 }
             },
             handleDuplicateContactGroupMarking() {
-                var self = this;
                 self.$nextTick(() => {
                     for (var j = 0; j < self.contactGroups.length; j++) {
                         self.contactGroups[j].added = false;
@@ -198,7 +207,6 @@ document.addEventListener('alpine:init', function () {
                 });
             },
             handleRemoveSelectedContactGroup(group) {
-                var self = this;
                 // iterate backward to avoid index shifting
                 for (let i = self.selectedContactGroups.length - 1; i >= 0; i--) {
                     if (self.selectedContactGroups[i]['id'] === group.id) {
@@ -209,7 +217,6 @@ document.addEventListener('alpine:init', function () {
                 self.handleDuplicateContactGroupMarking();
             },
             handleContactGroupDropdownClick(group) {
-                var self = this;
                 self.isContactGroupDropdownOpen = false;
                 let isDuplicate = false;
                 for (var i = 0; i < self.selectedContactGroups.length; i++) {
@@ -229,12 +236,10 @@ document.addEventListener('alpine:init', function () {
                 }
                 self.handleDuplicateContactGroupMarking();
             },
-            handleFormEnter(){
-            },
+            handleFormEnter() {},
             handleContactGroupClickEnter(e = null) {
                 // e.preventDefault();
                 // e.stopPropagation();
-                var self = this;
                 self.isContactGroupDropdownOpen = false;
                 self.isLoadingContactGroups = false;
                 if (self.contactGroupKeyword.trim().length) {
@@ -248,7 +253,6 @@ document.addEventListener('alpine:init', function () {
                 self.contactGroupKeyword = '';
             },
             handleRemoveSeparateNumber(separateNumber) {
-                var self = this;
                 // iterate backward to avoid index shifting
                 for (let i = self.separateNumbers.length - 1; i >= 0; i--) {
                     if (self.separateNumbers[i] === separateNumber) {
@@ -261,7 +265,6 @@ document.addEventListener('alpine:init', function () {
                 this.isFormEdited = true;
             },
             handleExitSmsForm() {
-                var self = this;
                 self.isFormEdited = false;
                 newSmsModal.hide();
                 self.separateNumbers = [];
@@ -269,9 +272,68 @@ document.addEventListener('alpine:init', function () {
                 self.showSmsEditExitForm = false;
                 self.$refs?.newSmsFormRef?.reset();
             },
+            handleFilterChange() {
+                self.items = [];
+                self.canAutoLoadItems = true;
+                self.loadItems(1);
+            },
+            handleKeywordChange() {
+                self.handleFilterChange();
+            },
+            handleFilterStatusChange() {
+                self.handleFilterChange();
+            },
+            loadItems(page) {
+                if (self.isLoadingItems) return;
+                if (!self.canAutoLoadItems) return;
+                page = page ? page : self.page;
+                self.isLoadingItems = true;
+                axios.get(smsRouteIndex, {
+                    params: {
+                        page: page,
+                        keyword: self.keyword,
+                        filterStartDate: self.filterStartDate,
+                        filterEndDate: self.filterEndDate,
+                        filterStatus: self.filterStatus,
+                        keywordRecipient: self.keywordRecipient,
+                    }
+                }).then(function (res) {
+                    dev && console.log(res.data);
+                    self.items.push(...res.data.items);
+                    self.page = res.data.page;
+                    self.totalPages = res.data.totalPages;
+                    self.totalItems = res.data.totalRows;
+                    if (res.data.items.length == 0) {
+                        self.canAutoLoadItems = false;
+                        setTimeout(function () {
+                            self.canAutoLoadItems = true;
+                        }, 5000);
+                        self.isLoadingItems = false;
+                    } else {
+                        self.isLoadingItems = false;
+                        self.canAutoLoadItems = true;
+                    }
+                    console.log(self.items);
+                }).catch(function (err) {
+                    if (err.code === 'ERR_CANCELED') {
+                    } else {
+                        dev && console.error(err);
+                        let msg = getAxiosError(err);
+                        Toastify({
+                            text: msg,
+                            className: 'toast-error',
+                            position: 'center',
+                        }).showToast();
+                        self.isLoadingItems = false;
+                    }
+                    self.isLoadingItems = false;
+                });
+            },
             init() {
-                var self = this;
+                self = this;
                 self.loadTemplates();
+                self.loadItems(1);
+
                 var sendAtEl = document.getElementById('send_at');
                 if (sendAtEl) {
                     flatpickr('#send_at', {
@@ -284,11 +346,59 @@ document.addEventListener('alpine:init', function () {
                         onChange: function (selectedDates, dateStr, instance) {
                             self.send_at = dateStr;
                         },
-                        onClose: function(selectedDates, dateStr, instance) {
+                        onClose: function (selectedDates, dateStr, instance) {
                             self.send_at = dateStr;
                         }
                     });
                 }
+
+                var filterStartDateEl = document.getElementById('filterStartDateEl');
+                if (filterStartDateEl) {
+                    flatpickr('#filterStartDateEl', {
+                        disableMobile: 'true',
+                        allowInput: true,
+                        enableTime: true,
+                        altInput: true,
+                        altFormat: 'd/m/Y h:i K',
+                        dateFormat: 'Y-m-d H:i:s',
+                        onChange: function (selectedDates, dateStr, instance) {
+                            self.filterStartDate = dateStr;
+                        },
+                        onClose: function (selectedDates, dateStr, instance) {
+                            self.filterStartDate = dateStr;
+                            self.handleFilterChange();
+                        }
+                    });
+                }
+
+                var filterEndDateEl = document.getElementById('filterEndDateEl');
+                if (filterEndDateEl) {
+                    flatpickr('#filterEndDateEl', {
+                        disableMobile: 'true',
+                        allowInput: true,
+                        enableTime: true,
+                        altInput: true,
+                        altFormat: 'd/m/Y h:i K',
+                        dateFormat: 'Y-m-d H:i:s',
+                        onChange: function (selectedDates, dateStr, instance) {
+                            self.filterEndDate = dateStr;
+                        },
+                        onClose: function (selectedDates, dateStr, instance) {
+                            self.filterEndDate = dateStr;
+                            self.handleFilterChange();
+                        }
+                    });
+                }
+
+
+                window.addEventListener('scroll', function (e) {
+                    const { clientHeight, scrollTop, scrollHeight } = e.target.documentElement;
+                    if ((clientHeight + scrollTop + 50) >= scrollHeight && !self.isLoadingItems) {
+                        let page = self.page + 1;
+                        self.loadItems(page)
+                        // dev && console.log('loading...');
+                    }
+                });
             },
         }
     });

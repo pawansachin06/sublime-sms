@@ -17,4 +17,11 @@ class Sms extends Model
         'tracked_link_url', 'link_hits_callback', 'dlr_callback',
         'reply_callback', 'status', 'delivered_at', 'local_status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'send_at' => 'datetime',
+        ];
+    }
 }

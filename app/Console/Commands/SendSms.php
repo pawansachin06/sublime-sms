@@ -36,7 +36,7 @@ class SendSms extends Command
         $show_msg = $this->option('show');
         try {
             $dlr_callback = route('api.sms.callback.dlr');
-            if($show_msg) {
+            if ($show_msg) {
                 $this->info('DELIVERY CALLBACK: ' . $dlr_callback);
             }
 
@@ -103,13 +103,13 @@ class SendSms extends Command
                                             'list_id' => '',
                                             'countrycode' => $contact_country,
                                             'from' => '',
-                                            'send_at'=> $send_at,
-                                            'dlr_callback'=> $dlr_callback,
-                                            'cost'=> !empty($api_res['cost']) ? $api_res['cost'] : '',
-                                            'status'=> 'SENT',
-                                            'local_status'=> 'SENT',
+                                            'send_at' => $send_at,
+                                            'dlr_callback' => $dlr_callback,
+                                            'cost' => !empty($api_res['cost']) ? $api_res['cost'] : '',
+                                            'status' => 'sent',
+                                            'local_status' => 'sent',
                                         ]);
-                                        if($show_msg){
+                                        if ($show_msg) {
                                             $this->info(json_encode($api_res));
                                         } else {
                                             Log::info($api_res);
@@ -124,12 +124,6 @@ class SendSms extends Command
                                     Log::error($msg);
                                 }
                             }
-
-                            // $this->info($message);
-                            // $this->info($send_at);
-                            // $this->info($is_scheduled);
-
-
                         } else {
                             $msg = 'SMS JOB: Group not found ' . $list_id;
                             if ($show_msg) {
