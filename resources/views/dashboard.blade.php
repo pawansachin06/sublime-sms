@@ -22,12 +22,12 @@
 
         <div class="flex flex-wrap items-center gap-2 my-3">
             <div class="inline-block relative">
-                <input type="text" placeholder="User/group" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
+                <input type="text" placeholder="User/group" x-model="keywordRecipient" @input.debounce.500ms="handleKeywordChange()" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
                 <span class="absolute left-0 top-0 bottom-0 pointer-events-none px-3 inline-flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" class="" fill="none"><path fill="#515151" d="M10 5.067C10 2.273 7.757 0 5 0S0 2.273 0 5.067c0 2.793 2.243 5.066 5 5.066s5-2.273 5-5.066Zm-5 3.8c-2.068 0-3.75-1.705-3.75-3.8 0-2.096 1.682-3.8 3.75-3.8s3.75 1.704 3.75 3.8c0 2.095-1.682 3.8-3.75 3.8Zm7.317 3.614a.619.619 0 0 1-.884 0L8.507 9.516c.326-.265.623-.565.884-.896l2.926 2.966a.64.64 0 0 1 0 .895Z"/></svg>
                 </span>
             </div>
-            <select x-model="filterStatus" @change="handleFilterStatusChange()" title="Status" class="py-2 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
+            <select x-model="filterStatus" @change="handleFilterStatusChange()" title="Status" class="py-2 font-title text-sm select-none rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
                 <option value="">All</option>
                 <option value="delivered">Delivered</option>
                 <option value="pending">Pending</option>
@@ -49,9 +49,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" fill="none"><path fill="#515151" d="M7.5 15c4.136 0 7.5-3.364 7.5-7.5S11.636 0 7.5 0 0 3.364 0 7.5 3.364 15 7.5 15ZM7.098 3.214a.401.401 0 1 1 .804 0v3.884h2.943c.22 0 .402.18.402.402a.403.403 0 0 1-.402.402H7.5a.401.401 0 0 1-.402-.402V3.214Z"/></svg>
                 </span>
             </div>
-            <select name="" class="py-2 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
-                <option value="out">Outbox</option>
-                <option value="in">Inbox</option>
+            <select x-model="filterFolder" @change="handleFilterChange()" class="py-2 font-title text-sm select-none rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
+                <option value="">All SMS</option>
+                <option value="outbox">Outbox</option>
+                <option value="inbox">Inbox</option>
             </select>
             <div class="inline-block relative">
                 <input type="text" x-model="keyword" @input.debounce.500ms="handleKeywordChange()" placeholder="Search" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
@@ -71,7 +72,7 @@
                         <th class="px-4 py-2 font-semibold text-white bg-black">Profile</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Status</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Date/Time</th>
-                        <th class="px-4 py-2 font-semibold text-white bg-black">Out/In</th>
+                        <th class="px-4 py-2 font-semibold text-white bg-black text-center">Out/In</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Message</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black"></th>
                     </tr>
@@ -80,12 +81,19 @@
                     <template x-for="sms in items" :key="sms.id">
                         <tr>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td>
-                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">All Futures</td>
+                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms.recipient"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms.to"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms.status"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms.send_at"></td>
-                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td>
+                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm text-center">
+                                <svg x-show="sms.folder == 'outbox'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#22c55e" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"/>
+                                </svg>
+                                <svg x-show="sms.folder == 'inbox'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#eab308" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"/>
+                                </svg>
+                            </td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
                                 <span x-text="sms.message"></span>
                                 {{-- <a href="#!" class="text-primary-500">View More</a> --}}
@@ -139,7 +147,7 @@
                                     </div>
                                     <div class="w-full md:w-6/12 px-1 mb-3">
                                         <div>Template</div>
-                                        <select name="template_id" class="w-full py-2 text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
+                                        <select name="template_id" x-model="selectedTemplateId" @change="handleTemplateSelected()" class="w-full py-2 text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
                                             <option value="">Select Template</option>
                                             <template x-for="template in templates" :key="template.id">
                                                 <option :value="template.id" x-text="template.name"></option>

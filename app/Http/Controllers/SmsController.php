@@ -24,6 +24,7 @@ class SmsController extends Controller
             $keyword = $req->keyword;
             $keywordRecipient = $req->keywordRecipient;
             $filterStatus = $req->filterStatus;
+            $filterFolder = $req->filterFolder;
             $filterStartDate = $req->filterStartDate;
             $filterEndDate = $req->filterEndDate;
 
@@ -31,24 +32,33 @@ class SmsController extends Controller
                 'id',
                 'message',
                 'to',
+                'name',
+                'recipient',
                 'send_at',
+                'folder',
                 'cost',
                 'status'
             ]);
             if (!empty($keyword)) {
                 $query = $query->where('message', 'like', '%' . $keyword . '%');
             }
-            if(!empty($filterStatus)) {
+            if (!empty($filterStatus)) {
                 $query = $query->where('status', $filterStatus);
             }
+            if (!empty($filterFolder)) {
+                $query = $query->where('folder', $filterFolder);
+            }
             if (!empty($keywordRecipient)) {
-                // $query = $query->where('recipient', $keywordRecipient);
+                $query = $query->where(function ($q) use ($keywordRecipient) {
+                    $q->where('name', 'like', '%' . $keywordRecipient . '%')
+                        ->orWhere('recipient', 'like', '%' . $keywordRecipient . '%');
+                });
             }
-            if(!empty($filterStartDate)) {
-                $query = $query->where('created_at', '>=', $filterStartDate);
+            if (!empty($filterStartDate)) {
+                $query = $query->where('send_at', '>=', $filterStartDate);
             }
-            if(!empty($filterEndDate)) {
-                $query = $query->where('created_at', '<=', $filterEndDate);
+            if (!empty($filterEndDate)) {
+                $query = $query->where('send_at', '<=', $filterEndDate);
             }
             $data = $query->latest()->paginate(20);
             $items = [];
@@ -67,7 +77,9 @@ class SmsController extends Controller
                         'to' => $row->to,
                         'send_at' => $row->send_at->format('d/m/Y h:i A'),
                         'cost' => $row->cost,
-                        'status' => $row->status,
+                        'recipient' => !empty($row->recipient) ? $row->recipient : $row->name,
+                        'status' => strtoupper($row->status),
+                        'folder'=> $row->folder,
                     ];
                 }
             }

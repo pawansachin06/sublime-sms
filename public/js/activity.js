@@ -24,20 +24,22 @@ document.addEventListener('alpine:init', function () {
             items: [],
             page: 1,
             keyword: '',
+            keywordRecipient: '',
             totalItems: 0,
             totalPages: 1,
-            keywordRecipient: '',
             isLoadingItems: false,
             canAutoLoadItems: true,
             filterStatus: '',
             filterStartDate: '',
             filterEndDate: '',
+            filterFolder: '',
 
             isPersonalizeDropdownOpen: false,
             currentTemplateMsg: '',
             showSmsEditExitForm: false,
 
             templates: [],
+            selectedTemplateId: '',
             isLoadingTemplates: false,
             searchTemplateKeyword: '',
             showTemplateSearchKeywordClearBtn: false,
@@ -132,7 +134,7 @@ document.addEventListener('alpine:init', function () {
                 });
             },
             handleMsgInput() {
-                autosize.update(iphoneSmsTextarea)
+                autosize.update(iphoneSmsTextarea);
             },
             handlePersonalizeItemClick(word) {
                 word = '[' + word + ']';
@@ -264,6 +266,17 @@ document.addEventListener('alpine:init', function () {
             sendSmsFormChanged() {
                 this.isFormEdited = true;
             },
+            handleTemplateSelected(){
+                if(self.selectedTemplateId) {
+                    for (var i = 0; i < self.templates.length; i++) {
+                        if(this.selectedTemplateId == self.templates[i].id) {
+                            self.currentTemplateMsg = self.templates[i].message;
+                            autosize.update(iphoneSmsTextarea);
+                            break;
+                        }
+                    }
+                }
+            },
             handleExitSmsForm() {
                 self.isFormEdited = false;
                 newSmsModal.hide();
@@ -296,6 +309,7 @@ document.addEventListener('alpine:init', function () {
                         filterEndDate: self.filterEndDate,
                         filterStatus: self.filterStatus,
                         keywordRecipient: self.keywordRecipient,
+                        filterFolder: self.filterFolder,
                     }
                 }).then(function (res) {
                     dev && console.log(res.data);

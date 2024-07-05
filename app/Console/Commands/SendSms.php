@@ -81,6 +81,9 @@ class SendSms extends Command
                                     $formatted_msg = str_replace('[Mobile]', $contact_phone, $formatted_msg);
                                     $formatted_msg = str_replace('[Company]', $contact_company, $formatted_msg);
 
+                                    $recipient_name = $contact_firstname . ' ' . $contact_lastname;
+                                    $recipient_group_name = $list->name;
+
                                     if (!empty($formatted_msg)) {
                                         $this->info($formatted_msg);
                                         // send to api
@@ -100,12 +103,15 @@ class SendSms extends Command
                                             'sms_id' => !empty($api_res['message_id']) ? $api_res['message_id'] : '',
                                             'message' => $formatted_msg,
                                             'to' => $to,
-                                            'list_id' => '',
+                                            'name' => $recipient_name,
+                                            'recipient' => $recipient_group_name,
+                                            'list_id' => $list_id,
                                             'countrycode' => $contact_country,
                                             'from' => '',
                                             'send_at' => $send_at,
                                             'dlr_callback' => $dlr_callback,
                                             'cost' => !empty($api_res['cost']) ? $api_res['cost'] : '',
+                                            'folder'=> 'outbox',
                                             'status' => 'sent',
                                             'local_status' => 'sent',
                                         ]);

@@ -218,6 +218,8 @@ class CreateTables extends Command
                 $table->string('user_id')->nullable();
                 $table->text('message');
                 $table->string('to')->nullable();
+                $table->string('recipient')->nullable();
+                $table->string('name')->nullable();
                 $table->string('list_id')->nullable();
                 $table->string('countrycode')->nullable();
                 $table->string('from')->nullable();
@@ -230,6 +232,7 @@ class CreateTables extends Command
                 $table->string('reply_callback')->nullable();
                 $table->string('cost')->nullable();
                 $table->string('status')->nullable();
+                $table->string('folder')->nullable();
                 $table->dateTime('delivered_at')->nullable();
                 $table->string('local_status')->default('DRAFT');
                 $table->timestamps();
