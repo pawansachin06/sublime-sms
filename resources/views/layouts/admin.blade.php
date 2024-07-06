@@ -1,5 +1,6 @@
 @props([
     'aos' => 0,
+    'users' > 0,
     'tippy' => 0,
     'swiper' => 0,
     'flags'=> 0,
@@ -74,12 +75,17 @@
             'flatpickr' => !empty($flatpickr) ? '/js/lib/flatpickr.min.js?v=4.6.13' : '',
             'tippy' => !empty($tippy) ? '/js/lib/tippy-bundle.umd.min.js?v=6.3.7' : '',
             'global' => '/js/global.js?v='. $version,
+            'users' => !empty($users) ? '/js/users.js?v='. $version : '',
             'activity' => !empty($activity) ? '/js/activity.js?v='. $version : '',
             'contacts' => !empty($contacts) ? '/js/contacts.js?v='. $version : '',
             'templates' => !empty($templates) ? '/js/templates.js?v='. $version : '',
             'contactGroups' => !empty($contactGroups) ? '/js/contact-groups.js?v='. $version : '',
         ];
         @endphp
+
+        <script type="text/javascript">
+            var USERS_PROFILE_UPDATE_INDEX = "{{ route('users.profile.update') }}";
+        </script>
 
         @foreach($scriptsArr as $scriptPath)
             @if( !empty($scriptPath) )

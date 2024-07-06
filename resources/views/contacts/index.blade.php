@@ -10,13 +10,7 @@
                 <x-header.add-btn data-bs-toggle="modal" data-bs-target="#newContactsModal">NEW CONTACT</x-header.add-btn>
             </div>
             <div class="">
-                <select name="" title="Company" class="font-title py-2 leading-tight rounded border-gray-400 focus:border-primary-500 focus:ring-primary-400">
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                </select>
+                <x-profile-switcher />
             </div>
         </div>
 

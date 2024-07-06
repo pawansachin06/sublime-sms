@@ -21,8 +21,11 @@ class PageController extends Controller
 
         // dd($this->smsApi->get_balance());
 
+        $current_user = $req->user();
+        $profiles = $current_user->getProfiles();
         return view('dashboard', [
+            'current_user' => $current_user,
+            'profiles' => $profiles,
         ]);
     }
-
 }

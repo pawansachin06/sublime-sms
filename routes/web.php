@@ -6,6 +6,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\SmsController;
 use App\Http\Controllers\SocialLoginController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -67,8 +68,18 @@ Route::middleware([
         TemplateController::class, 'delete'
     ])->name('templates.delete');
 
+    Route::resource('dashboard/users', UserController::class, [
+        'name' => 'users',
+    ]);
+
+    Route::post('/user/profile/update', [
+        UserController::class, 'setProfile'
+    ])->name('users.profile.update');
 
     Route::resource('sms', SmsController::class, [
         'name' => 'sms'
     ]);
 });
+
+Route::impersonate();
+

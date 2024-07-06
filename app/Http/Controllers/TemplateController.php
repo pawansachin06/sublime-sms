@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ModelStatusEnum;
 use App\Models\Profile;
 use App\Models\Template;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -16,6 +17,7 @@ class TemplateController extends Controller
      */
     public function index(Request $req)
     {
+        $current_user = $req->user();
         if($req->ajax()){
             $keyword = $req->keyword;
             $query = Template::query();
@@ -29,7 +31,7 @@ class TemplateController extends Controller
                 'message'=> 'Success'
             ]);
         } else {
-            $profiles = Profile::get(['id', 'name']);
+            $profiles = $current_user->getProfiles();
             return view('templates.index', [
                 'profiles' => $profiles,
             ]);
@@ -51,7 +53,7 @@ class TemplateController extends Controller
     {
         $input = $req->validate([
             'id' => ['nullable', 'string', Rule::exists(Template::class, 'id')],
-            'profile_id' => ['required', 'string', Rule::exists(Profile::class, 'id')],
+            'profile_id' => ['required', 'string', Rule::exists(User::class, 'id')],
             'name' => ['required', 'string', 'max:255'],
             'message' => ['required', 'string', 'max:255'],
         ], [

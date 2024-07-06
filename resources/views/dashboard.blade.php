@@ -10,13 +10,7 @@
                 <x-header.add-btn data-bs-toggle="modal" data-bs-target="#newSmsModal">NEW SMS</x-header.add-btn>
             </div>
             <div class="">
-                <select name="" title="Company" class="font-title py-2 leading-tight rounded border-gray-400 focus:border-primary-500 focus:ring-primary-400">
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                </select>
+                <x-profile-switcher />
             </div>
         </div>
 
@@ -130,9 +124,11 @@
                                     <div class="w-full md:w-6/12 px-1 mb-3">
                                         <div>Profile*</div>
                                         <select name="profile_id" class="w-full py-2 text-sm rounded border-gray-400 border-solid focus:border-gray-400 focus:ring-0">
-                                            <option value="1">Profile 1</option>
-                                            <option value="2">Profile 2</option>
-                                            <option value="3">Profile 3</option>
+                                            @if(!empty($profiles))
+                                                @foreach($profiles as $profile_id => $profile)
+                                                    <option value="{{ $profile_id }}">{{ $profile['name'] }}</option>
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
                                     <div class="w-full md:w-6/12 px-1 mb-3">

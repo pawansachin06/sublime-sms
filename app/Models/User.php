@@ -13,7 +13,9 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cookie;
 
 class User extends Authenticatable
 {
@@ -30,7 +32,13 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name', 'lastname', 'username', 'role', 'email', 'phone',
+        'name',
+        'lastname',
+        'username',
+        'company',
+        'role',
+        'email',
+        'phone',
         'password',
     ];
 
@@ -70,6 +78,94 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Get the parents of the user
+     * $parents = $user->parents;
+     *
+     * Get the children of the user
+     * $children = $user->children;
+     *
+     * Attach a parent to a user
+     * $user->parents()->attach($parentUserId);
+     *
+     * Detach a parent from a user
+     * $user->parents()->detach($parentUserId);
+     *
+     * Sync parents of a user (replaces existing parents)
+     * $user->parents()->sync([$parentUserId1, $parentUserId2]);
+     *
+     */
+    public function parents(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_user', 'user_id', 'parent_id');
+    }
+
+    public function children(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_user', 'parent_id', 'user_id');
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->role == UserRoleEnum::SUPERADMIN;
+    }
+
+    public function isAdmin()
+    {
+        return $this->role == UserRoleEnum::ADMIN;
+    }
+
+    public function isUser()
+    {
+        return $this->role == UserRoleEnum::USER;
+    }
+
+    public function getActiveProfile()
+    {
+        return Cookie::get('profileId');
+    }
+
+    public function setActiveProfile($id)
+    {
+        return Cookie::queue('profileId', $id, 5);
+    }
+
+    public function getProfiles()
+    {
+        if ($this->isSuperAdmin()) {
+            $users = User::get();
+        } elseif ($this->isAdmin()) {
+            $users = $this->children;
+        } else {
+            $users = $this->children;
+        }
+        $items = [];
+        if (!$this->isSuperAdmin()) {
+            $items[$this->id] = [
+                'name' => $this->name . ' (Me)',
+            ];
+        }
+        if (!empty($users) && count($users)) {
+            foreach ($users as $user) {
+                $user_name = $user->company ?? '';
+                $user_name = $user->name . ' ' . ($user->lastname ?? '');
+                $items[$user->id] = [
+                    'name' => $user_name,
+                ];
+            }
+        }
+        return $items;
+    }
+
+    public function canImpersonate(): bool
+    {
+        return ($this->isAdmin() || $this->isSuperAdmin());
+    }
+
+    public function canBeImpersonated(): bool
+    {
+        return !$this->isSuperAdmin();
+    }
 
     public function profilePhotoUrl(): Attribute
     {

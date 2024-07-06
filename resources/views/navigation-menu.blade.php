@@ -28,8 +28,9 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="{{ route('profile.show') }}">My Account</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        @if(!auth()->user()->isUser())
+                            <li><a class="dropdown-item" href="{{ route('users.index') }}">Users</a></li>
+                        @endif
                     </ul>
                 </div>
                 <form method="POST" action="{{ route('logout') }}" class="inline-flex">

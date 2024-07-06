@@ -41,22 +41,22 @@ class CreateTables extends Command
          * Create Profile Table
          * profile has parent child relationship
          */
-        $table_name = app(Profile::class)->getTable();
-        if(!Schema::hasTable($table_name)){
-            Schema::create($table_name, function (Blueprint $table) {
-                $table->id();
-                $table->string('name');
-                $table->bigInteger('parent_id', 0, 1)->nullable();
-                $table->bigInteger('author_id', 0, 1);
-                $table->string('status')->default(ModelStatusEnum::DRAFT);
-                $table->text('meta')->nullable();
-                $table->softDeletes();
-                $table->timestamps();
-            });
-            $this->info($table_name .' table created');
-        } else {
-            $this->error(' '. $table_name .' table already exist ');
-        }
+        // $table_name = app(Profile::class)->getTable();
+        // if(!Schema::hasTable($table_name)){
+        //     Schema::create($table_name, function (Blueprint $table) {
+        //         $table->id();
+        //         $table->string('name');
+        //         $table->bigInteger('parent_id', 0, 1)->nullable();
+        //         $table->bigInteger('author_id', 0, 1);
+        //         $table->string('status')->default(ModelStatusEnum::DRAFT);
+        //         $table->text('meta')->nullable();
+        //         $table->softDeletes();
+        //         $table->timestamps();
+        //     });
+        //     $this->info($table_name .' table created');
+        // } else {
+        //     $this->error(' '. $table_name .' table already exist ');
+        // }
 
 
         /**
@@ -67,7 +67,7 @@ class CreateTables extends Command
             Schema::create($table_name, function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
-                $table->bigInteger('profile_id', 0, 1)->nullable();
+                $table->unsignedBigInteger('profile_id')->nullable();
                 $table->string('status')->default(ModelStatusEnum::DRAFT);
                 $table->text('message')->nullable();
                 $table->text('meta')->nullable();
@@ -84,16 +84,16 @@ class CreateTables extends Command
         /**
          * Create Pivot Table as user can have many profiles
          */
-        $table_name = Profile::$pivot_table;
-        if(!Schema::hasTable($table_name)){
-            Schema::create($table_name, function (Blueprint $table) {
-                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-                $table->foreignId('profile_id')->constrained()->cascadeOnDelete();
-            });
-            $this->info($table_name .' table created');
-        } else {
-            $this->error(' '. $table_name .' table already exist ');
-        }
+        // $table_name = Profile::$pivot_table;
+        // if(!Schema::hasTable($table_name)){
+        //     Schema::create($table_name, function (Blueprint $table) {
+        //         $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+        //         $table->foreignId('profile_id')->constrained()->cascadeOnDelete();
+        //     });
+        //     $this->info($table_name .' table created');
+        // } else {
+        //     $this->error(' '. $table_name .' table already exist ');
+        // }
 
 
         /**
@@ -105,7 +105,7 @@ class CreateTables extends Command
                 $table->id();
                 $table->string('uid')->nullable();
                 $table->string('name');
-                $table->bigInteger('user_id', 0, 1)->nullable();
+                $table->unsignedBigInteger('user_id')->nullable();
                 $table->string('status')->default(ModelStatusEnum::DRAFT);
                 $table->text('meta')->nullable();
                 $table->softDeletes();
@@ -157,18 +157,18 @@ class CreateTables extends Command
 
         $existing_user = User::where('username', 'bgc')->first(['id']);
         if(empty($existing_user)){
-            $user = User::factory()->create([
+            User::factory()->create([
                 'name'=> 'BGC',
                 'username'=> 'bgc',
                 'role'=> UserRoleEnum::ADMIN,
                 'email'=> 'bgc@example.com',
             ]);
 
-            Profile::factory()->create([
-                'name'=> 'BGCG Fixed Income Solutions',
-                'author_id'=> $user->id,
-                'status'=> ModelStatusEnum::PUBLISHED,
-            ]);
+            // Profile::factory()->create([
+            //     'name'=> 'BGCG Fixed Income Solutions',
+            //     'author_id'=> $user->id,
+            //     'status'=> ModelStatusEnum::PUBLISHED,
+            // ]);
         }
 
         /**
@@ -179,14 +179,13 @@ class CreateTables extends Command
             Schema::create($table_name, function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->nullable();
-                $table->bigInteger('profile_id', 0, 1)->nullable();
+                $table->unsignedBigInteger('user_id')->nullable();
                 $table->dateTime('send_at')->nullable();
-                $table->bigInteger('template_id', 0, 1)->nullable();
+                $table->unsignedBigInteger('template_id')->nullable();
                 $table->mediumText('list_uids')->nullable();
                 $table->mediumText('numbers')->nullable();
                 $table->text('message');
 
-                $table->string('user_id')->nullable();
                 $table->string('from')->nullable();
                 $table->string('validity')->nullable();
                 $table->string('replies_to_email')->nullable();
@@ -213,7 +212,7 @@ class CreateTables extends Command
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
                 $table->id();
-                $table->bigInteger('sms_job_id', 0, 1)->nullable();
+                $table->unsignedBigInteger('sms_job_id')->nullable();
                 $table->string('sms_id')->nullable();
                 $table->string('user_id')->nullable();
                 $table->text('message');

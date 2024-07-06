@@ -10,13 +10,7 @@
                 <x-header.add-btn @click="handleClearSelectedTemplate()">NEW TEMPLATE</x-header.add-btn>
             </div>
             <div class="">
-                <select name="" title="Company" class="font-title py-2 leading-tight rounded border-gray-400 focus:border-primary-500 focus:ring-primary-400">
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                    <option>BGCG Fixed Income Solutions</option>
-                </select>
+                <x-profile-switcher />
             </div>
         </div>
 
@@ -67,8 +61,8 @@
                                 <div class="w-full md:w-6/12 px-2 mb-3">
                                     <div>Profile</div>
                                     <select name="profile_id" x-model="currentTemplateProfile" class="w-full py-2 rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
-                                        @foreach($profiles as $profile)
-                                            <option value="{{ $profile->id }}">{{ $profile->name }}</option>
+                                        @foreach($profiles as $profile_id => $profile)
+                                            <option value="{{ $profile_id }}">{{ $profile['name'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
