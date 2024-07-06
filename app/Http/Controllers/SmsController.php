@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contact;
 use App\Models\ContactGroup;
 use App\Models\Sms;
 use App\Models\SmsJob;
@@ -107,17 +108,18 @@ class SmsController extends Controller
     public function store(Request $req)
     {
         $input = $req->validate([
-            'profile_id' => ['required', 'string'],
-            'template_id' => ['nullable', 'string', Rule::exists(Template::class, 'id')],
-            'title' => ['nullable', 'string', 'max:255'],
+            'profile_id' => ['required', 'integer'],
+            'template_id' => ['nullable', 'integer', Rule::exists(Template::class, 'id')],
+            'title' => ['required', 'string', 'max:255'],
             'send_at' => ['nullable', 'string'],
+            'contact_id' => ['nullable'],
+            'contact_id.*' => ['nullable', Rule::exists(Contact::class, 'id')],
             'contact_group_uid' => ['nullable'],
             'contact_group_uid.*' => ['nullable', Rule::exists(ContactGroup::class, 'uid')],
-            'separate_numbers' => ['nullable'],
             'message' => ['required', 'string'],
         ], []);
 
-        if (empty($input['contact_group_uid']) && empty($input['separate_numbers'])) {
+        if (empty($input['contact_group_uid']) && empty($input['contact_id'])) {
             return response()->json(['message' => 'Please select recipient'], 422);
         }
 
@@ -136,8 +138,8 @@ class SmsController extends Controller
                 $list_uids = $input['contact_group_uid'];
             }
 
-            if (!empty($input['numbers'])) {
-                $numbers = $input['numbers'];
+            if (!empty($input['contact_id'])) {
+                $numbers = $input['contact_id'];
             }
 
             SmsJob::create([

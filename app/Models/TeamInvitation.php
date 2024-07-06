@@ -9,8 +9,6 @@ use Laravel\Jetstream\TeamInvitation as JetstreamTeamInvitation;
 
 class TeamInvitation extends JetstreamTeamInvitation
 {
-    use UuidTrait;
-
     /**
      * The attributes that are mass assignable.
      *

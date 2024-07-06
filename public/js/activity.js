@@ -55,6 +55,9 @@ document.addEventListener('alpine:init', function () {
             isContactGroupDropdownOpen: false,
             isLoadingContactGroups: false,
 
+            contactGroupContacts: [],
+            selectedContactGroupContacts: [],
+
             separateNumbers: [],
 
             isFormEdited: false,
@@ -157,13 +160,19 @@ document.addEventListener('alpine:init', function () {
                 self.isLoadingContactGroups = true;
                 self.isContactGroupDropdownOpen = true;
                 contactGroupAbortController = new AbortController();
-                axios.get(contactGroupsRouteIndex + '?keyword=' + self.contactGroupKeyword, {
+                axios.get(contactGroupsRouteIndex, {
                     signal: contactGroupAbortController.signal,
+                    params: {
+                        need_contacts: 1,
+                        keyword: self.contactGroupKeyword,
+                    }
                 }).then(function (res) {
                     dev && console.log(res.data);
                     if (res.data?.success) {
                         self.contactGroups = res.data.items;
+                        self.contactGroupContacts = res.data.contacts;
                         self.handleDuplicateContactGroupMarking();
+                        self.handleDuplicateContactGroupContactMarking();
                     } else {
                         let msg = (res.data?.message) ? res.data.message : 'No response from server';
                         Toastify({
@@ -189,7 +198,7 @@ document.addEventListener('alpine:init', function () {
                 });
             },
             handleContactGroupKeywordFocus() {
-                if (this.contactGroups.length) {
+                if (this.contactGroups.length || this.contactGroupContacts.length) {
                     this.isContactGroupDropdownOpen = true;
                 }
             },
@@ -208,6 +217,22 @@ document.addEventListener('alpine:init', function () {
                     }
                 });
             },
+            handleDuplicateContactGroupContactMarking() {
+                self.$nextTick(() => {
+                    for (var j = 0; j < self.contactGroupContacts.length; j++) {
+                        self.contactGroupContacts[j].added = false;
+                        console.log(self.contactGroupContacts);
+                        if (self.selectedContactGroupContacts?.length) {
+                            for (var i = 0; i < self.selectedContactGroupContacts.length; i++) {
+                                if (self.contactGroupContacts[j].id == self.selectedContactGroupContacts[i].id) {
+                                    self.contactGroupContacts[j].added = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+            },
             handleRemoveSelectedContactGroup(group) {
                 // iterate backward to avoid index shifting
                 for (let i = self.selectedContactGroups.length - 1; i >= 0; i--) {
@@ -217,6 +242,35 @@ document.addEventListener('alpine:init', function () {
                     }
                 }
                 self.handleDuplicateContactGroupMarking();
+            },
+            handleRemoveSelectedContactGroupContact(contact) {
+                // iterate backward to avoid index shifting
+                for (let i = self.selectedContactGroupContacts.length - 1; i >= 0; i--) {
+                    if (self.selectedContactGroupContacts[i]['id'] === contact.id) {
+                        self.selectedContactGroupContacts.splice(i, 1);
+                        break;
+                    }
+                }
+                self.handleDuplicateContactGroupMarking();
+            },
+            handleContactGroupContactDropdownClick(group) {
+                self.isContactGroupDropdownOpen = false;
+                let isDuplicate = false;
+                for (var i = 0; i < self.selectedContactGroupContacts.length; i++) {
+                    if (self.selectedContactGroupContacts[i].id == group.id) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+                if (!isDuplicate) {
+                    self.selectedContactGroupContacts.push({
+                        id: group.id,
+                        name: group.name,
+                    });
+                } else {
+                    self.handleRemoveSelectedContactGroupContact(group);
+                }
+                self.handleDuplicateContactGroupContactMarking();
             },
             handleContactGroupDropdownClick(group) {
                 self.isContactGroupDropdownOpen = false;
@@ -266,10 +320,10 @@ document.addEventListener('alpine:init', function () {
             sendSmsFormChanged() {
                 this.isFormEdited = true;
             },
-            handleTemplateSelected(){
-                if(self.selectedTemplateId) {
+            handleTemplateSelected() {
+                if (self.selectedTemplateId) {
                     for (var i = 0; i < self.templates.length; i++) {
-                        if(this.selectedTemplateId == self.templates[i].id) {
+                        if (this.selectedTemplateId == self.templates[i].id) {
                             self.currentTemplateMsg = self.templates[i].message;
                             autosize.update(iphoneSmsTextarea);
                             break;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ModelStatusEnum;
 use App\Exports\ContactGroupsExport;
+use App\Models\Contact;
 use App\Models\ContactGroup;
 use App\Services\SMSApi;
 use Illuminate\Http\Request;
@@ -27,11 +28,14 @@ class ContactGroupController extends Controller
     {
         if ($req->ajax()) {
             $keyword = $req->keyword;
+            $need_contacts = $req->need_contacts;
             $query = ContactGroup::query();
             if (!empty($keyword)) {
                 $query = $query->where('name', 'like', '%' . $keyword . '%');
             }
-            $data = $query->with('author:id,name')->orderBy('name', 'asc')->get(['id', 'uid', 'user_id', 'name', 'created_at']);
+            $data = $query->with('author:id,name')->orderBy('name', 'asc')
+                ->get(['id', 'uid', 'user_id', 'name', 'created_at'])
+                ->take(5);
             $items = [];
             if (!empty($data) && count($data)) {
                 foreach ($data as $item) {
@@ -45,9 +49,33 @@ class ContactGroupController extends Controller
                     ];
                 }
             }
+
+            $contacts = [];
+            if (!empty($need_contacts)) {
+                $contacts_obs = Contact::where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('lastname', 'like', '%' . $keyword . '%')
+                    ->orWhere('company', 'like', '%' . $keyword . '%')
+                    ->get(['id', 'name', 'lastname', 'company', 'phone'])->take(5);
+                if (!empty($contacts_obs)) {
+                    foreach ($contacts_obs as $cnt) {
+                        $cnt_name = $cnt->name . ' ' . $cnt->lastname;
+                        if (!empty($cnt->company)) {
+                            $cnt_name .= ' (' . $cnt->company . ')';
+                        }
+                        $contacts[] = [
+                            'id' => $cnt->id,
+                            'name' => $cnt_name,
+                            'phone'=> $cnt->phone,
+                        ];
+                    }
+                }
+            }
+
+
             return response()->json([
                 'success' => true,
                 'items' => $items,
+                'contacts' => $contacts,
             ]);
         } else {
             return view('contact-groups.index', []);
@@ -103,12 +131,12 @@ class ContactGroupController extends Controller
                     $input['uid'] = $res['id'];
                     $item = ContactGroup::create($input);
                 } else {
-                    if(!empty($res['error']['description'])){
+                    if (!empty($res['error']['description'])) {
                         return response()->json([
                             'message' => $res['error']['description'],
                         ], 500);
                     } else {
-                        return response()->json(['message'=> 'Something went wrong'], 500);
+                        return response()->json(['message' => 'Something went wrong'], 500);
                     }
                 }
             }
@@ -116,7 +144,7 @@ class ContactGroupController extends Controller
                 'success' => true,
                 'item' => [
                     'id' => $item->id,
-                    'uid'=> $item->uid,
+                    'uid' => $item->uid,
                     'name' => $item->name,
                     'createdBy' => 'Created by ' . $user->name . ' ' . $user->lastname,
                     'createdOn' => 'Created on ' . $item->created_at->format('jS \of F Y'),
@@ -170,7 +198,7 @@ class ContactGroupController extends Controller
             $item = ContactGroup::where('id', $id)->first();
             if ($item) {
                 $res = $this->smsApi->remove_list($item->uid);
-                if(!empty($res['error']) && !empty($res['code']) && $res['code'] !== 'SUCCESS'){
+                if (!empty($res['error']) && !empty($res['code']) && $res['code'] !== 'SUCCESS') {
                     $msg = $res['error'];
                     return response()->json([
                         'message' => !empty($msg['description']) ? $msg['description'] : 'Something went wrong',

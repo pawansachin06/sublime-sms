@@ -130,9 +130,9 @@
                                     <div class="w-full md:w-6/12 px-1 mb-3">
                                         <div>Profile*</div>
                                         <select name="profile_id" class="w-full py-2 text-sm rounded border-gray-400 border-solid focus:border-gray-400 focus:ring-0">
-                                            <option>Profile 1</option>
-                                            <option>Profile 2</option>
-                                            <option>Profile 3</option>
+                                            <option value="1">Profile 1</option>
+                                            <option value="2">Profile 2</option>
+                                            <option value="3">Profile 3</option>
                                         </select>
                                     </div>
                                     <div class="w-full md:w-6/12 px-1 mb-3">
@@ -172,14 +172,29 @@
                                                 <div x-show="isLoadingContactGroups" class="absolute text-center py-2 top-0 bottom-0 left-0 right-0 backdrop-blur-sm">
                                                     <x-loader />
                                                 </div>
-                                                <div x-show="!isLoadingContactGroups && !contactGroups?.length" class="px-3 py-2">
-                                                    Nothing found, create groups to add contacts
+                                                <div x-show="!isLoadingContactGroups && !contactGroups?.length" class="px-3 py-2 text-gray-400">
+                                                    Nothing found in groups
                                                 </div>
                                                 <div x-show="contactGroups?.length">
                                                     <template x-for="contactGroup in contactGroups" :key="contactGroup.id">
                                                         <button type="button" @click="handleContactGroupDropdownClick(contactGroup)" class="w-full px-3 py-2 leading-tight inline-flex items-center justify-between truncate border-0 bg-transparent hover:bg-gray-100">
                                                             <span x-text="contactGroup.name" class="grow text-left truncate"></span>
                                                             <span x-show="contactGroup?.added" class="inline-flex flex-none items-center text-gray-400">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-4 h-4" fill="currentColor" viewBox="0 -960 960 960">
+                                                                    <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
+                                                                </svg>
+                                                            </span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                                <div x-show="!isLoadingContactGroups && !contactGroupContacts?.length" class="px-3 py-2 text-gray-400">
+                                                    Nothing found in contacts
+                                                </div>
+                                                <div x-show="contactGroupContacts?.length">
+                                                    <template x-for="contactGroupContact in contactGroupContacts" :key="contactGroupContact.id">
+                                                        <button type="button" @click="handleContactGroupContactDropdownClick(contactGroupContact)" class="w-full px-3 py-2 leading-tight inline-flex items-center justify-between truncate border-0 bg-transparent hover:bg-gray-100">
+                                                            <span x-text="contactGroupContact.name" class="grow text-left truncate"></span>
+                                                            <span x-show="contactGroupContact?.added" class="inline-flex flex-none items-center text-gray-400">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-4 h-4" fill="currentColor" viewBox="0 -960 960 960">
                                                                     <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
                                                                 </svg>
@@ -201,11 +216,11 @@
                                                     </button>
                                                 </div>
                                             </template>
-                                            <template x-for="separateNumber in separateNumbers" :key="separateNumber">
+                                            <template x-for="selectedContactGroupContact in selectedContactGroupContacts" :key="selectedContactGroupContact.id">
                                                 <div class="inline-flex max-w-56 truncate rounded pl-3 text-sm leading-tight text-gray-600 border border-solid border-gray-200 bg-gray-100">
-                                                    <input type="hidden" name="separate_numbers[]" :value="separateNumber" />
-                                                    <span class="self-center truncate" x-text="separateNumber"></span>
-                                                    <button type="button" @click="handleRemoveSeparateNumber(separateNumber)" title="Clear" class="px-2 py-2 text-gray-600 border-0 bg-transparent">
+                                                    <input type="hidden" name="contact_id[]" :value="selectedContactGroupContact.id" />
+                                                    <span class="self-center truncate" x-text="selectedContactGroupContact.name"></span>
+                                                    <button type="button" @click="handleRemoveSelectedContactGroupContact(selectedContactGroupContact)" title="Clear" class="px-2 py-2 text-gray-600 border-0 bg-transparent">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-4 h-4" fill="currentColor" viewBox="0 -960 960 960">
                                                             <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
                                                         </svg>

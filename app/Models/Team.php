@@ -12,7 +12,6 @@ use Laravel\Jetstream\Team as JetstreamTeam;
 class Team extends JetstreamTeam
 {
     use HasFactory;
-    use UuidTrait;
 
     /**
      * The attributes that are mass assignable.

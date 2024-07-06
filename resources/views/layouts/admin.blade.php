@@ -7,7 +7,7 @@
     'autosize' => 0,
     'flatpickr' => 0,
     'sweetalert' => 0,
-    'activity' => 1,
+    'activity' => 0,
     'contacts' => 0,
     'templates' => 0,
     'contactGroups' => 0,

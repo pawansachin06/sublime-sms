@@ -44,10 +44,10 @@ class CreateTables extends Command
         $table_name = app(Profile::class)->getTable();
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
-                $table->uuid('id')->unique()->primary;
+                $table->id();
                 $table->string('name');
-                $table->uuid('parent_id')->nullable();
-                $table->uuid('author_id');
+                $table->bigInteger('parent_id', 0, 1)->nullable();
+                $table->bigInteger('author_id', 0, 1);
                 $table->string('status')->default(ModelStatusEnum::DRAFT);
                 $table->text('meta')->nullable();
                 $table->softDeletes();
@@ -65,9 +65,9 @@ class CreateTables extends Command
         $table_name = app(Template::class)->getTable();
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
-                $table->uuid('id')->unique()->primary;
+                $table->id();
                 $table->string('name');
-                $table->uuid('profile_id')->nullable();
+                $table->bigInteger('profile_id', 0, 1)->nullable();
                 $table->string('status')->default(ModelStatusEnum::DRAFT);
                 $table->text('message')->nullable();
                 $table->text('meta')->nullable();
@@ -87,8 +87,8 @@ class CreateTables extends Command
         $table_name = Profile::$pivot_table;
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
-                $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
-                $table->foreignUuid('profile_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('profile_id')->constrained()->cascadeOnDelete();
             });
             $this->info($table_name .' table created');
         } else {
@@ -102,10 +102,10 @@ class CreateTables extends Command
         $table_name = app(ContactGroup::class)->getTable();
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
-                $table->uuid('id')->unique()->primary;
+                $table->id();
                 $table->string('uid')->nullable();
                 $table->string('name');
-                $table->uuid('user_id')->nullable();
+                $table->bigInteger('user_id', 0, 1)->nullable();
                 $table->string('status')->default(ModelStatusEnum::DRAFT);
                 $table->text('meta')->nullable();
                 $table->softDeletes();
@@ -123,7 +123,7 @@ class CreateTables extends Command
         $table_name = app(Contact::class)->getTable();
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
-                $table->uuid('id')->unique()->primary;
+                $table->id();
                 $table->string('name');
                 $table->string('lastname')->nullable();
                 $table->string('phone');
@@ -146,8 +146,8 @@ class CreateTables extends Command
         $table_name = Contact::$pivot_table;
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
-                $table->foreignUuid('contact_id')->constrained()->cascadeOnDelete();
-                $table->foreignUuid('contact_group_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('contact_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('contact_group_id')->constrained()->cascadeOnDelete();
             });
             $this->info($table_name .' table created');
         } else {
@@ -177,11 +177,11 @@ class CreateTables extends Command
         $table_name = app(SmsJob::class)->getTable();
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
-                $table->uuid('id')->unique()->primary;
+                $table->id();
                 $table->string('name')->nullable();
-                $table->uuid('profile_id')->nullable();
+                $table->bigInteger('profile_id', 0, 1)->nullable();
                 $table->dateTime('send_at')->nullable();
-                $table->uuid('template_id')->nullable();
+                $table->bigInteger('template_id', 0, 1)->nullable();
                 $table->mediumText('list_uids')->nullable();
                 $table->mediumText('numbers')->nullable();
                 $table->text('message');
@@ -213,7 +213,7 @@ class CreateTables extends Command
         if(!Schema::hasTable($table_name)){
             Schema::create($table_name, function (Blueprint $table) {
                 $table->id();
-                $table->uuid('sms_job_id')->nullable();
+                $table->bigInteger('sms_job_id', 0, 1)->nullable();
                 $table->string('sms_id')->nullable();
                 $table->string('user_id')->nullable();
                 $table->text('message');

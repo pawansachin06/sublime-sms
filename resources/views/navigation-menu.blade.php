@@ -2,21 +2,36 @@
 
     <div class="flex flex-wrap justify-between">
         <div class="flex flex-col justify-center">
-            <a href="{{ route('dashboard') }}" class="block no-underline text-3xl sm:text-4xl font-title mb-5 font-bold text-black">BGC SMS PORTAL</a>
+            <a href="{{ route('dashboard') }}" class="inline-flex items-center no-underline text-3xl md:text-4xl font-title mb-5 font-bold text-black">
+                @auth
+                    <span class="inline-block max-w-72 truncate">{{ strtoupper(auth()->user()->name) }}&nbsp;</span><span class="inline-block">PORTAL</span>
+                @endauth
+            </a>
             <a href="https://www.sublimex.com.au/" target="_blank" rel="noopener noreferrer nofollow" class="font-title no-underline text-black inline-flex items-center gap-2">
                 <span class="mb-1">Powered by</span>
-                <img src="/img/sublime-x-black.png" loading="lazy" alt="Sublime X" height="35px" class="w-auto" />
+                <img src="/img/sublime-x-black.png" loading="lazy" alt="Sublime X" height="36px" class="h-9 w-auto" />
             </a>
         </div>
         <div class="w-full sm:w-auto text-right">
             <div class="mb-3">
-                <a href="{{ route('home') }}" title="Home"><img src="/img/logo.png" loading="lazy" alt="Logo" height="74px" class="w-auto" /></a>
+                <a href="{{ route('home') }}" title="Home">
+                    @auth
+                        <img src="{{ auth()->user()->profilePhotoUrl }}" loading="lazy" alt="Logo" height="74px" class="w-auto" />
+                    @endauth
+                </a>
             </div>
             <div class="inline-flex items-center gap-2">
-                <a href="#!" class="inline-flex gap-2 items-center font-title text-black no-underline">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"><path fill="#000" fill-rule="evenodd" d="M7.085 7.63c-1.68 0-2.794-1.723-3.043-3.815C3.775 1.567 4.82 0 7.085 0c2.266 0 3.31 1.523 3.043 3.815-.244 2.092-1.362 3.814-3.043 3.814Zm7.086 5.352c0 1.782-3.172 2.018-7.086 2.018C3.172 15 0 14.764 0 12.982c0-2.21 1.383-4.946 4.757-5.814a3.029 3.029 0 0 0 4.66.001c3.371.869 4.754 3.605 4.754 5.813Z" clip-rule="evenodd"/></svg>
-                    <span class="max-w-40 inline-block truncate">{{ auth()->user()->name }}</span>
-                </a>
+                <div class="dropdown">
+                    <button class="dropdown-toggle border-0 bg-transparent inline-flex gap-2 items-center font-title text-black" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none"><path fill="#000" fill-rule="evenodd" d="M7.085 7.63c-1.68 0-2.794-1.723-3.043-3.815C3.775 1.567 4.82 0 7.085 0c2.266 0 3.31 1.523 3.043 3.815-.244 2.092-1.362 3.814-3.043 3.814Zm7.086 5.352c0 1.782-3.172 2.018-7.086 2.018C3.172 15 0 14.764 0 12.982c0-2.21 1.383-4.946 4.757-5.814a3.029 3.029 0 0 0 4.66.001c3.371.869 4.754 3.605 4.754 5.813Z" clip-rule="evenodd"/></svg>
+                        <span class="max-w-40 inline-block truncate">{{ auth()->user()->name }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ route('profile.show') }}">My Account</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                </div>
                 <form method="POST" action="{{ route('logout') }}" class="inline-flex">
                     @csrf
                     <button type="submit" class="border-0 text-gray-500 bg-transparent">
