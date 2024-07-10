@@ -98,7 +98,7 @@
                     <tr>
                         <td colspan="9" class="px-4 py-2 text-sm text-center">
                             <span x-show="isLoadingItems">Loading, please wait...</span>
-                            <span x-show="!isLoadingItems">
+                            <span x-show="!isLoadingItems" x-cloak>
                                 Page <span x-text="page"></span> of <span x-text="totalPages"></span>, showing <span x-text="items.length"></span> of <span x-text="totalItems"></span>
                             </span>
                         </td>

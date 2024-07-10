@@ -30,10 +30,10 @@
                         </span>
                     </span>
                 </div>
-                <select name="" class="py-2 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
+                {{-- <select name="" class="py-2 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
                     <option value="">Alert</option>
                     <option value="">Failed</option>
-                </select>
+                </select> --}}
                 <div class="inline-block relative">
                     <input type="text" x-model="searchKeywordPhone" @input.debounce.750ms="handleSearchKeywordPhone()" placeholder="Phone Number" spellcheck="false" class="py-2 pl-8 font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
                     <button type="button" x-show="showSearchKeywordPhoneClearBtn" x-cloak x-transition @click="handleClearSearchKeywordPhone()" title="Clear" class="absolute end-0 top-0 bottom-0 inline-flex items-center justify-center py-2 border-0 text-gray-500 bg-transparent">
@@ -66,7 +66,7 @@
                             <th class="px-4 py-2 font-semibold text-white bg-black">User</th>
                             <th class="px-4 py-2 font-semibold text-white bg-black">Company</th>
                             <th class="px-4 py-2 font-semibold text-white bg-black">Phone Number</th>
-                            <th class="px-4 py-2 font-semibold text-white bg-black">Alert</th>
+                            {{-- <th class="px-4 py-2 font-semibold text-white bg-black">Alert</th> --}}
                             <th class="px-4 py-2 font-semibold text-white bg-black">Group(s)</th>
                             <th class="px-4 py-2 font-semibold text-white bg-black min-w-52"></th>
                         </tr>
@@ -86,8 +86,7 @@
                                     <span :class="'fi-' + contact?.country?.toLowerCase()" class="country-flag fi mr-1"></span>
                                     <span x-text="contact.phone"></span>
                                 </td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
-                                </td>
+                                {{-- <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td> --}}
                                 <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
                                     <div x-show="contact.groups?.length" class="flex flex-wrap gap-2">
                                         <template x-for="grp in contact.groups" :key="grp.id">
@@ -134,10 +133,18 @@
                                 </td>
                             </tr>
                         </template>
+                        <tr>
+                            <td colspan="6" class="px-4 py-2 text-sm text-center">
+                                <span x-show="isLoadingContacts">Loading, please wait...</span>
+                                <span x-show="!isLoadingContacts" x-cloak>
+                                    Page <span x-text="page"></span> of <span x-text="totalPages"></span>, showing <span x-text="contacts.length"></span> of <span x-text="totalContacts"></span>
+                                </span>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="px-2">
+            {{-- <div class="px-2">
                 <p x-cloak class="text-sm mb-1">Page <span x-text="page"></span> of <span x-text="totalPages"></span>, Total <span x-text="totalContacts"></span></p>
                 <div x-cloak x-show="totalPages > 1">
                     <div class="flex flex-wrap gap-2">
@@ -158,10 +165,10 @@
                         </template>
                     </div>
                 </div>
-            </div>
-            <div x-show="isLoadingContacts" class="absolute py-2 top-0 bottom-0 left-0 right-0 min-h-28 text-center backdrop-blur-xs">
+            </div> --}}
+            {{-- <div x-show="isLoadingContacts" class="absolute py-2 top-0 bottom-0 left-0 right-0 min-h-28 text-center backdrop-blur-xs">
                 <x-loader class="w-8 h-8 text-white" />
-            </div>
+            </div> --}}
         </div>
 
         <!-- Modal -->
@@ -191,7 +198,7 @@
                             </div>
                             <div class="w-full sm:w-6/12 lg:w-4/12 px-2 mb-3">
                                 <div>Ph. Number*</div>
-                                <input type="number" name="phone" x-model="modalInputPhone" required class="form-input-no-arrows w-full py-2 rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
+                                <input type="text" name="phone" x-model="modalInputPhone" required class="not-form-input-no-arrows w-full py-2 rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
                             </div>
                             <div class="w-full sm:w-6/12 lg:w-4/12 px-2 mb-3">
                                 <div>Country</div>

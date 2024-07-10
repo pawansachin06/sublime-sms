@@ -40,6 +40,8 @@ document.addEventListener('alpine:init', function () {
             totalPages: 0,
             totalContacts: 0,
             isLoadingContacts: false,
+            canAutoLoadItems: true,
+
 
             currentDeleteContact: null,
             isDeletingContact: false,
@@ -91,6 +93,8 @@ document.addEventListener('alpine:init', function () {
                 } else {
                     this.showSearchKeywordNameClearBtn = false;
                 }
+                this.canAutoLoadItems = true;
+                this.contacts = [];
                 this.loadContacts(1);
             },
             handleSearchKeywordPhone() {
@@ -99,21 +103,37 @@ document.addEventListener('alpine:init', function () {
                 } else {
                     this.showSearchKeywordPhoneClearBtn = false;
                 }
+                this.canAutoLoadItems = true;
+                this.contacts = [];
                 this.loadContacts(1);
             },
             handleClearSearchKeywordName() {
                 this.searchKeywordName = '';
                 this.showSearchKeywordNameClearBtn = false;
+                this.canAutoLoadItems = true;
+                this.contacts = [];
                 this.loadContacts(1);
             },
             handleClearSearchKeywordPhone() {
                 this.searchKeywordPhone = '';
                 this.showSearchKeywordPhoneClearBtn = false;
+                this.canAutoLoadItems = true;
+                this.contacts = [];
                 this.loadContacts(1);
             },
 
             handleDeleteContact(contact) {
                 this.currentDeleteContact = contact;
+            },
+            removeContactById(id){
+                var self = this;
+                for (var i = self.contacts.length - 1; i >= 0; i--) {
+                    if(self.contacts[i].id == id) {
+                        self.contacts.splice(i, 1);
+                        break;
+                    }
+                }
+
             },
             handleConfirmedDeleteContact(contact) {
                 var self = this;
@@ -122,7 +142,8 @@ document.addEventListener('alpine:init', function () {
                     id: contact.id
                 }).then(function (res) {
                     if (res.data.success) {
-                        self.loadContacts();
+                        self.canAutoLoadItems = true;
+                        self.removeContactById(contact.id);
                         self.currentDeleteContact = null;
                     }
                     let msg = (res.data?.message) ? res.data.message : 'No response from server';
@@ -163,7 +184,8 @@ document.addEventListener('alpine:init', function () {
                         self.handleDuplicateContactGroupMarking();
                     }
                     if (res.data?.reload) {
-                        self.loadContacts();
+                        self.contacts = [];
+                        self.loadContacts(1);
                     }
                     let msg = (res.data?.message) ? res.data.message : 'No response from server';
                     Toastify({
@@ -282,6 +304,8 @@ document.addEventListener('alpine:init', function () {
                     contactAbortController.abort();
                 }
                 contactAbortController = new AbortController();
+                if (self.isLoadingContacts) return;
+                if (!self.canAutoLoadItems) return;
                 self.isLoadingContacts = true;
                 page = page ? page : self.contactPage;
 
@@ -295,10 +319,11 @@ document.addEventListener('alpine:init', function () {
                 }).then(function (res) {
                     dev && console.log(res.data);
                     if (res.data?.success) {
-                        self.contacts = res.data.data.data;
-                        self.page = res.data.data.current_page;
-                        self.totalContacts = res.data.data.total;
-                        self.totalPages = res.data.data.last_page;
+                        dev && console.log(res.data.items);
+                        self.contacts.push(...res.data.items);
+                        self.page = res.data.page;
+                        self.totalContacts = res.data.totalRows;
+                        self.totalPages = res.data.totalPages;
                         self.prevPages = [];
                         self.nextPages = [];
                         for (let i = self.page - 2; i < self.page; i++) {
@@ -307,6 +332,16 @@ document.addEventListener('alpine:init', function () {
                         for (let j = self.page + 1; j < self.totalPages; j++) {
                             self.nextPages.push(j);
                             if (j >= self.page + 2) break;
+                        }
+                        if (res.data.items.length == 0) {
+                            self.canAutoLoadItems = false;
+                            setTimeout(function () {
+                                self.canAutoLoadItems = true;
+                            }, 5000);
+                            self.isLoadingContacts = false;
+                        } else {
+                            self.isLoadingContacts = false;
+                            self.canAutoLoadItems = true;
                         }
                     } else {
                         let msg = (res.data?.message) ? res.data.message : 'No response from server';
@@ -332,13 +367,15 @@ document.addEventListener('alpine:init', function () {
                 });
             },
             init() {
-                this.loadContacts();
+                this.loadContacts(1);
                 this.mounted = true;
                 var self = this;
                 window.addEventListener('scroll', function (e) {
                     const { clientHeight, scrollTop, scrollHeight } = e.target.documentElement;
-                    if( (clientHeight + scrollTop + 50) >=  scrollHeight && !self.isLoadingContacts){
-                        console.log('loaing..');
+                    if ((clientHeight + scrollTop + 50) >= scrollHeight && !self.isLoadingContacts) {
+                        let page = self.page + 1;
+                        self.loadContacts(page)
+                        dev && console.log('loading...');
                     }
                 });
             }

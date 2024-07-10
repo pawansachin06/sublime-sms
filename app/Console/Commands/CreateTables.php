@@ -6,7 +6,7 @@ use App\Enums\ModelStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Models\Contact;
 use App\Models\ContactGroup;
-use App\Models\Profile;
+// use App\Models\Profile;
 use App\Models\Template;
 use App\Models\User;
 use App\Models\Sms;
@@ -14,7 +14,6 @@ use App\Models\SmsJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
-use Symfony\Component\Console\Event\ConsoleEvent;
 
 class CreateTables extends Command
 {

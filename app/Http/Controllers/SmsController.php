@@ -61,7 +61,7 @@ class SmsController extends Controller
             if (!empty($filterEndDate)) {
                 $query = $query->where('send_at', '<=', $filterEndDate);
             }
-            $data = $query->latest()->paginate(20);
+            $data = $query->orderBy('id', 'DESC')->paginate(20);
             $items = [];
             $perPage = $data->perPage();
             $totalPages = $data->lastPage();

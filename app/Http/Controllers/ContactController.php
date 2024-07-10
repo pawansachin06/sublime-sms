@@ -45,18 +45,35 @@ class ContactController extends Controller
                 });
             }
 
-            $data = $query->latest()->with('groups:id,uid,name')->paginate(10, [
-                'id',
-                'name',
-                'lastname',
-                'company',
-                'phone',
-                'country',
-                'comments',
-            ]);
+            // $data = $query->latest()->with('groups:id,uid,name')->paginate(20, [
+            //     'id',
+            //     'name',
+            //     'lastname',
+            //     'company',
+            //     'phone',
+            //     'country',
+            //     'comments',
+            // ]);
+
+            $data = $query->orderBy('id', 'ASC')->with('groups:id,uid,name')->paginate(20);
+            $items = [];
+            $perPage = $data->perPage();
+            $totalPages = $data->lastPage();
+            $totalRows = $data->total();
+            $page = $data->currentPage();
+            if ($page > $totalPages) {
+                $page = $totalPages;
+            }
+            if (!empty($data->items())) {
+                $items = $data->items();
+            }
             return response()->json([
                 'success' => true,
-                'data' => $data,
+                'items' => $items,
+                'page' => $page,
+                'perPage' => $perPage,
+                'totalPages' => $totalPages,
+                'totalRows' => $totalRows,
             ]);
         } else {
             $countries = config('countries');

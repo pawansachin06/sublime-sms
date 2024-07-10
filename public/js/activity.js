@@ -381,7 +381,7 @@ document.addEventListener('alpine:init', function () {
                         self.isLoadingItems = false;
                         self.canAutoLoadItems = true;
                     }
-                    console.log(self.items);
+                    dev && console.log(self.items);
                 }).catch(function (err) {
                     if (err.code === 'ERR_CANCELED') {
                     } else {
