@@ -32,15 +32,30 @@ class ContactGroupController extends Controller
             $keyword = $req->keyword;
             $need_contacts = $req->need_contacts;
             $query = ContactGroup::query();
+            $query = $query->select([
+                'id',
+                'user_id',
+                'profile_id',
+                'name',
+                'created_at',
+            ]);
+
             if (!empty($keyword)) {
                 $query = $query->where('name', 'like', '%' . $keyword . '%');
             }
-            $data = $query->with('author:id,name')->with('profile:id,name,company')->orderBy('name', 'asc')
-                ->get(['id', 'user_id', 'profile_id', 'name', 'created_at'])
-                ->take(25);
+            $data = $query->with('author:id,name')
+                ->with('profile:id,name,company')->orderBy('id', 'desc')
+                ->paginate(25);
             $items = [];
-            if (!empty($data) && count($data)) {
-                foreach ($data as $item) {
+            $perPage = $data->perPage();
+            $totalPages = $data->lastPage();
+            $totalRows = $data->total();
+            $page = $data->currentPage();
+            if ($page > $totalPages) {
+                $page = $totalPages;
+            }
+            if (!empty($data->items())) {
+                foreach ($data->items() as $item) {
                     $items[] = [
                         'id' => $item->id,
                         'uid' => $item->id,
@@ -73,10 +88,13 @@ class ContactGroupController extends Controller
                 }
             }
 
-
             return response()->json([
                 'success' => true,
                 'items' => $items,
+                'page' => $page,
+                'perPage' => $perPage,
+                'totalPages' => $totalPages,
+                'totalRows' => $totalRows,
                 'contacts' => $contacts,
             ]);
         } else {

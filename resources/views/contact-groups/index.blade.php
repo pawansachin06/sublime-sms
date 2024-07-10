@@ -1,4 +1,4 @@
-<x-admin-layout contactGroups="1" toastify="1">
+<x-admin-layout contactGroups="1" toastify="1" flags="1">
     <div x-data="contactGroups" class="max-w-screen-xl mx-auto px-4 mb-8">
 
         <div class="flex flex-wrap justify-between gap-3 mt-4 mb-3">
@@ -33,18 +33,21 @@
                     </div>
                 </div>
                 <div class="relative min-h-40 h-full grow">
-                    <div class="absolute w-full h-full overflow-y-auto scrollbar-thin">
-                        <div x-show="isLoadingContactGroups" class="absolute left-0 top-0 bottom-0 backdrop-blur-sm right-0 text-center text-primary-500 py-3">
-                            <x-loader class="w-7 h-7" />
-                        </div>
+                    <div id="contact-groups-overflow-el" class="absolute w-full h-full overflow-y-auto scrollbar-thin">
                         <div x-show="!isLoadingContactGroups && contactGroups.length == 0" x-cloak>
                             <div class="py-2 text-center">No Goups Found!</div>
                         </div>
                         <template x-for="contactGroup in contactGroups" :key="contactGroup.id">
-                            <button type="button" @click="handleSelectGroup(contactGroup)" :class="contactGroup.id == currentContactGroup.id ? 'bg-gray-200':'bg-transparent hover:bg-gray-50'" class="px-2 py-0 border-0 flex font-normal text-left w-full">
+                            <button type="button" :title="'ID: '+ contactGroup.id" @click="handleSelectGroup(contactGroup)" :class="contactGroup.id == currentContactGroup.id ? 'bg-gray-200':'bg-transparent hover:bg-gray-50'" class="px-2 py-0 border-0 flex font-normal text-left w-full">
                                 <span class="inline-block truncate px-3 py-2 grow border border-solid border-0 border-b" :class="contactGroup.id == currentContactGroup.id ? 'border-gray-200':'border-gray-100'" x-text="contactGroup.name"></span>
                             </button>
                         </template>
+                        <div class="text-center text-primary-500 py-3">
+                            <p x-show="!isLoadingContactGroups" x-cloak class="text-sm">Page <span x-text="contactGroupPage"></span> of <span x-text="totalContactGroupPages"></span>, showing <span x-text="contactGroups.length"></span> of <span x-text="totalContactGroupRows"></span></p>
+                            <div x-show="isLoadingContactGroups">
+                                <x-loader class="w-7 h-7" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -64,7 +67,7 @@
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <div class="inline-block relative">
-                                <input type="text" placeholder="Search for contact in group" class="py-2 pl-8 w-60 max-w-full font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
+                                <input type="text" x-model="contactSearchKeyword" @input.debounce="handleContactsSearch()" placeholder="Search for contact in group" class="py-2 pl-8 w-60 max-w-full font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
                                 <span class="absolute left-0 top-0 bottom-0 pointer-events-none px-3 inline-flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" class="" fill="none">
                                         <path fill="#515151" d="M10 5.067C10 2.273 7.757 0 5 0S0 2.273 0 5.067c0 2.793 2.243 5.066 5 5.066s5-2.273 5-5.066Zm-5 3.8c-2.068 0-3.75-1.705-3.75-3.8 0-2.096 1.682-3.8 3.75-3.8s3.75 1.704 3.75 3.8c0 2.095-1.682 3.8-3.75 3.8Zm7.317 3.614a.619.619 0 0 1-.884 0L8.507 9.516c.326-.265.623-.565.884-.896l2.926 2.966a.64.64 0 0 1 0 .895Z" />
@@ -97,29 +100,41 @@
                         </svg>
                     </button>
                 </div>
-                <div class="overflow-auto">
+                <div id="contact-overflow-el" class="overflow-auto scrollbar-thin h-96">
                     <table class="w-full">
                         <thead>
                             <tr>
-                                <th class="text-white bg-black"></th>
                                 <th class="px-4 py-2 font-semibold text-white bg-black">Name</th>
                                 <th class="px-4 py-2 font-semibold text-white bg-black">Mobile Number</th>
-                                <th class="px-4 py-2 font-semibold text-white bg-black">Alert</th>
-                                <th class="px-4 py-2 font-semibold text-white bg-black">Members</th>
+                                <th class="px-4 py-2 font-semibold text-white bg-black">Company</th>
                             </tr>
                         </thead>
                         <tbody class="">
-                            @for($i = 0; $i < 10; $i++) <tr>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">Name</td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">+61 473 128 738</td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
-                                    Active
+                            <template x-for="contact in contacts" :key="contact.id">
+                                <tr class="bg-white relative">
+                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                        <span x-text="contact.name"></span>
+                                        <span x-text="contact.lastname"></span>
+                                    </td>
+                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                        <span :class="'fi-' + contact?.country?.toLowerCase()" class="country-flag fi mr-1"></span>
+                                        <span x-text="contact.phone"></span>
+                                    </td>
+                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                        <span x-text="contact.company"></span>
+                                    </td>
+                                </tr>
+                            </template>
+                            <tr>
+                                <td colspan="3" class="px-4 py-2 text-sm text-center">
+                                    <span x-show="!isLoadingContacts" x-cloak>
+                                        Page <span x-text="contactPage"></span> of <span x-text="contactTotalPages"></span>, showing <span x-text="contacts.length"></span> of <span x-text="contactTotalRows"></span>
+                                    </span>
+                                    <span x-show="isLoadingContacts" class="text-primary-500">
+                                        <x-loader />
+                                    </span>
                                 </td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
-                                    edit delete
-                                </td>
-                                @endfor
+                            </tr>
                         </tbody>
                     </table>
                 </div>

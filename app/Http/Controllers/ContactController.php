@@ -32,8 +32,45 @@ class ContactController extends Controller
         if ($req->ajax()) {
             $keyword = $req->keyword;
             $phone = $req->phone;
-            $query = Contact::query();
+            $contactGroupId = $req->contactGroupId;
 
+            if (!empty($contactGroupId)) {
+                $contactGroup = ContactGroup::find($contactGroupId);
+                $items = [];
+                $totalPages = 1;
+                $totalRows = 0;
+                $page = 1;
+                if (!empty($contactGroup)) {
+                    if (!empty($keyword)) {
+                        $data = $contactGroup->contacts()
+                                ->where('name', 'like', '%' . $keyword . '%')
+                                ->orWhere('lastname', 'like', '%' . $keyword . '%')
+                                ->orWhere('company', 'like', '%' . $keyword . '%')
+                                ->orWhere('phone', 'like', '%' . $keyword . '%')
+                                ->paginate(25);
+                    } else {
+                        $data = $contactGroup->contacts()->paginate(25);
+                    }
+                    // $data = Contact::paginate(25); // for testing pagination
+                    $totalPages = $data->lastPage();
+                    $totalRows = $data->total();
+                    $page = $data->currentPage();
+                    if ($page > $totalPages) {
+                        $page = $totalPages;
+                    }
+                    if (!empty($data->items())) {
+                        $items = $data->items();
+                    }
+                }
+                return response()->json([
+                    'items' => $items,
+                    'page' => $page,
+                    'totalPages' => $totalPages,
+                    'totalRows' => $totalRows,
+                ]);
+            }
+
+            $query = Contact::query();
             if (!empty($phone)) {
                 $query = $query->where('phone', 'like', '%' . $phone . '%');
             }
@@ -44,16 +81,6 @@ class ContactController extends Controller
                         ->orWhere('company', 'like', '%' . $keyword . '%');
                 });
             }
-
-            // $data = $query->latest()->with('groups:id,uid,name')->paginate(20, [
-            //     'id',
-            //     'name',
-            //     'lastname',
-            //     'company',
-            //     'phone',
-            //     'country',
-            //     'comments',
-            // ]);
 
             $data = $query->orderBy('id', 'ASC')->with('groups:id,uid,name')->paginate(20);
             $items = [];

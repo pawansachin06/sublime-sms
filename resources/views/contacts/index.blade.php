@@ -90,8 +90,8 @@
                                 <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
                                     <div x-show="contact.groups?.length" class="flex flex-wrap gap-2">
                                         <template x-for="grp in contact.groups" :key="grp.id">
-                                            <div class="inline-flex max-w-56 truncate rounded px-3 py-2 text-sm leading-none text-gray-500 border border-solid border-gray-300 bg-gray-200 group-hover/tr:bg-white">
-                                                <span class="self-center truncate" x-text="grp.name"></span>
+                                            <div :title="'ID: ' + grp.id" class="inline-flex max-w-56 truncate rounded px-3 py-2 text-sm leading-none text-gray-500 border border-solid border-gray-300 bg-gray-200 group-hover/tr:bg-white">
+                                                <span class="self-center truncate select-none" x-text="grp.name"></span>
                                             </div>
                                         </template>
                                     </div>
