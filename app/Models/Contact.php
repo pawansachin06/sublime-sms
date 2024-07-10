@@ -21,4 +21,5 @@ class Contact extends Model
     {
         return $this->belongsToMany(ContactGroup::class, $this::$pivot_table, 'contact_id', 'contact_group_id');
     }
+
 }

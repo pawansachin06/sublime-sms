@@ -5,19 +5,23 @@ namespace App\Http\Controllers;
 use App\Enums\ModelStatusEnum;
 use App\Models\Contact;
 use App\Models\ContactGroup;
-use App\Services\SMSApi;
+// use App\Services\SMSApi;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Exports\ContactsExport;
+use App\Imports\ContactsImport;
 use Exception;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ContactController extends Controller
 {
-    protected $smsApi;
+    // protected $smsApi;
 
-    function __construct(SMSApi $smsApi)
+    function __construct(
+        // SMSApi $smsApi
+    )
     {
-        $this->smsApi = $smsApi;
+        // $this->smsApi = $smsApi;
     }
 
     /**
@@ -42,7 +46,13 @@ class ContactController extends Controller
             }
 
             $data = $query->latest()->with('groups:id,uid,name')->paginate(10, [
-                'id', 'name', 'lastname', 'company', 'phone', 'country','comments',
+                'id',
+                'name',
+                'lastname',
+                'company',
+                'phone',
+                'country',
+                'comments',
             ]);
             return response()->json([
                 'success' => true,
@@ -89,7 +99,7 @@ class ContactController extends Controller
 
         try {
 
-            if(!empty($input['id'])){
+            if (!empty($input['id'])) {
                 $is_updating = true;
                 $item = Contact::findOrFail($input['id']);
 
@@ -100,81 +110,79 @@ class ContactController extends Controller
                 $delete_uids = array_diff($old_uids, $new_uids);
                 $create_uids = array_diff($new_uids, $old_uids);
 
-                if(!empty($update_uids)){
-                    foreach ($update_uids as $update_uid) {
-                        $res = $this->smsApi->edit_list_member($update_uid, [
-                            'phone'=> $input['phone'],
-                            'countrycode'=> $input['country'],
-                            'name'=> $input['name'],
-                            'lastname'=> $input['lastname'],
-                            'company'=> $input['company'],
-                            'comments'=> $input['comments'],
-                        ]);
-                    }
-                    if(!empty($res['msisdn'])){
-                        $input['phone'] = $res['msisdn'];
-                    }
+                if (!empty($update_uids)) {
+                    // foreach ($update_uids as $update_uid) {
+                    //     $res = $this->smsApi->edit_list_member($update_uid, [
+                    //         'phone' => $input['phone'],
+                    //         'countrycode' => $input['country'],
+                    //         'name' => $input['name'],
+                    //         'lastname' => $input['lastname'],
+                    //         'company' => $input['company'],
+                    //         'comments' => $input['comments'],
+                    //     ]);
+                    // }
+                    // if (!empty($res['msisdn'])) {
+                    //     $input['phone'] = $res['msisdn'];
+                    // }
                 }
 
-                if(!empty($delete_uids)){
-                    foreach ($delete_uids as $delete_uid) {
-                        $res = $this->smsApi->delete_from_list($delete_uid, [
-                            'phone'=> $item->phone,
-                            'country'=> $item->country
-                        ]);
-                    }
-                    if(!empty($res['msisdn'])){
-                        $input['phone'] = $res['msisdn'];
-                    }
+                if (!empty($delete_uids)) {
+                    // foreach ($delete_uids as $delete_uid) {
+                    //     $res = $this->smsApi->delete_from_list($delete_uid, [
+                    //         'phone'=> $item->phone,
+                    //         'country'=> $item->country
+                    //     ]);
+                    // }
+                    // if (!empty($res['msisdn'])) {
+                    //     $input['phone'] = $res['msisdn'];
+                    // }
                 }
 
-                if(!empty($create_uids)){
-                    foreach ($create_uids as $create_uid) {
-                        $res = $this->smsApi->add_to_list($create_uid, [
-                            'phone'=> $input['phone'],
-                            'countrycode'=> $input['country'],
-                            'name'=> $input['name'],
-                            'lastname'=> $input['lastname'],
-                            'company'=> $input['company'],
-                            'comments'=> $input['comments'],
-                        ]);
-                    }
-                    if(!empty($res['msisdn'])){
-                        $input['phone'] = $res['msisdn'];
-                    }
-                }
+                // if (!empty($create_uids)) {
+                //     foreach ($create_uids as $create_uid) {
+                //         $res = $this->smsApi->add_to_list($create_uid, [
+                //             'phone' => $input['phone'],
+                //             'countrycode' => $input['country'],
+                //             'name' => $input['name'],
+                //             'lastname' => $input['lastname'],
+                //             'company' => $input['company'],
+                //             'comments' => $input['comments'],
+                //         ]);
+                //     }
+                //     if (!empty($res['msisdn'])) {
+                //         $input['phone'] = $res['msisdn'];
+                //     }
+                // }
 
                 $item->update($input);
                 $item->groups()->sync($input['contact_group_uid']);
                 $message = 'Updated contact successfully';
-
-
             } else {
 
                 $duplicate_item = Contact::where('country', $input['country'])
-                                    ->where('phone', $input['phone'])->first();
-                if(!empty($duplicate_item)){
+                    ->where('phone', $input['phone'])->first();
+                if (!empty($duplicate_item)) {
                     return response()->json([
-                        'success'=> false,
-                        'message'=> 'Contact with same phone number already exists',
+                        'success' => false,
+                        'message' => 'Contact with same phone number already exists',
                     ]);
                 }
 
                 // add contact to api list
-                $uids = $input['contact_group_uid'];
-                foreach ($uids as $uid) {
-                    $res = $this->smsApi->add_to_list($uid, [
-                        'phone'=> $input['phone'],
-                        'countrycode'=> $input['country'],
-                        'name'=> $input['name'],
-                        'lastname'=> $input['lastname'],
-                        'company'=> $input['company'],
-                        'comments'=> $input['comments'],
-                    ]);
-                    if(!empty($res['msisdn'])){
-                        $input['phone'] = $res['msisdn'];
-                    }
-                }
+                // $uids = $input['contact_group_uid'];
+                // foreach ($uids as $uid) {
+                //     $res = $this->smsApi->add_to_list($uid, [
+                //         'phone'=> $input['phone'],
+                //         'countrycode'=> $input['country'],
+                //         'name'=> $input['name'],
+                //         'lastname'=> $input['lastname'],
+                //         'company'=> $input['company'],
+                //         'comments'=> $input['comments'],
+                //     ]);
+                //     if(!empty($res['msisdn'])){
+                //         $input['phone'] = $res['msisdn'];
+                //     }
+                // }
 
                 $item = Contact::create($input);
                 $item->groups()->sync($input['contact_group_uid']);
@@ -182,7 +190,7 @@ class ContactController extends Controller
 
             return response()->json([
                 'success' => true,
-                'reload'=> !$is_updating,
+                'reload' => !$is_updating,
                 'reset' =>  !$is_updating,
                 'close' => !$is_updating,
                 'message' => $message,
@@ -218,7 +226,104 @@ class ContactController extends Controller
 
     public function importUpload(Request $req)
     {
-        // code...
+        $input = $req->validate([
+            'group_id' => ['nullable', Rule::exists(ContactGroup::class, 'id')],
+            'importFile' => ['required', 'file', 'mimes:xls,xlsx'],
+            'newPhoneNumberAction' => ['nullable', 'in:update,ignore'],
+            'step' => ['required', 'string'],
+        ]);
+
+        $step = $req->step;
+        $newPhoneNumbersAction = 'unknown';
+        if (!empty($input['newPhoneNumberAction'])) {
+            $newPhoneNumbersAction = $input['newPhoneNumberAction'];
+        }
+        $group_id = $input['group_id'];
+        try {
+            $group = ContactGroup::select('name')->where('id', $group_id)->first();
+            $group_name = '';
+            if (!empty($group)) {
+                $group_name = $group->name;
+            }
+            if ($step == 'upload') {
+                $import = new ContactsImport($group_id, $newPhoneNumbersAction);
+                Excel::import($import, $req->file('importFile'));
+                $countHasNewPhoneNumbers = 0;
+                if (is_iterable($import->hasNewPhoneNumbers)) {
+                    $countHasNewPhoneNumbers = count($import->hasNewPhoneNumbers);
+                }
+                if ($countHasNewPhoneNumbers > 0) {
+                    $msg = '(' . $countHasNewPhoneNumbers . ') Contact';
+                    $msg .= ($countHasNewPhoneNumbers > 1 ? 's' : '');
+                    $msg .= ' already exists. But, phone numbers do not match';
+                    return response()->json([
+                        'message' => $msg,
+                        'status' => false,
+                        'hasNewPhoneNumbers' => true,
+                        'newPhoneNumbers' => $countHasNewPhoneNumbers,
+                    ]);
+                } else {
+                    $newPhoneNumbersAction = 'ignore';
+                    $import = new ContactsImport($group_id, $newPhoneNumbersAction);
+                    Excel::import($import, $req->file('importFile'));
+                    $contactsCount = $import->totalContactsImported;
+                    $contactsUpdateCount = $import->totalContactsUpdated;
+                    $msg = 'Hooray! ';
+                    if (!empty($contactsUpdateCount)) {
+                        $msg .= $contactsUpdateCount . ' contact' . ($contactsUpdateCount > 1 ? 's' : '') . ' updated';
+                    }
+                    if (!empty($contactsCount)) {
+                        if (!empty($contactsUpdateCount)) {
+                            $msg .= ', ';
+                        }
+                        $msg .= $contactsCount . ' contact' . ($contactsCount > 1 ? 's' : '') . ' added ';
+                    }
+                    if (!empty($group_name)) {
+                        $msg .= ' to group "' . $group_name . '"';
+                    }
+                    if (!empty($contactsCount) || !empty($contactsUpdateCount)) {
+                        return response()->json(['message' => $msg]);
+                    } else {
+                        return response()->json([
+                            'count' => $contactsCount,
+                            'countUpdate' => $contactsUpdateCount,
+                            'message' => 'No new contact to import',
+                        ], 422);
+                    }
+                }
+            } elseif ($step == 'hasNewPhoneNumbers') {
+                $import = new ContactsImport($group_id, $newPhoneNumbersAction);
+                Excel::import($import, $req->file('importFile'));
+                $contactsCount = $import->totalContactsImported;
+                $contactsUpdateCount = $import->totalContactsUpdated;
+                $msg = 'Hooray! ';
+                if (!empty($contactsUpdateCount)) {
+                    $msg .= $contactsUpdateCount . ' contact' . ($contactsUpdateCount > 1 ? 's' : '') . ' updated';
+                }
+                if (!empty($contactsCount)) {
+                    if (!empty($contactsUpdateCount)) {
+                        $msg .= ', ';
+                    }
+                    $msg .= $contactsCount . ' contact' . ($contactsCount > 1 ? 's' : '') . ' added ';
+                }
+                if (!empty($group_name)) {
+                    $msg .= ' to group "' . $group_name . '"';
+                }
+                if (!empty($contactsCount) || !empty($contactsUpdateCount)) {
+                    return response()->json(['message' => $msg]);
+                } else {
+                    return response()->json([
+                        'count' => $contactsCount,
+                        'countUpdate' => $contactsUpdateCount,
+                        'message' => 'No new contact to import',
+                    ], 422);
+                }
+            } else {
+                return response()->json(['message' => 'Unknow import, please refresh page'], 500);
+            }
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function exportDownload(Request $req)
@@ -227,8 +332,8 @@ class ContactController extends Controller
         $id = $req->id;
         $item = ContactGroup::select('id')->where('id', $id)->firstOrFail();
         $filename = 'contacts-' . date('Y-m-d-H-i-s') . '.xlsx';
-        $query = Contact::query();
-        $query = $query->withTrashed()->orderBy('name');
+        // $query = Contact::query();
+        $query = $item->contacts()->orderBy('name');
         return (new ContactsExport($query))->download($filename);
     }
 
@@ -244,16 +349,16 @@ class ContactController extends Controller
         $item = Contact::findOrFail($id);
         try {
 
-            $res = $this->smsApi->delete_from_list(0, [
-                'phone'=> $item->phone,
-                'country'=> $item->country
-            ]);
-            if(!empty($res['error']) && !empty($res['code']) && $res['code'] !== 'SUCCESS'){
-                $msg = $res['error'];
-                return response()->json([
-                    'message' => !empty($msg['description']) ? $msg['description'] : 'Something went wrong',
-                ], 500);
-            }
+            // $res = $this->smsApi->delete_from_list(0, [
+            //     'phone' => $item->phone,
+            //     'country' => $item->country
+            // ]);
+            // if (!empty($res['error']) && !empty($res['code']) && $res['code'] !== 'SUCCESS') {
+            //     $msg = $res['error'];
+            //     return response()->json([
+            //         'message' => !empty($msg['description']) ? $msg['description'] : 'Something went wrong',
+            //     ], 500);
+            // }
 
             $item->delete();
             return response()->json([

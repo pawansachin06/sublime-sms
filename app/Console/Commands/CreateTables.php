@@ -106,6 +106,7 @@ class CreateTables extends Command
                 $table->string('uid')->nullable();
                 $table->string('name');
                 $table->unsignedBigInteger('user_id')->nullable();
+                $table->unsignedBigInteger('profile_id')->nullable();
                 $table->string('status')->default(ModelStatusEnum::DRAFT);
                 $table->text('meta')->nullable();
                 $table->softDeletes();

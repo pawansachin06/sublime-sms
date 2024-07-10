@@ -29,13 +29,14 @@ class ContactGroupsExport implements FromQuery, WithMapping, WithHeadings
     {
         return [
             'id',
-            'uid',
+            'user_id',
+            'profile_id',
             'name',
             'username',
             'status',
-            'deleted_at',
             'created_at',
             'updated_at',
+            'deleted_at',
         ];
     }
 
@@ -43,13 +44,14 @@ class ContactGroupsExport implements FromQuery, WithMapping, WithHeadings
     {
         return [
             $item->id,
-            $item->uid,
+            $item->user_id,
+            $item->profile_id,
             $item->name,
             $item->author->username,
             strtolower($item->status),
-            $item->deleted_at,
             $item->created_at,
             $item->updated_at,
+            $item->deleted_at,
         ];
     }
 }

@@ -31,6 +31,11 @@ class ContactsExport implements FromQuery, WithMapping, WithHeadings
             'id',
             'name',
             'lastname',
+            'phone',
+            'country',
+            'company',
+            'group_ids',
+            'comments',
             'created_at',
             'updated_at',
         ];
@@ -38,10 +43,20 @@ class ContactsExport implements FromQuery, WithMapping, WithHeadings
 
     public function map($item): array
     {
+        $groups_ids = [];
+        $groups = $item->groups?->pluck('id');
+        if (!empty($groups)) {
+            $groups_ids = $groups->toArray();
+        }
         return [
             $item->id,
             $item->name,
             $item->lastname,
+            $item->phone,
+            $item->country,
+            $item->company,
+            implode(', ', $groups_ids),
+            $item->comments,
             $item->created_at,
             $item->updated_at,
         ];

@@ -99,7 +99,7 @@
                                 </td>
                                 <td class="pr-6 py-2 border-0 border-b border-solid border-gray-100 text-sm">
                                     <div class="flex gap-2 items-center justify-end">
-                                        <div x-show="(currentDeleteContact?.id && currentDeleteContact.id == contact.id)" class="flex gap-3 justify-end">
+                                        <div x-show="(currentDeleteContact?.id && currentDeleteContact.id == contact.id)" class="flex gap-3 justify-end select-none">
                                             <div class="font-semibold max-w-72">
                                                 <span x-show="!isDeletingContact">Are you sure you want to delete this contact?</span>
                                                 <span x-show="isDeletingContact">Please wait, deleting this contact...</span>

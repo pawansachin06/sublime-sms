@@ -14,11 +14,23 @@ class ContactGroup extends Model
     protected $table = 'contact_groups';
 
     protected $fillable = [
-        'id', 'uid', 'name', 'user_id', 'status', 'meta'
+        // 'id', // enable when using UUID
+        'uid',
+        'name',
+        'user_id',
+        'profile_id',
+        'status',
+        'meta',
     ];
 
-    public function author(){
-        return $this->belongsTo(User::class, 'user_id');
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function profile()
+    {
+        return $this->belongsTo(User::class, 'profile_id', 'id');
     }
 
     public function contacts()

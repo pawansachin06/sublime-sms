@@ -6,7 +6,7 @@ use App\Enums\ModelStatusEnum;
 use App\Exports\ContactGroupsExport;
 use App\Models\Contact;
 use App\Models\ContactGroup;
-use App\Services\SMSApi;
+// use App\Services\SMSApi;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Exception;
@@ -16,9 +16,11 @@ class ContactGroupController extends Controller
 {
     protected $smsApi;
 
-    function __construct(SMSApi $smsApi)
+    function __construct(
+        // SMSApi $smsApi
+    )
     {
-        $this->smsApi = $smsApi;
+        // $this->smsApi = $smsApi;
     }
 
     /**
@@ -33,19 +35,19 @@ class ContactGroupController extends Controller
             if (!empty($keyword)) {
                 $query = $query->where('name', 'like', '%' . $keyword . '%');
             }
-            $data = $query->with('author:id,name')->orderBy('name', 'asc')
-                ->get(['id', 'uid', 'user_id', 'name', 'created_at'])
-                ->take(5);
+            $data = $query->with('author:id,name')->with('profile:id,name,company')->orderBy('name', 'asc')
+                ->get(['id', 'user_id', 'profile_id', 'name', 'created_at'])
+                ->take(25);
             $items = [];
             if (!empty($data) && count($data)) {
                 foreach ($data as $item) {
                     $items[] = [
                         'id' => $item->id,
-                        'uid' => $item->uid,
+                        'uid' => $item->id,
                         'name' => $item->name,
                         'createdBy' => 'Created by ' . $item->author->name . ' ' . $item->author->lastname,
                         'createdOn' => 'Created on ' . $item->created_at->format('jS \of F Y'),
-                        'profile' => '',
+                        'profile' => $item->profile?->company . ' ' . $item->profile?->name,
                     ];
                 }
             }
@@ -55,7 +57,7 @@ class ContactGroupController extends Controller
                 $contacts_obs = Contact::where('name', 'like', '%' . $keyword . '%')
                     ->orWhere('lastname', 'like', '%' . $keyword . '%')
                     ->orWhere('company', 'like', '%' . $keyword . '%')
-                    ->get(['id', 'name', 'lastname', 'company', 'phone'])->take(5);
+                    ->get(['id', 'name', 'profile_id', 'lastname', 'company', 'phone'])->take(5);
                 if (!empty($contacts_obs)) {
                     foreach ($contacts_obs as $cnt) {
                         $cnt_name = $cnt->name . ' ' . $cnt->lastname;
@@ -65,7 +67,7 @@ class ContactGroupController extends Controller
                         $contacts[] = [
                             'id' => $cnt->id,
                             'name' => $cnt_name,
-                            'phone'=> $cnt->phone,
+                            'phone' => $cnt->phone,
                         ];
                     }
                 }
@@ -125,26 +127,33 @@ class ContactGroupController extends Controller
                 $msg = 'Updated group';
             } else {
                 // add contact group to SMS API
-                $res = $this->smsApi->add_list($name);
-                if (!empty($res['id'])) {
-                    $input['id'] = $res['id'];
-                    $input['uid'] = $res['id'];
-                    $item = ContactGroup::create($input);
-                } else {
-                    if (!empty($res['error']['description'])) {
-                        return response()->json([
-                            'message' => $res['error']['description'],
-                        ], 500);
-                    } else {
-                        return response()->json(['message' => 'Something went wrong'], 500);
-                    }
+                // $res = $this->smsApi->add_list($name);
+                // if (!empty($res['id'])) {
+                // $input['id'] = $res['id'];
+                // $input['uid'] = $res['id'];
+                $profile_id = $user->getActiveProfile();
+                if (empty($profile_id)) {
+                    $profile_id = $user->id;
                 }
+                $input['profile_id'] = $profile_id;
+                $item = ContactGroup::create($input);
+                $item->uid = $item->id;
+                $item->save();
+                // } else {
+                // if (!empty($res['error']['description'])) {
+                // return response()->json([
+                // 'message' => $res['error']['description'],
+                // ], 500);
+                // } else {
+                // return response()->json(['message' => 'Something went wrong'], 500);
+                // }
+                // }
             }
             return response()->json([
                 'success' => true,
                 'item' => [
                     'id' => $item->id,
-                    'uid' => $item->uid,
+                    'uid' => $item->id,
                     'name' => $item->name,
                     'createdBy' => 'Created by ' . $user->name . ' ' . $user->lastname,
                     'createdOn' => 'Created on ' . $item->created_at->format('jS \of F Y'),
@@ -197,13 +206,13 @@ class ContactGroupController extends Controller
         try {
             $item = ContactGroup::where('id', $id)->first();
             if ($item) {
-                $res = $this->smsApi->remove_list($item->uid);
-                if (!empty($res['error']) && !empty($res['code']) && $res['code'] !== 'SUCCESS') {
-                    $msg = $res['error'];
-                    return response()->json([
-                        'message' => !empty($msg['description']) ? $msg['description'] : 'Something went wrong',
-                    ], 500);
-                }
+                // $res = $this->smsApi->remove_list($item->uid);
+                // if (!empty($res['error']) && !empty($res['code']) && $res['code'] !== 'SUCCESS') {
+                //     $msg = $res['error'];
+                //     return response()->json([
+                //         'message' => !empty($msg['description']) ? $msg['description'] : 'Something went wrong',
+                //     ], 500);
+                // }
                 $item->forceDelete();
             }
             return response()->json([
