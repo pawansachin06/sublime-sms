@@ -247,6 +247,12 @@
                                             <textarea name="message" rows="6" id="current-template-message-input" @input.debouce.500ms="handleMsgInput()" x-model="currentTemplateMsg" class="w-full py-2 rounded-b border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400"></textarea>
                                         </div>
                                     </div>
+                                    <div class="w-full px-2 mb-3">
+                                        <label class="inline-flex gap-2 cursor-pointer items-center">
+                                            <input type="checkbox" name="isTesting" value="YES" class="border-solid rounded bg-gray-200 text-primary-500 focus:ring-primary-400" />
+                                            <span>Is Testing</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             <div class="w-12 md:w-4/12">

@@ -50,7 +50,7 @@
                 </div>
             </div>
             <div class="">
-                <button type="button" class="inline-flex gap-2 font-title text-sm font-semibold rounded px-4 py-2 justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#importContactGroupsModal" class="inline-flex gap-2 font-title text-sm font-semibold rounded px-4 py-2 justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" width="24" height="24" fill="currentColor" viewBox="0 -960 960 960"><path d="M440-367v127q0 17 11.5 28.5T480-200q17 0 28.5-11.5T520-240v-127l36 36q6 6 13.5 9t15 2.5q7.5-.5 14.5-3.5t13-9q11-12 11.5-28T612-388L508-492q-6-6-13-8.5t-15-2.5q-8 0-15 2.5t-13 8.5L348-388q-12 12-11.5 28t12.5 28q12 11 28 11.5t28-11.5l35-35ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h287q16 0 30.5 6t25.5 17l194 194q11 11 17 25.5t6 30.5v447q0 33-23.5 56.5T720-80H240Zm280-560v-160H240v640h480v-440H560q-17 0-28.5-11.5T520-640ZM240-800v200-200 640-640Z"/></svg>
                     <span>IMPORT CONTACTS</span>
                 </button>
@@ -279,6 +279,86 @@
                 </form>
             </div>
         </div>
+
+
+
+        <!-- Import Modal Start -->
+        <div class="modal fade" id="importContactGroupsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="importContactGroupsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <form @submit.prevent="handleImportContactsForm($el)" action="{{ route('contacts.import.upload') }}" class="modal-content">
+                    <div class="modal-header">
+                        <h4 x-show="importContactStep == 'upload'" class="modal-title text-lg mt-3 font-title font-semibold select-none" id="importContactGroupsModalLabel">Import Contacts</h4>
+                        <div x-show="importContactStep == 'complete' && !isImportingContacts">
+                            <div class="text-lg mt-3 mb-2 font-title font-bold select-none" x-text="importContactsErrorMsg"></div>
+                            <div class="text-sm text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mx-1" fill="currentColor" viewBox="0 0 448 512"><path d="M364.2 83.8c-24.4-24.4-64-24.4-88.4 0l-184 184c-42.1 42.1-42.1 110.3 0 152.4s110.3 42.1 152.4 0l152-152c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-152 152c-64 64-167.6 64-231.6 0s-64-167.6 0-231.6l184-184c46.3-46.3 121.3-46.3 167.6 0s46.3 121.3 0 167.6l-176 176c-28.6 28.6-75 28.6-103.6 0s-28.6-75 0-103.6l144-144c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-144 144c-6.7 6.7-6.7 17.7 0 24.4s17.7 6.7 24.4 0l176-176c24.4-24.4 24.4-64 0-88.4z"/></svg>
+                                <span x-text="importContactsFilename.length ? importContactsFilename : ''"></span>
+                            </div>
+                        </div>
+                        <button type="button" @click.prevent="closeImportContactsModal()" title="Close" data-not-bs-dismiss="modal" aria-label="Close" class="absolute -top-2 -right-1 w-7 h-7 px-0 py-0 border text-gray-500 border-solid border-gray-400 inline-flex items-center justify-center rounded-full bg-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
+                                <path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div x-show="importContactStep == 'upload'">
+                            <input type="file" id="import_contacts_file" name="importFile" @change="handleImportContactsFile($event)" accept=".xls,.xlsx" class="hidden" />
+                            <label for="import_contacts_file" :class="{'opacity-50 pointer-events-none': isImportingContacts}" class="cursor-pointer inline-flex w-full mb-1 gap-3 font-title text font-semibold rounded px-4 py-3 justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" width="24" height="24" fill="currentColor" viewBox="0 -960 960 960"><path d="M440-367v127q0 17 11.5 28.5T480-200q17 0 28.5-11.5T520-240v-127l36 36q6 6 13.5 9t15 2.5q7.5-.5 14.5-3.5t13-9q11-12 11.5-28T612-388L508-492q-6-6-13-8.5t-15-2.5q-8 0-15 2.5t-13 8.5L348-388q-12 12-11.5 28t12.5 28q12 11 28 11.5t28-11.5l35-35ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h287q16 0 30.5 6t25.5 17l194 194q11 11 17 25.5t6 30.5v447q0 33-23.5 56.5T720-80H240Zm280-560v-160H240v640h480v-440H560q-17 0-28.5-11.5T520-640ZM240-800v200-200 640-640Z"/></svg>
+                                <span>UPLOAD CONTACTS</span>
+                            </label>
+                            <p class="mb-8 text-center text-sm text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mx-1" fill="currentColor" viewBox="0 0 448 512"><path d="M364.2 83.8c-24.4-24.4-64-24.4-88.4 0l-184 184c-42.1 42.1-42.1 110.3 0 152.4s110.3 42.1 152.4 0l152-152c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-152 152c-64 64-167.6 64-231.6 0s-64-167.6 0-231.6l184-184c46.3-46.3 121.3-46.3 167.6 0s46.3 121.3 0 167.6l-176 176c-28.6 28.6-75 28.6-103.6 0s-28.6-75 0-103.6l144-144c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-144 144c-6.7 6.7-6.7 17.7 0 24.4s17.7 6.7 24.4 0l176-176c24.4-24.4 24.4-64 0-88.4z"/></svg>
+                                <span x-text="importContactsFilename.length ? importContactsFilename : 'No file uploaded'">No file uploaded</span>
+                            </p>
+                        </div>
+                        <div x-show="importContactStep == 'hasNewPhoneNumbers'">
+                            <div class="flex gap-2 mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="flex-none text-primary-500" width="30" height="30" fill="none" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M13 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM12 11.75a.75.75 0 0 1 .75.75v5a.75.75 0 1 1-1.5 0v-5a.75.75 0 0 1 .75-.75Z"/>
+                                    <path fill="currentColor" fill-rule="evenodd" d="M14.27 3.993c-1.092-1.598-3.448-1.598-4.54 0l-.432.632a75.95 75.95 0 0 0-6.944 12.563l-.09.208a2.511 2.511 0 0 0 2.024 3.497 69.43 69.43 0 0 0 15.424 0 2.511 2.511 0 0 0 2.024-3.497l-.09-.208a75.951 75.951 0 0 0-6.944-12.563l-.432-.632Zm-3.302.846a1.25 1.25 0 0 1 2.064 0l.432.632a74.444 74.444 0 0 1 6.806 12.315l.09.208a1.011 1.011 0 0 1-.814 1.408c-5.015.56-10.077.56-15.092 0a1.011 1.011 0 0 1-.815-1.408l.09-.208a74.45 74.45 0 0 1 6.807-12.315l.432-.632Z" clip-rule="evenodd"/>
+                                </svg>
+                                <div class="">
+                                    <span class="block mb-1 text-lg text-primary-500 font-title font-semibold select-none">
+                                        (<span x-text="countNewPhoneNumbers"></span>) Contact<span x-show="countNewPhoneNumbers > 1">s</span> already exist. But, phone number<span x-show="countNewPhoneNumbers > 1">s</span> do not match
+                                    </span>
+                                    <div class="text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mx-1" fill="currentColor" viewBox="0 0 448 512"><path d="M364.2 83.8c-24.4-24.4-64-24.4-88.4 0l-184 184c-42.1 42.1-42.1 110.3 0 152.4s110.3 42.1 152.4 0l152-152c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-152 152c-64 64-167.6 64-231.6 0s-64-167.6 0-231.6l184-184c46.3-46.3 121.3-46.3 167.6 0s46.3 121.3 0 167.6l-176 176c-28.6 28.6-75 28.6-103.6 0s-28.6-75 0-103.6l144-144c10.9-10.9 28.7-10.9 39.6 0s10.9 28.7 0 39.6l-144 144c-6.7 6.7-6.7 17.7 0 24.4s17.7 6.7 24.4 0l176-176c24.4-24.4 24.4-64 0-88.4z"/></svg>
+                                        <span x-text="importContactsFilename.length ? importContactsFilename : ''"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <template x-if="importContactStep == 'hasNewPhoneNumbers' && !isImportingContacts">
+                                <div class="">
+                                    <div class="flex gap-3 mb-2">
+                                        <input type="radio" name="newPhoneNumberAction" id="new-phone-number-action-update" value="update" required class="flex-none w-5 h-5 my-1 border-solid text-gray-900 focus:ring-gray-800 border-gray-500" />
+                                        <label class="leading-tight cursor-pointer" for="new-phone-number-action-update">Update phone numbers to the new numbers from <span x-text="importContactsFilename"></span></label>
+                                    </div>
+                                    <div class="flex gap-3 mb-2">
+                                        <input type="radio" name="newPhoneNumberAction" id="new-phone-number-action-ignore" value="ignore" required class="flex-none w-5 h-5 my-1 border-solid text-gray-900 focus:ring-gray-800 border-gray-500" />
+                                        <label class="leading-tight cursor-pointer" for="new-phone-number-action-ignore">Keep existing phone numbers for contacts. Do not update</label>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <p x-show="importContactsErrorMsg.length && !isImportingContacts && importContactStep != 'complete'" x-text="importContactsErrorMsg" class="font-semibold text-center mb-0"></p>
+                        <div x-show="isImportingContacts" class="text-center">
+                            <small>Do not close browser, while import is processing</small>
+                            <div class="my-2">
+                                <x-loader class="w-10 h-10 text-primary-500" />
+                            </div>
+                        </div>
+                        <button type="submit" x-show="!isImportingContacts && importContactStep != 'complete'" :disabled="importContactsDisabled" class="w-full my-2 py-2 font-medium rounded text-center border border-solid border-black bg-black text-white disabled:text-black disabled:bg-white">
+                            <span x-show="importContactStep == 'upload'">CREATE CONTACTS & ADD TO GROUP</span>
+                            <span x-show="importContactStep == 'hasNewPhoneNumbers'">CONTINUE</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Import Modal End -->
+
 
         <span x-show="(currentDeleteContact?.id)" data-show="isOpenNewContactGroupForm || isOpenEditContactGroupForm || isOpenDeleteContactGroupForm" x-cloak x-transition.opacity class="fixed top-0 right-0 bottom-0 left-0 bg-black/50"></span>
 

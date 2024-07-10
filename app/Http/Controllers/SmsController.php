@@ -117,7 +117,10 @@ class SmsController extends Controller
             'contact_group_uid' => ['nullable'],
             'contact_group_uid.*' => ['nullable', Rule::exists(ContactGroup::class, 'uid')],
             'message' => ['required', 'string'],
+            'isTesting' => ['nullable'],
         ], []);
+
+        $isTesting = !empty($input['isTesting']) ? true : false;
 
         if (empty($input['contact_group_uid']) && empty($input['contact_id'])) {
             return response()->json(['message' => 'Please select recipient'], 422);
@@ -144,14 +147,14 @@ class SmsController extends Controller
 
             SmsJob::create([
                 'name' => $input['title'],
-                'profile_id' => $input['profile_id'],
+                'user_id' => $input['profile_id'],
                 'send_at' => $send_at,
                 'template_id' => $input['template_id'],
                 'list_uids' => $list_uids,
                 'numbers' => $numbers,
                 'message' => $input['message'],
                 'scheduled' => $scheduled,
-                'status' => 'PENDING',
+                'status' => $isTesting ? 'COMPLETE' : 'PENDING',
             ]);
             if (!empty($send_at) && !empty($send_at_obj)) {
                 return response()->json([

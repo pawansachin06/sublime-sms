@@ -43,6 +43,7 @@ class ContactController extends Controller
                 if (!empty($contactGroup)) {
                     if (!empty($keyword)) {
                         $data = $contactGroup->contacts()
+                                ->orderBy('id', 'DESC')
                                 ->where('name', 'like', '%' . $keyword . '%')
                                 ->orWhere('lastname', 'like', '%' . $keyword . '%')
                                 ->orWhere('company', 'like', '%' . $keyword . '%')
@@ -82,7 +83,7 @@ class ContactController extends Controller
                 });
             }
 
-            $data = $query->orderBy('id', 'ASC')->with('groups:id,uid,name')->paginate(20);
+            $data = $query->orderBy('id', 'DESC')->with('groups:id,uid,name')->paginate(20);
             $items = [];
             $perPage = $data->perPage();
             $totalPages = $data->lastPage();
@@ -282,9 +283,9 @@ class ContactController extends Controller
         if (!empty($input['newPhoneNumberAction'])) {
             $newPhoneNumbersAction = $input['newPhoneNumberAction'];
         }
-        $group_id = $input['group_id'];
+        $group_id = !empty($input['group_id']) ? $input['group_id'] : 0;
         try {
-            $group = ContactGroup::select('name')->where('id', $group_id)->first();
+            $group = !empty($group_id) ? ContactGroup::select('name')->where('id', $group_id)->first() : null;
             $group_name = '';
             if (!empty($group)) {
                 $group_name = $group->name;

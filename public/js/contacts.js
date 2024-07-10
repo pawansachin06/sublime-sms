@@ -5,6 +5,9 @@ document.addEventListener('alpine:init', function () {
     var contactsRouteIndex = CONTACTS_ROUTE_INDEX;
     var contactsRouteDelete = CONTACTS_ROUTE_DELETE;
 
+    const importContactsModal = new bsModal('#importContactGroupsModal');
+    var importContactsFileEl = document.getElementById('import_contacts_file');
+
     var contactGroupAbortController = null;
     var contactAbortController = null;
 
@@ -42,6 +45,12 @@ document.addEventListener('alpine:init', function () {
             isLoadingContacts: false,
             canAutoLoadItems: true,
 
+            importContactsFilename: '',
+            importContactsDisabled: true,
+            isImportingContacts: false,
+            importContactStep: 'upload',
+            importContactsErrorMsg: '',
+            countNewPhoneNumbers: 0,
 
             currentDeleteContact: null,
             isDeletingContact: false,
@@ -51,6 +60,56 @@ document.addEventListener('alpine:init', function () {
             selectedContactGroups: [],
             isContactGroupDropdownOpen: false,
             isLoadingContactGroups: false,
+
+            handleImportContactsFile(e) {
+                var self = this;
+                if (e.target.files?.length) {
+                    let file = e.target.files[0];
+                    self.importContactsFilename = file.name;
+                    self.importContactsDisabled = false;
+                } else {
+                    self.importContactsDisabled = true;
+                    self.importContactsFilename = '';
+                }
+            },
+
+            handleImportContactsForm(form) {
+                var self = this;
+                self.isImportingContacts = true;
+                let formData = new FormData(form);
+                formData.append('step', self.importContactStep);
+                let url = form.getAttribute('action');
+                axios.post(url, formData).then(function (res) {
+                    if (res.data.hasNewPhoneNumbers) {
+                        self.importContactStep = 'hasNewPhoneNumbers';
+                        self.countNewPhoneNumbers = res.data.newPhoneNumbers;
+                    } else {
+                        self.importContactsErrorMsg = res.data.message;
+                        self.importContactStep = 'complete';
+                    }
+                }).catch(function (err) {
+                    dev && console.error(err);
+                    let msg = getAxiosError(err);
+                    self.importContactsErrorMsg = msg;
+                    Toastify({
+                        text: msg,
+                        className: 'toast-error',
+                        position: 'center',
+                    }).showToast();
+                }).finally(function () {
+                    self.isImportingContacts = false;
+                });
+            },
+
+            closeImportContactsModal() {
+                importContactsModal.hide();
+                importContactsFileEl.value = '';
+                this.importContactsFilename = '';
+                this.importContactsErrorMsg = '';
+                this.countNewPhoneNumbers = 0;
+                this.importContactsDisabled = true;
+                this.importContactStep = 'upload';
+            },
 
             handleCloseModalBtn() {
                 newContactsModal.hide();

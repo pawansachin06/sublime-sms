@@ -72,7 +72,7 @@ class ContactGroupController extends Controller
                 $contacts_obs = Contact::where('name', 'like', '%' . $keyword . '%')
                     ->orWhere('lastname', 'like', '%' . $keyword . '%')
                     ->orWhere('company', 'like', '%' . $keyword . '%')
-                    ->get(['id', 'name', 'profile_id', 'lastname', 'company', 'phone'])->take(5);
+                    ->get(['id', 'name', 'lastname', 'company', 'phone'])->take(5);
                 if (!empty($contacts_obs)) {
                     foreach ($contacts_obs as $cnt) {
                         $cnt_name = $cnt->name . ' ' . $cnt->lastname;
