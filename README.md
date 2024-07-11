@@ -1,4 +1,4 @@
-## Installation
+## Installations
 
 ### Create symlink for public_html folder
 
