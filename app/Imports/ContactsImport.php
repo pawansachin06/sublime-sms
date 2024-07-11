@@ -63,6 +63,14 @@ class ContactsImport implements ToCollection
                 $groupIds = [$this->selectedGroupId];
             }
 
+            if (!empty($groupIds) && is_array($groupIds)) {
+                $tempGroupIds = $groupIds;
+                $groupIds = [];
+                foreach ($tempGroupIds as $gId) {
+                    $groupIds[] = trim($gId);
+                }
+            }
+
             $commonData = [
                 'name' => $name,
                 'lastname' => $lastname,
