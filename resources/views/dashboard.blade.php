@@ -63,7 +63,7 @@
                         <th class="text-white bg-black"></th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Recipient</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">From</th>
-                        <th class="px-4 py-2 font-semibold text-white bg-black">Profile</th>
+                        <th class="px-4 py-2 font-semibold text-white bg-black">Mobile</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Status</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Date/Time</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black text-center">Out/In</th>

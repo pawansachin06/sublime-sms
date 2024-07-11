@@ -215,37 +215,31 @@ class SmsController extends Controller
     public function dlr_callback(Request $req)
     {
         $sms_id           = $req->message_id;
-        $sms_phone        = $req->mobile;
         $sms_delivered_at = $req->datetime;
         $sms_status       = $req->status;
         $sms_user_id      = $req->user_id;
 
         $inputs = $req->all();
 
-        $sms = Sms::select([
-            'id',
-            'sms_id',
-            'user_id',
-            'to',
-            'status',
-            'delivered_at',
-            'sender_id',
-        ])->where('sms_id', $sms_id)->first();
-        if (!empty($sms)) {
-            $sms->to = $sms_phone;
-            $sms->delivered_at = $sms_delivered_at;
-            $sms->status = $sms_status;
-            $sms->sender_id = $sms_user_id;
-            $sms->save();
+        try {
+            $sms = Sms::select([
+                'id',
+                'sms_id',
+                'user_id',
+                'to',
+                'status',
+                'delivered_at',
+                'sender_id',
+            ])->where('sms_id', $sms_id)->first();
+            if (!empty($sms)) {
+                $sms->delivered_at = $sms_delivered_at;
+                $sms->status = $sms_status;
+                $sms->sender_id = $sms_user_id;
+                $sms->save();
+            }
+            Log::info(json_encode($inputs));
+        } catch (Exception $e) {
+            // $e->getMessage();
         }
-
-        Log::info('sms_id' . $sms_id);
-        Log::info('sms_phone' . $sms_phone);
-        Log::info('sms_delivered_at' . $sms_delivered_at);
-        Log::info('sms_status' . $sms_status);
-        Log::info('sms_user_id' . $sms_user_id);
-
-        // dd($sms_id, $sms_phone, $sms_delivered_at, $sms_status, $sms_user_id);
-        Log::info(json_encode($inputs));
     }
 }

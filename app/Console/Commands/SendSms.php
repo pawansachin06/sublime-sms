@@ -40,6 +40,7 @@ class SendSms extends Command
             if ($show_msg) {
                 $this->info('DELIVERY CALLBACK: ' . $dlr_callback);
             }
+            // Log::info('DELIVERY CALLBACK: ' . $dlr_callback);
 
             $job = SmsJob::whereIn('status', ['PENDING', 'TESTING'])->first();
             if (!empty($job)) {
@@ -82,19 +83,18 @@ class SendSms extends Command
                             if (!empty($formatted_msg)) {
                                 $this->info($formatted_msg);
                                 // send to api
-                                $api_res = '';
                                 if ($is_teting) {
+                                    $api_res = [];
                                 } else {
                                     // $is_scheduled if false then keep send_at empty
-                                    // $api_res = $smsApi->send_sms([
-                                    //     'to' => $to,
-                                    //     'message' => $formatted_msg,
-                                    //     'send_at' => !empty($is_scheduled) ? $send_at : '',
-                                    //     'dlr_callback'=> $dlr_callback,
-                                    // ]);
+                                    $api_res = $smsApi->send_sms([
+                                        'to' => $to,
+                                        'message' => $formatted_msg,
+                                        'countrycode' => $contact_country,
+                                        'send_at' => !empty($is_scheduled) ? $send_at : '',
+                                        'dlr_callback' => $dlr_callback,
+                                    ]);
                                 }
-
-                                Log::info(json_encode($api_res));
 
                                 $sms = Sms::create([
                                     'sms_job_id' => $job->id,
@@ -109,7 +109,7 @@ class SendSms extends Command
                                     'from' => '',
                                     'send_at' => $send_at,
                                     'dlr_callback' => $dlr_callback,
-                                    'cost' => !empty($api_res['cost']) ? $api_res['cost'] : '',
+                                    'cost' => isset($api_res['cost']) ? $api_res['cost'] : '',
                                     'folder' => 'outbox',
                                     'status' => 'sent',
                                     'local_status' => 'sent',
@@ -117,7 +117,7 @@ class SendSms extends Command
                                 if ($show_msg) {
                                     $this->info(json_encode($api_res));
                                 } else {
-                                    Log::info($api_res);
+                                    Log::info(json_encode($api_res));
                                 }
                             }
                         }
@@ -151,18 +151,17 @@ class SendSms extends Command
                                         $this->info($formatted_msg);
                                         // send to api
                                         if ($is_teting) {
+                                            $api_res = [];
                                         } else {
                                             // $is_scheduled if false then keep send_at empty
-                                            // $api_res = $smsApi->send_sms([
-                                            //     'to' => $to,
-                                            //     'message' => $formatted_msg,
-                                            //     'send_at' => !empty($is_scheduled) ? $send_at : '',
-                                            //     'dlr_callback'=> $dlr_callback,
-                                            // ]);
+                                            $api_res = $smsApi->send_sms([
+                                                'to' => $to,
+                                                'message' => $formatted_msg,
+                                                'countrycode' => $contact_country,
+                                                'send_at' => !empty($is_scheduled) ? $send_at : '',
+                                                'dlr_callback' => $dlr_callback,
+                                            ]);
                                         }
-                                        $api_res = '';
-
-                                        Log::info(json_encode($api_res));
 
                                         $sms = Sms::create([
                                             'sms_job_id' => $job->id,
@@ -177,7 +176,7 @@ class SendSms extends Command
                                             'from' => '',
                                             'send_at' => $send_at,
                                             'dlr_callback' => $dlr_callback,
-                                            'cost' => !empty($api_res['cost']) ? $api_res['cost'] : '',
+                                            'cost' => isset($api_res['cost']) ? $api_res['cost'] : '',
                                             'folder' => 'outbox',
                                             'status' => 'sent',
                                             'local_status' => 'sent',
@@ -185,7 +184,7 @@ class SendSms extends Command
                                         if ($show_msg) {
                                             $this->info(json_encode($api_res));
                                         } else {
-                                            Log::info($api_res);
+                                            Log::error(json_encode($api_res));
                                         }
                                     }
                                 }
