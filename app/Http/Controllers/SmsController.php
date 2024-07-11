@@ -21,6 +21,8 @@ class SmsController extends Controller
      */
     public function index(Request $req)
     {
+        $current_user = $req->user();
+        $profile_id = $current_user->getActiveProfile();
         if ($req->ajax()) {
             $keyword = $req->keyword;
             $keywordRecipient = $req->keywordRecipient;
@@ -40,6 +42,10 @@ class SmsController extends Controller
                 'cost',
                 'status'
             ]);
+            if (!$current_user->isSuperAdmin()) {
+                $query = $query->where('user_id', $profile_id);
+            }
+
             if (!empty($keyword)) {
                 $query = $query->where('message', 'like', '%' . $keyword . '%');
             }
@@ -80,7 +86,7 @@ class SmsController extends Controller
                         'cost' => $row->cost,
                         'recipient' => !empty($row->recipient) ? $row->recipient : $row->name,
                         'status' => strtoupper($row->status),
-                        'folder'=> $row->folder,
+                        'folder' => $row->folder,
                     ];
                 }
             }
@@ -115,7 +121,7 @@ class SmsController extends Controller
             'contact_id' => ['nullable'],
             'contact_id.*' => ['nullable', Rule::exists(Contact::class, 'id')],
             'contact_group_uid' => ['nullable'],
-            'contact_group_uid.*' => ['nullable', Rule::exists(ContactGroup::class, 'uid')],
+            'contact_group_uid.*' => ['nullable', Rule::exists(ContactGroup::class, 'id')],
             'message' => ['required', 'string'],
             'isTesting' => ['nullable'],
         ], []);
@@ -154,7 +160,7 @@ class SmsController extends Controller
                 'numbers' => $numbers,
                 'message' => $input['message'],
                 'scheduled' => $scheduled,
-                'status' => $isTesting ? 'COMPLETE' : 'PENDING',
+                'status' => $isTesting ? 'TESTING' : 'PENDING',
             ]);
             if (!empty($send_at) && !empty($send_at_obj)) {
                 return response()->json([
@@ -215,6 +221,23 @@ class SmsController extends Controller
         $sms_user_id      = $req->user_id;
 
         $inputs = $req->all();
+
+        $sms = Sms::select([
+            'id',
+            'sms_id',
+            'user_id',
+            'to',
+            'status',
+            'delivered_at',
+            'sender_id',
+        ])->where('sms_id', $sms_id)->first();
+        if (!empty($sms)) {
+            $sms->to = $sms_phone;
+            $sms->delivered_at = $sms_delivered_at;
+            $sms->status = $sms_status;
+            $sms->sender_id = $sms_user_id;
+            $sms->save();
+        }
 
         Log::info('sms_id' . $sms_id);
         Log::info('sms_phone' . $sms_phone);

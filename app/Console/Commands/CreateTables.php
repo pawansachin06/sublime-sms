@@ -215,6 +215,7 @@ class CreateTables extends Command
                 $table->unsignedBigInteger('sms_job_id')->nullable();
                 $table->string('sms_id')->nullable();
                 $table->string('user_id')->nullable();
+                $table->string('sender_id')->nullable();
                 $table->text('message');
                 $table->string('to')->nullable();
                 $table->string('recipient')->nullable();

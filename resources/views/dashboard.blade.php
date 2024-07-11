@@ -250,7 +250,7 @@
                                     <div class="w-full px-2 mb-3">
                                         <label class="inline-flex gap-2 cursor-pointer items-center">
                                             <input type="checkbox" name="isTesting" value="YES" class="border-solid rounded bg-gray-200 text-primary-500 focus:ring-primary-400" />
-                                            <span>Is Testing</span>
+                                            <span class="select-none">Is Testing</span>
                                         </label>
                                     </div>
                                 </div>

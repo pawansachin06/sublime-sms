@@ -122,7 +122,11 @@ class User extends Authenticatable
 
     public function getActiveProfile()
     {
-        return Cookie::get('profileId');
+        $profile_id = Cookie::get('profileId');
+        if(empty($profile_id)) {
+            $profile_id = $this->id;
+        }
+        return $profile_id;
     }
 
     public function setActiveProfile($id)

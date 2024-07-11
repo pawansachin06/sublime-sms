@@ -41,7 +41,7 @@ class SendSms extends Command
                 $this->info('DELIVERY CALLBACK: ' . $dlr_callback);
             }
 
-            $job = SmsJob::where('status', 'PENDING')->first();
+            $job = SmsJob::whereIn('status', ['PENDING', 'TESTING'])->first();
             if (!empty($job)) {
                 $msg = 'SMS JOB: started ' . $job->id . ' ' . $job->name;
                 if ($show_msg) {
@@ -52,6 +52,7 @@ class SendSms extends Command
 
                 $message = $job->message;
                 $is_scheduled = $job->scheduled;
+                $is_teting = ($job->status != 'PENDING') ? true : false;
                 $send_at = $job->send_at;
                 $user_id = $job->user_id;
 
@@ -81,14 +82,17 @@ class SendSms extends Command
                             if (!empty($formatted_msg)) {
                                 $this->info($formatted_msg);
                                 // send to api
-                                // $is_scheduled if false then keep send_at empty
-                                // $api_res = $smsApi->send_sms([
-                                //     'to' => $to,
-                                //     'message' => $formatted_msg,
-                                //     'send_at' => !empty($is_scheduled) ? $send_at : '',
-                                //     'dlr_callback'=> $dlr_callback,
-                                // ]);
                                 $api_res = '';
+                                if ($is_teting) {
+                                } else {
+                                    // $is_scheduled if false then keep send_at empty
+                                    // $api_res = $smsApi->send_sms([
+                                    //     'to' => $to,
+                                    //     'message' => $formatted_msg,
+                                    //     'send_at' => !empty($is_scheduled) ? $send_at : '',
+                                    //     'dlr_callback'=> $dlr_callback,
+                                    // ]);
+                                }
 
                                 Log::info(json_encode($api_res));
 
@@ -122,7 +126,7 @@ class SendSms extends Command
 
                 if (!empty($list_uids)) {
                     foreach ($list_uids as $list_id) {
-                        $list = ContactGroup::where('uid', $list_id)->with('contacts')->first(['id', 'uid', 'name']);
+                        $list = ContactGroup::where('id', $list_id)->with('contacts')->first(['id', 'name']);
                         if (!empty($list)) {
                             $contacts = $list->contacts;
                             if (!empty($contacts)) {
@@ -146,13 +150,16 @@ class SendSms extends Command
                                     if (!empty($formatted_msg)) {
                                         $this->info($formatted_msg);
                                         // send to api
-                                        // $is_scheduled if false then keep send_at empty
-                                        // $api_res = $smsApi->send_sms([
-                                        //     'to' => $to,
-                                        //     'message' => $formatted_msg,
-                                        //     'send_at' => !empty($is_scheduled) ? $send_at : '',
-                                        //     'dlr_callback'=> $dlr_callback,
-                                        // ]);
+                                        if ($is_teting) {
+                                        } else {
+                                            // $is_scheduled if false then keep send_at empty
+                                            // $api_res = $smsApi->send_sms([
+                                            //     'to' => $to,
+                                            //     'message' => $formatted_msg,
+                                            //     'send_at' => !empty($is_scheduled) ? $send_at : '',
+                                            //     'dlr_callback'=> $dlr_callback,
+                                            // ]);
+                                        }
                                         $api_res = '';
 
                                         Log::info(json_encode($api_res));
@@ -183,7 +190,7 @@ class SendSms extends Command
                                     }
                                 }
                             } else {
-                                $msg = 'SMS JOB: Group has no contacts ' . $list->uid . ' ' . $list->name;
+                                $msg = 'SMS JOB: Group has no contacts ' . $list->id . ' ' . $list->name;
                                 if ($show_msg) {
                                     $this->error($msg);
                                 } else {
