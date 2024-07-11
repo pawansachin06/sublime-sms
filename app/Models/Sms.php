@@ -25,4 +25,9 @@ class Sms extends Model
             'send_at' => 'datetime',
         ];
     }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }

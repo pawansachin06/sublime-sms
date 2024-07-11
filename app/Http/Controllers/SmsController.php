@@ -36,12 +36,13 @@ class SmsController extends Controller
                 'message',
                 'to',
                 'name',
+                'user_id',
                 'recipient',
                 'send_at',
                 'folder',
                 'cost',
                 'status'
-            ]);
+            ])->with('sender:id,email');
             if (!$current_user->isSuperAdmin()) {
                 $query = $query->where('user_id', $profile_id);
             }
@@ -82,6 +83,7 @@ class SmsController extends Controller
                         'id' => $row->id,
                         'message' => $row->message,
                         'to' => $row->to,
+                        'from' => $row?->sender?->email,
                         'send_at' => $row->send_at->format('d/m/Y h:i A'),
                         'cost' => $row->cost,
                         'recipient' => !empty($row->recipient) ? $row->recipient : $row->name,

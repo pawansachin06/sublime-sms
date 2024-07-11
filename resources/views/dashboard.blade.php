@@ -76,7 +76,7 @@
                         <tr>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms.recipient"></td>
-                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td>
+                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms?.from"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms.to"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms.status"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm" x-text="sms.send_at"></td>
