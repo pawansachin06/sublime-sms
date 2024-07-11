@@ -239,9 +239,9 @@ class SmsController extends Controller
                 $sms->sender_id = $sms_user_id;
                 $sms->save();
             }
-            Log::info(json_encode($inputs));
+            // Log::info(json_encode($inputs));
         } catch (Exception $e) {
-            // $e->getMessage();
+            // Log::error($e->getMessage());
         }
     }
 }
