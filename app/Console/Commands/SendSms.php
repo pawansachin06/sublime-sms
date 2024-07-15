@@ -37,13 +37,44 @@ class SendSms extends Command
         $show_msg = $this->option('show');
         try {
             $dlr_callback = route('api.sms.callback.dlr');
-            if ($show_msg) {
-                $this->info('DELIVERY CALLBACK: ' . $dlr_callback);
+            $smses = Sms::where('local_status', 'PENDING')->take(250);
+
+            foreach ($smses as $sms) {
+                // $is_scheduled if false then keep send_at empty
+                $api_res = $smsApi->send_sms([
+                    'to' => $sms->to,
+                    'message' => $sms->message,
+                    'countrycode' => $sms->countrycode,
+                    'send_at' => !empty($sms->send_at) ? $sms->send_at : '',
+                    'dlr_callback' => $dlr_callback,
+                ]);
+                if (empty($sms->send_at)) {
+                    $sms->send_at = date('Y-m-d H:i:s');
+                }
+                $sms->local_status = 'SENT';
+                $sms->save();
+                Log::info(json_encode($api_res));
             }
+
+
+            // if ($show_msg) {
+            //     $this->info('DELIVERY CALLBACK: ' . $dlr_callback);
+            // }
             // Log::info('DELIVERY CALLBACK: ' . $dlr_callback);
 
+            /*
             $job = SmsJob::whereIn('status', ['PENDING', 'TESTING'])->first();
             if (!empty($job)) {
+
+                $message = $job->message;
+                $is_scheduled = $job->scheduled;
+                $is_teting = ($job->status != 'PENDING') ? true : false;
+                $send_at = $job->send_at;
+                $user_id = $job->user_id;
+
+                $job->status = 'WORKING';
+                $job->save();
+
                 $msg = 'SMS JOB: started ' . $job->id . ' ' . $job->name;
                 if ($show_msg) {
                     $this->info($msg);
@@ -51,11 +82,6 @@ class SendSms extends Command
                     Log::info($msg);
                 }
 
-                $message = $job->message;
-                $is_scheduled = $job->scheduled;
-                $is_teting = ($job->status != 'PENDING') ? true : false;
-                $send_at = $job->send_at;
-                $user_id = $job->user_id;
 
                 $numbers = $job->numbers;
                 $list_uids = $job->list_uids;
@@ -222,6 +248,7 @@ class SendSms extends Command
             // $this->info(json_encode($job));
             // $balance = $smsApi->get_balance();
             // Log::info('BALANCE', $balance);
+            */
         } catch (Exception $e) {
             $msg = 'ERROR ' . $e->getMessage();
             $this->error($msg);

@@ -84,7 +84,7 @@ class SmsController extends Controller
                         'message' => $row->message,
                         'to' => $row->to,
                         'from' => $row?->sender?->email,
-                        'send_at' => $row->send_at->format('d/m/Y h:i A'),
+                        'send_at' => $row?->send_at?->format('d/m/Y h:i A'),
                         'cost' => $row->cost,
                         'recipient' => !empty($row->recipient) ? $row->recipient : $row->name,
                         'status' => strtoupper($row->status),
@@ -153,7 +153,7 @@ class SmsController extends Controller
                 $numbers = $input['contact_id'];
             }
 
-            SmsJob::create([
+            $job = SmsJob::create([
                 'name' => $input['title'],
                 'user_id' => $input['profile_id'],
                 'send_at' => $send_at,
@@ -164,6 +164,134 @@ class SmsController extends Controller
                 'scheduled' => $scheduled,
                 'status' => $isTesting ? 'TESTING' : 'PENDING',
             ]);
+
+            // generate all sms here
+            $dlr_callback = route('api.sms.callback.dlr');
+            $message = $job->message;
+            $is_scheduled = $job->scheduled;
+            $is_teting = ($job->status != 'PENDING') ? true : false;
+            $send_at = $job->send_at;
+            $user_id = $job->user_id;
+
+            $numbers = $job->numbers;
+            $list_uids = $job->list_uids;
+            if (!empty($numbers)) {
+                foreach ($numbers as $number) {
+                    // send sms to number changing placeholders
+                    $cnt = Contact::where('id', $number)->first();
+                    if (!empty($cnt) && !empty($cnt->phone)) {
+                        $contact_firstname = $cnt->name;
+                        $contact_lastname = $cnt->lastname;
+                        $contact_phone = $cnt->phone;
+                        $contact_company = $cnt->company;
+                        $contact_country = $cnt->country;
+                        $to = $contact_phone;
+
+                        $formatted_msg = $message;
+                        $formatted_msg = str_replace('[Firstname]', $contact_firstname, $formatted_msg);
+                        $formatted_msg = str_replace('[Lastname]', $contact_lastname, $formatted_msg);
+                        $formatted_msg = str_replace('[Mobile]', $contact_phone, $formatted_msg);
+                        $formatted_msg = str_replace('[Company]', $contact_company, $formatted_msg);
+
+                        $recipient_name = $contact_firstname . ' ' . $contact_lastname;
+                        $recipient_group_name = '';
+
+                        if (!empty($formatted_msg)) {
+                            // send to api
+                            if ($is_teting) {
+                                $api_res = [];
+                            } else {
+                            }
+
+                            $sms = Sms::create([
+                                'sms_job_id' => $job->id,
+                                'sms_id' => !empty($api_res['message_id']) ? $api_res['message_id'] : '',
+                                'message' => $formatted_msg,
+                                'to' => $to,
+                                'name' => $recipient_name,
+                                'recipient' => $recipient_group_name,
+                                'list_id' => 0,
+                                'user_id' => $user_id,
+                                'countrycode' => $contact_country,
+                                'from' => '',
+                                'send_at' => !empty($is_scheduled) ? $send_at : NULL,
+                                'dlr_callback' => $dlr_callback,
+                                'cost' => isset($api_res['cost']) ? $api_res['cost'] : '',
+                                'folder' => 'outbox',
+                                'status' => 'pending',
+                                'local_status' => !empty($is_teting) ? 'SENT' : 'PENDING',
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            if (!empty($list_uids)) {
+                foreach ($list_uids as $list_id) {
+                    $list = ContactGroup::where('id', $list_id)->with('contacts')->first(['id', 'name']);
+                    if (!empty($list)) {
+                        $contacts = $list->contacts;
+                        if (!empty($contacts)) {
+                            foreach ($contacts as $contact) {
+                                $contact_firstname = $contact->name;
+                                $contact_lastname = $contact->lastname;
+                                $contact_phone = $contact->phone;
+                                $contact_company = $contact->company;
+                                $contact_country = $contact->country;
+                                $to = $contact_phone;
+
+                                $formatted_msg = $message;
+                                $formatted_msg = str_replace('[Firstname]', $contact_firstname, $formatted_msg);
+                                $formatted_msg = str_replace('[Lastname]', $contact_lastname, $formatted_msg);
+                                $formatted_msg = str_replace('[Mobile]', $contact_phone, $formatted_msg);
+                                $formatted_msg = str_replace('[Company]', $contact_company, $formatted_msg);
+
+                                $recipient_name = $contact_firstname . ' ' . $contact_lastname;
+                                $recipient_group_name = $list->name;
+
+                                if (!empty($formatted_msg)) {
+                                    // send to api
+                                    if ($is_teting) {
+                                        $api_res = [];
+                                    } else {
+                                    }
+
+                                    $sms = Sms::create([
+                                        'sms_job_id' => $job->id,
+                                        'sms_id' => !empty($api_res['message_id']) ? $api_res['message_id'] : '',
+                                        'message' => $formatted_msg,
+                                        'to' => $to,
+                                        'name' => $recipient_name,
+                                        'recipient' => $recipient_group_name,
+                                        'list_id' => $list_id,
+                                        'user_id' => $user_id,
+                                        'countrycode' => $contact_country,
+                                        'from' => '',
+                                        'send_at' => !empty($is_scheduled) ? $send_at : NULL,
+                                        'dlr_callback' => $dlr_callback,
+                                        'cost' => isset($api_res['cost']) ? $api_res['cost'] : '',
+                                        'folder' => 'outbox',
+                                        'status' => 'pending',
+                                        'local_status' => !empty($is_teting) ? 'SENT' : 'PENDING',
+                                    ]);
+                                }
+                            }
+                        } else {
+                            $msg = 'SMS JOB: Group has no contacts ' . $list->id . ' ' . $list->name;
+                        }
+                    } else {
+                        $msg = 'SMS JOB: Group not found ' . $list_id;
+                    }
+                }
+                $job->status = 'COMPLETE';
+                $job->save();
+            } else {
+                $job->status = 'COMPLETE';
+                $job->save();
+                $msg = 'SMS JOB: Groups not added, Marked Complete ' . $job->id . ' ' . $job->name;
+            }
+
+
             if (!empty($send_at) && !empty($send_at_obj)) {
                 return response()->json([
                     'scheduled' => true,
