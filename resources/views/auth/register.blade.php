@@ -4,9 +4,9 @@
             <x-authentication-card-logo />
         </x-slot>
 
-        <div class="mb-4">
+        {{-- <div class="mb-4">
             <x-button.google />
-        </div>
+        </div> --}}
 
         <x-validation-errors class="mb-4" />
 

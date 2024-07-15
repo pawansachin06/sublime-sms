@@ -19,12 +19,15 @@ class SocialLoginController extends Controller
 {
     public function googleRedirect()
     {
-        Cookie::queue('my_intented_url', url()->previous(), 5);
-        return Socialite::driver('google')->redirect();
+        return redirect('/');
+        // Cookie::queue('my_intented_url', url()->previous(), 5);
+        // return Socialite::driver('google')->redirect();
     }
 
     public function googleCallback(Request $request)
     {
+        return redirect('/');
+        /*
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
             $finduser = User::where('email', $googleUser->email)->first();
@@ -73,5 +76,6 @@ class SocialLoginController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+        */
     }
 }

@@ -4,9 +4,9 @@
             <x-authentication-card-logo />
         </x-slot>
 
-        <div class="mb-4">
+        {{-- <div class="mb-4">
             <x-button.google />
-        </div>
+        </div> --}}
 
         <x-validation-errors class="mb-4" />
 
@@ -15,11 +15,6 @@
                 {{ $value }}
             </div>
         @endsession
-
-        <div class="mb-6 rounded text-center border border-solid border-red-500">
-            username: admin<br>
-            password: password
-        </div>
 
         <form method="POST" action="{{ route('login') }}">
             @csrf
