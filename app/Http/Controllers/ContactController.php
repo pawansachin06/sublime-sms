@@ -142,13 +142,16 @@ class ContactController extends Controller
             'country' => ['required', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
             'comments' => ['nullable', 'string'],
-            'contact_group_uid' => ['required'],
-            'contact_group_uid.*' => ['required', Rule::exists(ContactGroup::class, 'uid')],
+            'contact_group_uid' => ['nullable'],
+            'contact_group_uid.*' => ['nullable', Rule::exists(ContactGroup::class, 'uid')],
         ], [
             'contact_group_uid.required' => 'Select at least one Group to save'
         ]);
 
         $input['phone'] = preg_replace('/\s+/', '', $input['phone']);
+        if(empty($input['contact_group_uid'])) {
+            $input['contact_group_uid'] = [];
+        }
 
 
         $input['status'] = ModelStatusEnum::PUBLISHED;
@@ -252,7 +255,8 @@ class ContactController extends Controller
 
             return response()->json([
                 'success' => true,
-                'reload' => !$is_updating,
+                // 'reload' => !$is_updating,
+                'reload' => true,
                 'reset' =>  !$is_updating,
                 'close' => !$is_updating,
                 'message' => $message,

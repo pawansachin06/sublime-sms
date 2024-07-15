@@ -118,7 +118,7 @@ class SmsController extends Controller
         $input = $req->validate([
             'profile_id' => ['required', 'integer'],
             'template_id' => ['nullable', 'integer', Rule::exists(Template::class, 'id')],
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'send_at' => ['nullable', 'string'],
             'contact_id' => ['nullable'],
             'contact_id.*' => ['nullable', Rule::exists(Contact::class, 'id')],

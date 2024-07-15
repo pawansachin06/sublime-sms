@@ -37,7 +37,7 @@ class SendSms extends Command
         $show_msg = $this->option('show');
         try {
             $dlr_callback = route('api.sms.callback.dlr');
-            $smses = Sms::where('local_status', 'PENDING')->take(250);
+            $smses = Sms::where('local_status', 'PENDING')->take(250)->get();
 
             foreach ($smses as $sms) {
                 // $is_scheduled if false then keep send_at empty
@@ -52,6 +52,8 @@ class SendSms extends Command
                     $sms->send_at = date('Y-m-d H:i:s');
                 }
                 $sms->local_status = 'SENT';
+                $sms->sms_id = !empty($api_res['message_id']) ? $api_res['message_id'] : '';
+                $sms->cost = isset($api_res['cost']) ? $api_res['cost'] : '';
                 $sms->save();
                 Log::info(json_encode($api_res));
             }
