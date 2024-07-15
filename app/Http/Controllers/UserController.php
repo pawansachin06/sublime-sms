@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -109,7 +110,7 @@ class UserController extends Controller
             'phone' => ['nullable', 'numeric'],
             'username' => ['required', 'string', 'max:255', Rule::unique(User::class)],
             'role' => [new Enum(UserRoleEnum::class)],
-            'password' => ['string', 'max:26'],
+            'password' => ['required', 'string', 'max:26'],
         ]);
 
         if ($currentUser->isAdmin() && $input['role'] == UserRoleEnum::SUPERADMIN) {
@@ -175,6 +176,7 @@ class UserController extends Controller
             'children_id.*' => ['nullable', Rule::exists(User::class, 'id')],
             'parent_id' => ['nullable'],
             'parent_id.*' => ['nullable', Rule::exists(User::class, 'id')],
+            'password' => ['nullable', 'string', 'min:6', 'max:26'],
         ]);
 
         if ($currentUser->isUser() && $currentUser->id != $user->id) {
@@ -205,6 +207,12 @@ class UserController extends Controller
             $user->children()->sync($input['children_id']);
             $user->parents()->sync($input['parent_id']);
             $user->update($input);
+
+            if( !empty($input['password']) ) {
+                $user->password = Hash::make($input['password']);
+                $user->save();
+            }
+
             return response()->json(['message' => 'Updated successfully']);
         } catch (Exception $e) {
             return response()->json([
