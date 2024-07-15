@@ -138,7 +138,7 @@ class ContactController extends Controller
             'id' => ['nullable', 'string', Rule::exists(Contact::class, 'id')],
             'name' => ['required', 'string', 'max:255'],
             'lastname' => ['nullable', 'string', 'max:255'],
-            'phone' => ['required', 'numeric',],
+            'phone' => ['required', 'string',],
             'country' => ['required', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
             'comments' => ['nullable', 'string'],
@@ -147,6 +147,9 @@ class ContactController extends Controller
         ], [
             'contact_group_uid.required' => 'Select at least one Group to save'
         ]);
+
+        $input['phone'] = preg_replace('/\s+/', '', $input['phone']);
+
 
         $input['status'] = ModelStatusEnum::PUBLISHED;
         $message = 'Saved new contact successfully';

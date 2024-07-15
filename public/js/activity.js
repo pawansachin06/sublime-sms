@@ -76,7 +76,11 @@ document.addEventListener('alpine:init', function () {
                     self.resMessage = (res.data?.message) ? res.data.message : 'No response from server';
                     self.resMessage2 = (res.data?.message2) ? res.data.message2 : '';
                     smsCreatedModal.show();
-                    self.loadItems();
+                    setTimeout(function(){
+                        self.items = [];
+                        self.canAutoLoadItems = true;
+                        self.loadItems(1);
+                    }, 2000);
                 }).catch(function (err) {
                     dev && console.log(err);
                     let msg = getAxiosError(err);
