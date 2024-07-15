@@ -28,6 +28,9 @@ class ContactGroupController extends Controller
      */
     public function index(Request $req)
     {
+        $current_user = $req->user();
+        $profile_id = $current_user->getActiveProfile();
+
         if ($req->ajax()) {
             $keyword = $req->keyword;
             $need_contacts = $req->need_contacts;
@@ -39,6 +42,10 @@ class ContactGroupController extends Controller
                 'name',
                 'created_at',
             ]);
+
+            if(!$current_user->isSuperAdmin()){
+                $query = $query->where('profile_id', $profile_id);
+            }
 
             if (!empty($keyword)) {
                 $query = $query->where('name', 'like', '%' . $keyword . '%');
@@ -69,19 +76,29 @@ class ContactGroupController extends Controller
 
             $contacts = [];
             if (!empty($need_contacts)) {
-                $contacts_obs = Contact::where('name', 'like', '%' . $keyword . '%')
+                $contacts_obs_q = Contact::query();
+                if(!$current_user->isSuperAdmin()) {
+                    $contacts_obs_q = $contacts_obs_q->where('profile_id', $profile_id);
+                }
+                $contacts_obs = $contacts_obs_q->where('name', 'like', '%' . $keyword . '%')
                     ->orWhere('lastname', 'like', '%' . $keyword . '%')
                     ->orWhere('company', 'like', '%' . $keyword . '%')
-                    ->get(['id', 'name', 'lastname', 'company', 'phone'])->take(5);
+                    ->get(['id', 'name', 'lastname', 'profile_id', 'company', 'phone'])->take(5);
                 if (!empty($contacts_obs)) {
                     foreach ($contacts_obs as $cnt) {
                         $cnt_name = $cnt->name . ' ' . $cnt->lastname;
                         if (!empty($cnt->company)) {
                             $cnt_name .= ' (' . $cnt->company . ')';
                         }
+                        if(!$current_user->isSuperAdmin()){
+                            if($profile_id != $cnt->profile_id) {
+                                continue;
+                            }
+                        }
                         $contacts[] = [
                             'id' => $cnt->id,
                             'name' => $cnt_name,
+                            '_' => $cnt->profile_id,
                             'phone' => $cnt->phone,
                         ];
                     }

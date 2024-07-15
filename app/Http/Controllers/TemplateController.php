@@ -18,9 +18,16 @@ class TemplateController extends Controller
     public function index(Request $req)
     {
         $current_user = $req->user();
+        $profile_id = $current_user->getActiveProfile();
+
         if($req->ajax()){
             $keyword = $req->keyword;
             $query = Template::query();
+
+            if(!$current_user->isSuperAdmin()){
+                $query = $query->where('profile_id', $profile_id);
+            }
+
             if(!empty($keyword)){
                 $query = $query->where('name', 'like', '%'. $keyword . '%');
             }

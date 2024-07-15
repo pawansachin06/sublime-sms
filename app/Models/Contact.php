@@ -14,8 +14,13 @@ class Contact extends Model
     public static $pivot_table = 'contact_pivot_contact_group';
 
     protected $fillable = [
-        'name', 'lastname', 'phone', 'company', 'country', 'status', 'comments', 'meta'
+        'name', 'lastname', 'phone', 'company', 'country', 'status', 'profile_id', 'comments', 'meta'
     ];
+
+    public function profile()
+    {
+        return $this->belongsTo(User::class, 'profile_id', 'id');
+    }
 
     public function groups()
     {

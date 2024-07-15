@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Contact;
+use Exception;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Collection;
 
@@ -14,17 +15,25 @@ class ContactsImport implements ToCollection
     public $totalContactsUpdated = 0;
     protected $newPhoneNumbersAction = 'unknown';
     public $selectedGroupId = 0;
+    public $profile_id = 1;
 
     public function __construct($selectedGroupId, $newPhoneNumbersAction)
     {
         $this->selectedGroupId = $selectedGroupId;
         $this->newPhoneNumbersAction = $newPhoneNumbersAction;
+        try {
+            $current_user = auth()->user();
+            $this->profile_id = $current_user->getActiveProfile();
+        } catch(Exception $e) {
+
+        }
     }
 
     public function importContact($data, $oldData = [], $groupIds)
     {
         if (!empty($data)) {
             if (empty($oldData)) {
+                $data['profile_id'] = $this->profile_id;
                 $item = Contact::create($data);
                 $item->groups()->sync($groupIds);
                 $this->totalContactsImported = $this->totalContactsImported + 1;

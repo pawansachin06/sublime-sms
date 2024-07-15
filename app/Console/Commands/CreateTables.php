@@ -132,6 +132,7 @@ class CreateTables extends Command
                 $table->string('status')->default(ModelStatusEnum::DRAFT);
                 $table->text('comments')->nullable();
                 $table->text('meta')->nullable();
+                $table->unsignedBigInteger('profile_id')->nullable();
                 $table->timestamps();
             });
             $this->info($table_name .' table created');

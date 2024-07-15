@@ -29,13 +29,20 @@ class ContactController extends Controller
      */
     public function index(Request $req)
     {
+        $current_user = $req->user();
+        $profile_id = $current_user->getActiveProfile();
+
         if ($req->ajax()) {
             $keyword = $req->keyword;
             $phone = $req->phone;
             $contactGroupId = $req->contactGroupId;
 
             if (!empty($contactGroupId)) {
-                $contactGroup = ContactGroup::find($contactGroupId);
+                if($current_user->isSuperAdmin()) {
+                    $contactGroup = ContactGroup::where('id', $contactGroupId)->first();
+                } else {
+                    $contactGroup = ContactGroup::where('profile_id', $profile_id)->where('id', $contactGroupId)->first();
+                }
                 $items = [];
                 $totalPages = 1;
                 $totalRows = 0;
@@ -72,6 +79,9 @@ class ContactController extends Controller
             }
 
             $query = Contact::query();
+            if(!$current_user->isSuperAdmin()) {
+                $query = $query->where('profile_id', $profile_id);
+            }
             if (!empty($phone)) {
                 $query = $query->where('phone', 'like', '%' . $phone . '%');
             }
@@ -142,6 +152,9 @@ class ContactController extends Controller
         $message = 'Saved new contact successfully';
         $is_updating = false;
 
+        $current_user = $req->user();
+        $profile_id = $current_user->getActiveProfile();
+
         try {
 
             if (!empty($input['id'])) {
@@ -209,7 +222,7 @@ class ContactController extends Controller
                 if (!empty($duplicate_item)) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Contact with same phone number already exists',
+                        'message' => 'Contact with same phone number and country code already exists',
                     ]);
                 }
 
@@ -228,6 +241,7 @@ class ContactController extends Controller
                 //         $input['phone'] = $res['msisdn'];
                 //     }
                 // }
+                $input['profile_id'] = $profile_id;
 
                 $item = Contact::create($input);
                 $item->groups()->sync($input['contact_group_uid']);
