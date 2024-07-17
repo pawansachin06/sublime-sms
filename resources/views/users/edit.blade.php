@@ -46,7 +46,7 @@
                     <div class="flex flex-col">
                         <span>Password (leave empty to not change)</span>
                         <div x-data="{show: false}" class="relative">
-                            <input :type="show ? 'text' : 'password'" name="password" value="" autocomplete="off" required class="w-full rounded focus:border-primary-500 focus:ring-primary-400" />
+                            <input :type="show ? 'text' : 'password'" name="password" value="" autocomplete="off" class="w-full rounded focus:border-primary-500 focus:ring-primary-400" />
                             <button x-cloak @click="show = !show" :title="show ? 'Hide Password':'Show Password'" type="button" class="absolute top-0 bottom-0 right-0 inline-flex items-center justify-center mx-1 my-1 px-2 py-1 rounded-md border bg-gray-100 text-gray-700 focus:outline-primary-500">
                                 <span :class="show ? 'inline-block' : 'hidden'">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="h-5 w-5 bi bi-eye-slash" viewBox="0 0 16 16">
