@@ -30,6 +30,7 @@ class ContactGroupController extends Controller
     {
         $current_user = $req->user();
         $profile_id = $current_user->getActiveProfile();
+        $profileIds = $current_user->allProfileIds();
 
         if ($req->ajax()) {
             $keyword = $req->keyword;
@@ -44,7 +45,7 @@ class ContactGroupController extends Controller
             ]);
 
             if(!$current_user->isSuperAdmin()){
-                $query = $query->where('profile_id', $profile_id);
+                $query = $query->whereIn('profile_id', $profileIds);
             }
 
             if (!empty($keyword)) {
@@ -65,6 +66,7 @@ class ContactGroupController extends Controller
                 foreach ($data->items() as $item) {
                     $items[] = [
                         'id' => $item->id,
+                        'total' => $item?->contacts()->count(),
                         'uid' => $item->id,
                         'name' => $item->name,
                         'createdBy' => 'Created by ' . $item->author->name . ' ' . $item->author->lastname,
@@ -78,7 +80,7 @@ class ContactGroupController extends Controller
             if (!empty($need_contacts)) {
                 $contacts_obs_q = Contact::query();
                 if(!$current_user->isSuperAdmin()) {
-                    $contacts_obs_q = $contacts_obs_q->where('profile_id', $profile_id);
+                    $contacts_obs_q = $contacts_obs_q->whereIn('profile_id', $profileIds);
                 }
                 $contacts_obs = $contacts_obs_q->where('name', 'like', '%' . $keyword . '%')
                     ->orWhere('lastname', 'like', '%' . $keyword . '%')
@@ -91,7 +93,7 @@ class ContactGroupController extends Controller
                             $cnt_name .= ' (' . $cnt->company . ')';
                         }
                         if(!$current_user->isSuperAdmin()){
-                            if($profile_id != $cnt->profile_id) {
+                            if(!in_array($cnt->profile_id, $profileIds) ) {
                                 continue;
                             }
                         }

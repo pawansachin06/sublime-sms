@@ -161,6 +161,34 @@ class User extends Authenticatable
         return $items;
     }
 
+    public function allProfileIds()
+    {
+        $current_user = $this;
+        $profileIds = [];
+        $profileIds[] = $current_user->getActiveProfile();
+
+        // $superAdminIds = User::where('role', UserRoleEnum::SUPERADMIN)->pluck('id');
+        // if(!empty($superAdminIds)) {
+        //     $profileIds = array_merge($profileIds, $superAdminIds->toArray());
+        // }
+
+        if($current_user->isUser()) {
+            $parentIds = $current_user->parents?->pluck('id');
+            if(!empty($parentIds)) {
+                foreach ($parentIds as $pId) {
+                    $parentUser = User::find($pId);
+                    $children = $parentUser->children?->pluck('id')->toArray();
+                    if(!empty($children)) {
+                        $profileIds = array_merge($profileIds, $children);
+                    }
+                }
+                $profileIds = array_merge($profileIds, $parentIds->toArray());
+            }
+        }
+        $profileIds = array_unique($profileIds);
+        return  $profileIds;
+    }
+
     public function canImpersonate(): bool
     {
         return ($this->isAdmin() || $this->isSuperAdmin());

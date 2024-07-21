@@ -19,13 +19,14 @@ class TemplateController extends Controller
     {
         $current_user = $req->user();
         $profile_id = $current_user->getActiveProfile();
+        $profileIds = $current_user->allProfileIds();
 
         if($req->ajax()){
             $keyword = $req->keyword;
             $query = Template::query();
 
             if(!$current_user->isSuperAdmin()){
-                $query = $query->where('profile_id', $profile_id);
+                $query = $query->whereIn('profile_id', $profileIds);
             }
 
             if(!empty($keyword)){

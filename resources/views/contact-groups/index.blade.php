@@ -15,8 +15,8 @@
         </div>
 
         <div :class="(isOpenNewContactGroupForm || isOpenEditContactGroupForm) ? 'relative z-50':''" class="flex flex-wrap bg-white rounded border border-solid border-gray-100 shadow">
-            <div class="w-full md:w-4/12 lg:w-3/12 flex flex-col border-solid border-0 border-r border-gray-100">
-                <div class="px-4 py-3 flex-none border border-solid border-0 border-b border-gray-100">
+            <div class="w-full md:w-4/12 lg:w-3/12 flex flex-col border-solid border-0 border-r border-gray-300">
+                <div class="px-4 py-3 flex-none border border-solid border-0 border-b border-gray-300">
                     <div class="text-lg font-semibold font-title mb-2">Groups <span x-show="contactGroups.length" x-text="'(' + contactGroups.length + ')'"></span></div>
                     <div class="block relative">
                         <input type="text" x-model="contactGroupSearchKeyword" @input.debounce.750ms="handleContactGroupInput()" placeholder="Search groups" class="py-2 pl-8 w-full font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
@@ -39,15 +39,15 @@
                         </div>
                         <template x-for="contactGroup in contactGroups" :key="contactGroup.id">
                             <button type="button" :title="'ID: '+ contactGroup.id" @click="handleSelectGroup(contactGroup)" :class="contactGroup.id == currentContactGroup.id ? 'bg-gray-200':'bg-transparent hover:bg-gray-50'" class="px-2 py-0 border-0 flex font-normal text-left w-full">
-                                <span class="inline-block truncate px-3 py-2 grow border border-solid border-0 border-b" :class="contactGroup.id == currentContactGroup.id ? 'border-gray-200':'border-gray-100'" x-text="contactGroup.name"></span>
+                                <span class="inline-block truncate px-3 py-2 grow border border-solid border-0 border-b" :class="contactGroup.id == currentContactGroup.id ? 'border-gray-200':'border-gray-300'" x-text="contactGroup.name + ' (' + contactGroup.total + ')'"></span>
                             </button>
                         </template>
-                        <div class="text-center text-primary-500 py-3">
+                        {{-- <div class="text-center text-primary-500 py-3">
                             <p x-show="!isLoadingContactGroups" x-cloak class="text-sm">Page <span x-text="contactGroupPage"></span> of <span x-text="totalContactGroupPages"></span>, showing <span x-text="contactGroups.length"></span> of <span x-text="totalContactGroupRows"></span></p>
                             <div x-show="isLoadingContactGroups">
                                 <x-loader class="w-7 h-7" />
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -112,15 +112,15 @@
                         <tbody class="">
                             <template x-for="contact in contacts" :key="contact.id">
                                 <tr class="bg-white relative">
-                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                         <span x-text="contact.name"></span>
                                         <span x-text="contact.lastname"></span>
                                     </td>
-                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                         <span :class="'fi-' + contact?.country?.toLowerCase()" class="country-flag fi mr-1"></span>
                                         <span x-text="contact.phone"></span>
                                     </td>
-                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                    <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                         <span x-text="contact.company"></span>
                                     </td>
                                 </tr>

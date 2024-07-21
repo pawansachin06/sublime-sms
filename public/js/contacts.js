@@ -54,6 +54,7 @@ document.addEventListener('alpine:init', function () {
 
             currentDeleteContact: null,
             isDeletingContact: false,
+            isEditingContact: false,
 
             contactGroupKeyword: '',
             contactGroups: [],
@@ -114,6 +115,7 @@ document.addEventListener('alpine:init', function () {
             handleCloseModalBtn() {
                 newContactsModal.hide();
                 var self = this;
+                self.isEditingContact = false;
                 if (self.modalInputId?.length) {
                     self.loadContacts();
                 }
@@ -131,6 +133,7 @@ document.addEventListener('alpine:init', function () {
             handleEditContactBtn(contact) {
                 newContactsModal.show();
                 var self = this;
+                self.isEditingContact = true;
                 self.modalInputId = contact.id;
                 self.modalInputName = contact.name;
                 self.modalInputLastname = contact.lastname;

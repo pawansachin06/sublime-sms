@@ -15,8 +15,8 @@
         </div>
 
         <div class="flex flex-wrap bg-white border border-solid border-gray-100 shadow">
-            <div class="w-full md:w-4/12 lg:w-3/12 flex flex-col border-solid border-0 border-r border-gray-100">
-                <div class="px-4 py-3 flex-none border border-solid border-0 border-b border-gray-100">
+            <div class="w-full md:w-4/12 lg:w-3/12 flex flex-col border-solid border-0 border-r border-gray-300">
+                <div class="px-4 py-3 flex-none border border-solid border-0 border-b border-gray-300">
                     <div class="text-lg font-semibold font-title mb-2">Templates</div>
                     <div class="block relative">
                         <input type="text" x-model="searchTemplateKeyword" @input.debounce.750ms="handleTemplateSearchKeyword()" spellcheck="false" placeholder="Search templates" class="py-2 pl-8 w-full font-title text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
@@ -43,7 +43,7 @@
                         </div>
                         <template x-for="tpl in templates" :key="tpl.id">
                             <button type="button" @click="handleSelectTemplate(tpl)" :class="tpl.id == currentTemplateId ? 'bg-gray-200':'bg-transparent hover:bg-gray-50'" class="px-2 py-0 border-0 flex font-normal text-left w-full">
-                                <span class="inline-block truncate px-3 py-2 grow border border-solid border-0 border-b" :class="tpl.id == currentTemplateId ? 'border-gray-200':'border-gray-100'" x-text="tpl.name"></span>
+                                <span class="inline-block truncate px-3 py-2 grow border border-solid border-0 border-b" :class="tpl.id == currentTemplateId ? 'border-gray-200':'border-gray-300'" x-text="tpl.name"></span>
                             </button>
                         </template>
                     </div>

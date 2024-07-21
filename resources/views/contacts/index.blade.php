@@ -74,20 +74,20 @@
                     <tbody class="border border-t-0 border-solid border-gray-200">
                         <template x-for="contact in contacts" :key="contact.id">
                             <tr :class="[(currentDeleteContact?.id && currentDeleteContact.id == contact.id) ? 'z-50' : '']" class="group/tr bg-white hover:bg-gray-200 relative">
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm"></td>
+                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                     <span x-text="contact.name"></span>
                                     <span x-text="contact.lastname"></span>
                                 </td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                     <span x-text="contact.company"></span>
                                 </td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                     <span :class="'fi-' + contact?.country?.toLowerCase()" class="country-flag fi mr-1"></span>
                                     <span x-text="contact.phone"></span>
                                 </td>
-                                {{-- <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm"></td> --}}
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                {{-- <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm"></td> --}}
+                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                     <div x-show="contact.groups?.length" class="flex flex-wrap gap-2">
                                         <template x-for="grp in contact.groups" :key="grp.id">
                                             <div :title="'ID: ' + grp.id" class="inline-flex max-w-56 truncate rounded px-3 py-2 text-sm leading-none text-gray-500 border border-solid border-gray-300 bg-gray-200 group-hover/tr:bg-white">
@@ -96,7 +96,7 @@
                                         </template>
                                     </div>
                                 </td>
-                                <td class="pr-6 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                <td class="pr-6 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                     <div class="flex gap-2 items-center justify-end">
                                         <div x-show="(currentDeleteContact?.id && currentDeleteContact.id == contact.id)" class="flex gap-3 justify-end select-none">
                                             <div class="font-semibold max-w-72">
@@ -178,7 +178,7 @@
                     <div class="modal-header">
                         <h4 class="modal-title text-lg mt-3 font-title font-semibold" id="newContactsModalLabel">
                             <span x-show="isSavingContact">Saving Contact...</span>
-                            <span x-show="!isSavingContact"><span x-show="modalInputId?.length">Update</span><span x-show="!modalInputId?.length">New</span> Contact</span>
+                            <span x-show="!isSavingContact"><span x-show="modalInputId">Edit</span><span x-show="!modalInputId">New</span> Contact</span>
                         </h4>
                         <button type="button" title="Close" @click="handleCloseModalBtn()" data-not-bs-dismiss="modal" aria-label="Close" class="absolute -top-2 -right-1 w-7 h-7 px-0 py-0 border text-gray-500 border-solid border-gray-400 inline-flex items-center justify-center rounded-full bg-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960">
@@ -270,9 +270,9 @@
                     <div class="modal-footer">
                         <div class="flex justify-end">
                             <button type="submit" :disabled="isSavingContact" class="inline-flex gap-2 font-title font-semibold rounded px-4 py-3 text-sm justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500 disabled:opacity-50">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none"><path fill="#fff" fill-rule="evenodd" d="M7.2 0H4.8v4.8H0v2.4h4.8V12h2.4V7.2H12V4.8H7.2V0Z" clip-rule="evenodd"/></svg>
+                                <svg x-show="!modalInputId" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none"><path fill="#fff" fill-rule="evenodd" d="M7.2 0H4.8v4.8H0v2.4h4.8V12h2.4V7.2H12V4.8H7.2V0Z" clip-rule="evenodd"/></svg>
                                 <span x-show="isSavingContact">SAVING CONTACT...</span>
-                                <span x-show="!isSavingContact"><span x-show="modalInputId?.length">UPDATE</span><span x-show="!modalInputId?.length">CREATE</span> CONTACT</span>
+                                <span x-show="!isSavingContact"><span x-show="modalInputId">UPDATE</span><span x-show="!modalInputId">CREATE</span> CONTACT</span>
                             </button>
                         </div>
                     </div>

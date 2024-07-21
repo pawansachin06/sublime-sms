@@ -3,6 +3,7 @@
         {{-- <div class="mb-4"><x-button.google /></div> --}}
         <form method="POST" action="{{ route('login') }}" class="block">
             <div class="px-6">
+                <h2 class="text-lg text-gray-600 mb-3">Login to your account</h2>
                 <x-validation-errors class="mb-4" />
                 @session('status')
                     <div class="mb-4 font-medium text-sm text-green-600">

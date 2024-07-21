@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ModelStatusEnum;
+use App\Enums\UserRoleEnum;
 use App\Models\Contact;
 use App\Models\ContactGroup;
 // use App\Services\SMSApi;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Exports\ContactsExport;
 use App\Imports\ContactsImport;
+use App\Models\User;
 use Exception;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -31,6 +33,7 @@ class ContactController extends Controller
     {
         $current_user = $req->user();
         $profile_id = $current_user->getActiveProfile();
+        $profileIds = $current_user->allProfileIds();
 
         if ($req->ajax()) {
             $keyword = $req->keyword;
@@ -41,7 +44,7 @@ class ContactController extends Controller
                 if($current_user->isSuperAdmin()) {
                     $contactGroup = ContactGroup::where('id', $contactGroupId)->first();
                 } else {
-                    $contactGroup = ContactGroup::where('profile_id', $profile_id)->where('id', $contactGroupId)->first();
+                    $contactGroup = ContactGroup::whereIn('profile_id', $profileIds)->where('id', $contactGroupId)->first();
                 }
                 $items = [];
                 $totalPages = 1;
@@ -80,7 +83,7 @@ class ContactController extends Controller
 
             $query = Contact::query();
             if(!$current_user->isSuperAdmin()) {
-                $query = $query->where('profile_id', $profile_id);
+                $query = $query->whereIn('profile_id', $profileIds);
             }
             if (!empty($phone)) {
                 $query = $query->where('phone', 'like', '%' . $phone . '%');
@@ -223,14 +226,14 @@ class ContactController extends Controller
                 $message = 'Updated contact successfully';
             } else {
 
-                $duplicate_item = Contact::where('country', $input['country'])
-                    ->where('phone', $input['phone'])->first();
-                if (!empty($duplicate_item)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Contact with same phone number and country code already exists',
-                    ]);
-                }
+                // $duplicate_item = Contact::where('country', $input['country'])
+                //     ->where('phone', $input['phone'])->first();
+                // if (!empty($duplicate_item)) {
+                //     return response()->json([
+                //         'success' => false,
+                //         'message' => 'Contact with same phone number and country code already exists',
+                //     ]);
+                // }
 
                 // add contact to api list
                 // $uids = $input['contact_group_uid'];

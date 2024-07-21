@@ -10,10 +10,6 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/', function () {
-    return view('pages.index');
-})->name('home');
-
 Route::get('/welcome', function () {
     return view('welcome');
 });
@@ -31,6 +27,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware([
     'auth:sanctum', config('jetstream.auth_session'), 'verified',
 ])->group(function () {
+
+    Route::get('/', function () {
+        return redirect('/dashboard');
+        // return view('pages.index');
+    })->name('home');
 
     Route::get('/dashboard', [
         PageController::class, 'dashboard'
