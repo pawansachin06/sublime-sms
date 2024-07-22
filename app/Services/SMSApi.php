@@ -111,6 +111,21 @@ class SMSApi
         ], 'GET');
     }
 
+    public function get_number($data = [])
+    {
+        return $this->call('get-number.json', [
+            'number' => $data['number'] ?? '',
+        ], 'POST');
+    }
+
+    public function lease_number($data = [])
+    {
+        return $this->call('lease-number.json', [
+            'number' => $data['number'] ?? '',
+            'forward_url' => $data['forward_url'] ?? route('api.sms.callback.reply'),
+        ], 'POST');
+    }
+
     private function url($action)
     {
         return rtrim($this::$apiUrl) . '/' . ltrim($action, '/');

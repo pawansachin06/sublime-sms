@@ -13,6 +13,7 @@
                         <th class="px-1 py-2 font-semibold text-white bg-black w-12 text-center">Image</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Name</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Role</th>
+                        <th class="px-4 py-2 font-semibold text-white bg-black">Sender</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Childrens</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Action</th>
                     </tr>
@@ -34,6 +35,9 @@
                                     {{ $item->role }}
                                 </td>
                                 <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
+                                    {{ $item?->sender?->phone }}
+                                </td>
+                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
                                     @if(count($item?->children))
                                         @foreach($item->children as $child)
                                             <span>{{ $child->email }}{{ $loop->last ? '' : ',' }}</span>
@@ -42,7 +46,16 @@
                                 </td>
                                 <td class="px-4 py-2 border-0 border-b border-solid border-gray-100 text-sm">
                                     @if($current_user->isSuperAdmin() || $current_user->isAdmin())
-                                        <a href="{{ route('users.edit', $item->id) }}">Edit</a>
+                                        <div class="flex gap-3 items-center">
+                                            <a href="{{ route('users.edit', $item->id) }}">Edit</a>
+                                            @if($current_user->id != $item->id)
+                                                <form method="post" action="{{ route('mimic-login') }}">
+                                                    @csrf
+                                                    <input type="hidden" name="id" value="{{ $item->id }}" />
+                                                    <button type="submit" class="bg-transparent border-0 px-0 py-0 underline text-primary-500">Login</button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

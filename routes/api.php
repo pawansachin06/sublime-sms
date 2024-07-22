@@ -12,3 +12,8 @@ Route::get('/user', function (Request $request) {
 Route::any('/callback/sms/dlr', [
     SmsController::class, 'dlr_callback'
 ])->name('api.sms.callback.dlr');
+
+Route::any('/callback/sms/reply', [
+    SmsController::class, 'reply_callback'
+])->name('api.sms.callback.reply');
+

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -39,6 +40,7 @@ class User extends Authenticatable
         'role',
         'email',
         'phone',
+        'sender_number',
         'password',
     ];
 
@@ -103,6 +105,11 @@ class User extends Authenticatable
     public function children(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_user', 'parent_id', 'user_id');
+    }
+
+    public function sender(): BelongsTo
+    {
+        return $this->belongsTo(SenderNumber::class, 'sender_number', 'id');
     }
 
     public function isSuperAdmin()

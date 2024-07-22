@@ -6,9 +6,12 @@ use App\Enums\UserRoleEnum;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use App\Models\SenderNumber;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Fortify\Fortify;
 
 class UserController extends Controller
 {
@@ -68,6 +71,7 @@ class UserController extends Controller
             ]);
         }
 
+        $query = $query->with('sender');
         if ($current_user->isSuperAdmin()) {
             $items = $query->with('children:id,name,email')->paginate(10);
         } else {
@@ -147,10 +151,12 @@ class UserController extends Controller
     public function edit(Request $req, string $id)
     {
         $currentUser = $req->user();
+        $senderNumbers = SenderNumber::get();
         $item = User::findOrFail($id);
         return view('users.edit', [
             'item' => $item,
             'currentUser' => $currentUser,
+            'senderNumbers' => $senderNumbers,
             'user_roles' => UserRoleEnum::toArray(),
         ]);
     }
@@ -164,20 +170,25 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $req->merge(['email' => strtolower($req['email'])]);
-        $input = $req->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'lastname' => ['nullable', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
             'username' => ['required', 'string', 'max:255', Rule::unique(User::class)->ignore($user->id)],
-            'phone' => ['required', 'numeric'],
+            'phone' => ['nullable', 'numeric'],
             'role' => ['nullable', new Enum(UserRoleEnum::class)],
             'children_id' => ['nullable'],
             'children_id.*' => ['nullable', Rule::exists(User::class, 'id')],
             'parent_id' => ['nullable'],
             'parent_id.*' => ['nullable', Rule::exists(User::class, 'id')],
-            'password' => ['nullable', 'string', 'min:6', 'max:26'],
-        ]);
+        ];
+
+        if(!$user->isUser()) {
+            $rules['sender_number'] = ['required', Rule::exists(SenderNumber::class, 'id')];
+        }
+
+        $input = $req->validate($rules);
 
         if ($currentUser->isUser() && $currentUser->id != $user->id) {
             return response()->json([
@@ -208,8 +219,8 @@ class UserController extends Controller
             $user->parents()->sync($input['parent_id']);
             $user->update($input);
 
-            if( !empty($input['password']) ) {
-                $user->password = Hash::make($input['password']);
+            if( !empty($req->password) ) {
+                $user->password = Hash::make($req->password);
                 $user->save();
             }
 
@@ -232,6 +243,18 @@ class UserController extends Controller
         }
         $current_user->setActiveProfile($id);
         return response()->json(['refresh' => true]);
+    }
+
+    public function mimic_login(Request $req) {
+        // $id = $req->id;
+        // $current_user = $req->user();
+        // if($current_user->isAdmin() || $current_user->isSuperAdmin()) {
+        //     Fortify::authenticateUsing(function (Request $req) {
+        //         $user = User::where('id', $req->id)->first();
+        //         return $user;
+        //     });
+        // }
+        // return redirect('/user/profile');
     }
 
     /**

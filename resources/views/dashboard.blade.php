@@ -125,8 +125,8 @@
                                         <div>Profile*</div>
                                         <select name="profile_id" class="w-full py-2 text-sm rounded border-gray-400 border-solid focus:border-gray-400 focus:ring-0">
                                             @if(!empty($profiles))
-                                                @foreach($profiles as $profile_id => $profile)
-                                                    <option value="{{ $profile_id }}">{{ $profile['name'] }}</option>
+                                                @foreach($profiles as $_profile_id => $_profile)
+                                                    <option value="{{ $_profile_id }}">{{ $_profile['name'] }}</option>
                                                 @endforeach
                                             @endif
                                         </select>
@@ -151,9 +151,20 @@
                                         </select>
                                     </div>
                                     <div class="w-full md:w-6/12 px-1 mb-3">
+                                        <div>Sender Number</div>
+                                        <select name="from" required class="w-full py-2 text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
+                                            <option value="">Select sender number</option>
+                                            @if(is_array($phoneNumbers))
+                                                @foreach($phoneNumbers as $number_key => $number)
+                                                    <option value="{{ $number['phone'] }}">{{ $number['phone'] }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    {{-- <div class="w-full md:w-6/12 px-1 mb-3">
                                         <div>Title/subject</div>
                                         <input type="text" name="title" placeholder="Type Subject" class="py-2 text-sm w-full font-title rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
-                                    </div>
+                                    </div> --}}
                                     <div @click.away="isContactGroupDropdownOpen = false" class="w-full px-1 mb-3">
                                         <div>Recipient*</div>
                                         <div class="relative">

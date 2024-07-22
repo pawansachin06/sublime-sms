@@ -12,6 +12,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use App\Models\SenderNumber;
 
 
 class SmsController extends Controller
@@ -118,16 +119,17 @@ class SmsController extends Controller
         $input = $req->validate([
             'profile_id' => ['required', 'integer'],
             'template_id' => ['nullable', 'integer', Rule::exists(Template::class, 'id')],
-            'title' => ['nullable', 'string', 'max:255'],
             'send_at' => ['nullable', 'string'],
             'contact_id' => ['nullable'],
             'contact_id.*' => ['nullable', Rule::exists(Contact::class, 'id')],
             'contact_group_uid' => ['nullable'],
             'contact_group_uid.*' => ['nullable', Rule::exists(ContactGroup::class, 'id')],
             'message' => ['required', 'string'],
+            'from' => ['required', Rule::exists(SenderNumber::class, 'phone')],
             'isTesting' => ['nullable'],
         ], []);
 
+        $input['title'] = 'No title';
         $isTesting = !empty($input['isTesting']) ? true : false;
 
         if (empty($input['contact_group_uid']) && empty($input['contact_id'])) {
@@ -153,6 +155,7 @@ class SmsController extends Controller
                 $numbers = $input['contact_id'];
             }
 
+
             $job = SmsJob::create([
                 'name' => $input['title'],
                 'user_id' => $input['profile_id'],
@@ -160,6 +163,7 @@ class SmsController extends Controller
                 'template_id' => $input['template_id'],
                 'list_uids' => $list_uids,
                 'numbers' => $numbers,
+                'from' => $input['from'],
                 'message' => $input['message'],
                 'scheduled' => $scheduled,
                 'status' => $isTesting ? 'TESTING' : 'PENDING',
@@ -213,7 +217,7 @@ class SmsController extends Controller
                                 'list_id' => 0,
                                 'user_id' => $user_id,
                                 'countrycode' => $contact_country,
-                                'from' => '',
+                                'from' => $job->from,
                                 'send_at' => !empty($is_scheduled) ? $send_at : NULL,
                                 'dlr_callback' => $dlr_callback,
                                 'cost' => isset($api_res['cost']) ? $api_res['cost'] : '',
@@ -371,5 +375,13 @@ class SmsController extends Controller
         } catch (Exception $e) {
             Log::error($e->getMessage());
         }
+    }
+
+    public function reply_callback(Request $req)
+    {
+        $inputs = $req->all();
+        Log::info('Replay Callback: ');
+        Log::info(json_encode($inputs));
+        return response()->json($inputs);
     }
 }

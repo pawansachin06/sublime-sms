@@ -7,11 +7,12 @@ use App\Http\Controllers\SmsController;
 use App\Http\Controllers\SocialLoginController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SenderNumberController;
 use Illuminate\Support\Facades\Route;
 
 
 Route::get('/welcome', function () {
-    return view('welcome');
+    // return view('welcome');
 });
 
 Route::middleware('guest')->group(function () {
@@ -80,6 +81,13 @@ Route::middleware([
     Route::resource('sms', SmsController::class, [
         'name' => 'sms'
     ]);
+
+    Route::resource('dashboard/sender-numbers', SenderNumberController::class, [
+        'name' => 'sender-numbers'
+    ]);
+
+    Route::post('dashboard/mimic-login', [UserController::class, 'mimic_login'])->name('mimic-login');
+
 });
 
 Route::impersonate();

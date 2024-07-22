@@ -30,6 +30,7 @@
                         <li><a class="dropdown-item" href="{{ route('profile.show') }}">My Account</a></li>
                         @if(!auth()->user()->isUser())
                             <li><a class="dropdown-item" href="{{ route('users.index') }}">Users</a></li>
+                            <li><a class="dropdown-item" href="{{ route('sender-numbers.index') }}">Numbers</a></li>
                         @endif
                     </ul>
                 </div>

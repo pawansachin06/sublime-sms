@@ -399,10 +399,13 @@ class ContactController extends Controller
     {
         $user = $req->user();
         $id = $req->id;
-        $item = ContactGroup::select('id')->where('id', $id)->firstOrFail();
+        if(!empty($id)) {
+            $item = ContactGroup::select('id')->where('id', $id)->firstOrFail();
+            $query = $item->contacts()->orderBy('name');
+        } else {
+            $query = Contact::query();
+        }
         $filename = 'contacts-' . date('Y-m-d-H-i-s') . '.xlsx';
-        // $query = Contact::query();
-        $query = $item->contacts()->orderBy('name');
         return (new ContactsExport($query))->download($filename);
     }
 

@@ -33,7 +33,7 @@
                 <div class="w-full sm:w-6/12 px-1 mb-2">
                     <div class="flex flex-col">
                         <span>Phone</span>
-                        <input type="number" name="phone" value="{{ $item->phone }}" required class="rounded focus:border-primary-500 focus:ring-primary-400" />
+                        <input type="number" name="phone" value="{{ $item->phone }}" class="rounded focus:border-primary-500 focus:ring-primary-400" />
                     </div>
                 </div>
                 <div class="w-full sm:w-6/12 px-1 mb-2">
@@ -67,6 +67,19 @@
                 </div>
 
                 @if( ($currentUser->isSuperAdmin() || $currentUser->isAdmin()) )
+                    @if( !empty($senderNumbers) )
+                        <div class="w-full sm:w-6/12 px-1 mb-2">
+                            <div class="flex flex-col">
+                                <span>Sender Number</span>
+                                <select name="sender_number" class="rounded focus:border-primary-500 focus:ring-primary-400">
+                                    <option value="">Select sender number</option>
+                                    @foreach($senderNumbers as $senderNumber)
+                                        <option value="{{ $senderNumber->id }}" <?= ($item?->sender_number == $senderNumber->id) ? 'selected' : '' ?>>{{ $senderNumber->phone }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    @endif
                     <div class="w-full sm:w-6/12 px-1 mb-2">
                         <div @click.away="isParentsDropdownOpen = false" class="flex flex-col">
                             <span><span x-show="isLoadingSelectedParents">Loading Parents...</span><span x-cloak x-show="!isLoadingSelectedParents">Parents</span></span>
