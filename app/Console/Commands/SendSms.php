@@ -48,7 +48,6 @@ class SendSms extends Command
                     'send_at' => !empty($sms->send_at) ? $sms->send_at : '',
                     'dlr_callback' => $dlr_callback,
                     'from' => $sms->from,
-                    // 'from' => 61480008600,
                 ]);
                 if (empty($sms->send_at)) {
                     $sms->send_at = date('Y-m-d H:i:s');
