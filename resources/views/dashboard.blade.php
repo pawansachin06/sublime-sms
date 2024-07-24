@@ -54,16 +54,19 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" class="" fill="none"><path fill="#515151" d="M10 5.067C10 2.273 7.757 0 5 0S0 2.273 0 5.067c0 2.793 2.243 5.066 5 5.066s5-2.273 5-5.066Zm-5 3.8c-2.068 0-3.75-1.705-3.75-3.8 0-2.096 1.682-3.8 3.75-3.8s3.75 1.704 3.75 3.8c0 2.095-1.682 3.8-3.75 3.8Zm7.317 3.614a.619.619 0 0 1-.884 0L8.507 9.516c.326-.265.623-.565.884-.896l2.926 2.966a.64.64 0 0 1 0 .895Z"/></svg>
                 </span>
             </div>
+            <a href="{{ route('sms.index', ['export'=> 1]) }}" title="Export" target="_blank" rel="noopener noreferrer nofollow" class="inline-flex gap-2 font-title text-sm font-semibold rounded px-2 py-2 justify-center items-center leading-none no-underline border border-solid border-gray-600 text-white bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" width="24" height="24" fill="currentColor" viewBox="0 -960 960 960"><path d="M480-337q-8 0-15-2.5t-13-8.5L308-492q-12-12-11.5-28t11.5-28q12-12 28.5-12.5T365-549l75 75v-286q0-17 11.5-28.5T480-800q17 0 28.5 11.5T520-760v286l75-75q12-12 28.5-11.5T652-548q11 12 11.5 28T652-492L508-348q-6 6-13 8.5t-15 2.5ZM240-160q-33 0-56.5-23.5T160-240v-80q0-17 11.5-28.5T200-360q17 0 28.5 11.5T240-320v80h480v-80q0-17 11.5-28.5T760-360q17 0 28.5 11.5T800-320v80q0 33-23.5 56.5T720-160H240Z"/></svg>
+            </a>
         </div>
 
         <div class="overflow-auto">
             <table class="w-full bg-white shadow">
                 <thead>
                     <tr>
-                        <th class="text-white bg-black"></th>
+                        {{-- <th class="text-white bg-black"></th> --}}
                         <th class="px-4 py-2 font-semibold text-white bg-black">Recipient</th>
-                        <th class="px-4 py-2 font-semibold text-white bg-black">From</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Mobile</th>
+                        <th class="px-4 py-2 font-semibold text-white bg-black">From</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Status</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black">Date/Time</th>
                         <th class="px-4 py-2 font-semibold text-white bg-black text-center">Out/In</th>
@@ -74,13 +77,13 @@
                 <tbody class="border border-t-0 border-solid border-gray-200">
                     <template x-for="sms in items" :key="sms.id">
                         <tr>
-                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm"></td>
+                            {{-- <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm"></td> --}}
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm" x-text="sms.recipient"></td>
+                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm" x-text="sms.to"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
-                                <div class="text-sm" x-text="sms?.from"></div>
+                                <div class="text-sm" x-text="sms?.from_name"></div>
                                 <div x-text="sms?.from_number"></div>
                             </td>
-                            <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm" x-text="sms.to"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm" x-text="sms.status"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm" x-text="sms.send_at"></td>
                             <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm text-center">
@@ -156,8 +159,10 @@
                                     <div class="w-full md:w-6/12 px-1 mb-3">
                                         <div>Sender Number</div>
                                         <select name="from" required class="w-full py-2 text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
-                                            <option value="">Select sender number</option>
                                             @if(is_array($phoneNumbers))
+                                                @if(count($phoneNumbers) > 1)
+                                                    <option value="">Select sender number</option>
+                                                @endif
                                                 @foreach($phoneNumbers as $number_key => $number)
                                                     <option value="{{ $number['phone'] }}">{{ $number['phone'] }}</option>
                                                 @endforeach

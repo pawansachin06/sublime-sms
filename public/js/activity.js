@@ -464,6 +464,17 @@ document.addEventListener('alpine:init', function () {
                 }
 
 
+                setInterval(function () {
+                    self.items = [];
+                    self.loadItems(1)
+                    Toastify({
+                        text: 'Refreshing activity...',
+                        className: 'toast-success',
+                        position: 'center',
+                    }).showToast();
+                }, 15000);
+
+
                 window.addEventListener('scroll', function (e) {
                     const { clientHeight, scrollTop, scrollHeight } = e.target.documentElement;
                     if ((clientHeight + scrollTop + 50) >= scrollHeight && !self.isLoadingItems) {

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SmsExport;
 use App\Models\Contact;
 use App\Models\ContactGroup;
 use App\Models\Sms;
+use App\Models\User;
 use App\Models\SmsJob;
 use App\Models\Template;
 use Exception;
@@ -13,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Models\SenderNumber;
+use App\Imports\SmsImport;
 
 
 class SmsController extends Controller
@@ -24,7 +27,10 @@ class SmsController extends Controller
     {
         $current_user = $req->user();
         $profile_id = $current_user->getActiveProfile();
-        if ($req->ajax()) {
+        $profile_ids = $current_user->allProfileIds();
+        $is_export = $req->export;
+
+        if ($req->ajax() || !empty($is_export)) {
             $keyword = $req->keyword;
             $keywordRecipient = $req->keywordRecipient;
             $filterStatus = $req->filterStatus;
@@ -36,6 +42,7 @@ class SmsController extends Controller
                 'id',
                 'message',
                 'to',
+                'countrycode',
                 'from',
                 'name',
                 'user_id',
@@ -43,10 +50,11 @@ class SmsController extends Controller
                 'send_at',
                 'folder',
                 'cost',
+                'delivered_at',
                 'status'
-            ])->with('sender:id,email');
+            ])->with('sender:id,email,name');
             if (!$current_user->isSuperAdmin()) {
-                $query = $query->where('user_id', $profile_id);
+                $query = $query->whereIn('user_id', $profile_ids);
             }
 
             if (!empty($keyword)) {
@@ -70,7 +78,16 @@ class SmsController extends Controller
             if (!empty($filterEndDate)) {
                 $query = $query->where('send_at', '<=', $filterEndDate);
             }
-            $data = $query->orderBy('id', 'DESC')->paginate(20);
+            $query = $query->orderBy('id', 'DESC');
+
+            if($is_export) {
+                $query = $query->take(500);
+                $filename = 'activity-' . date('Y-m-d-H-i-s') . '.xlsx';
+                return (new SmsExport($query))->download($filename);
+            }
+
+
+            $data = $query->paginate(20);
             $items = [];
             $perPage = $data->perPage();
             $totalPages = $data->lastPage();
@@ -87,6 +104,7 @@ class SmsController extends Controller
                         'to' => $row->to,
                         'from_number' => $row->from,
                         'from' => $row?->sender?->email,
+                        'from_name' => $row?->sender?->name,
                         'send_at' => $row?->send_at?->format('d/m/Y h:i A'),
                         'cost' => $row->cost,
                         'recipient' => !empty($row->recipient) ? $row->recipient : $row->name,
@@ -384,6 +402,36 @@ class SmsController extends Controller
         $inputs = $req->all();
         Log::info('Replay Callback: ');
         Log::info(json_encode($inputs));
-        return response()->json($inputs);
+        $x = $inputs;
+        if( !empty($x['message_id']) && !empty($x['mobile']) && !empty($x['longcode']) ) {
+            $user_id = 1;
+            $sender_number = SenderNumber::where('phone', $x['longcode'])->select('id')->first();
+            if(!empty($sender_number)) {
+                $user = User::where('sender_number', $sender_number->id)->where('role', 'ADMIN')->select('id')->first();
+                if(!empty($user)) {
+                    $user_id = $user->id;
+                }
+            }
+            $sms = Sms::create([
+                'sms_job_id' => 0,
+                'sms_id' => !empty($x['message_id']) ? $x['message_id'] : '',
+                'message' => !empty($x['response']) ? $x['response'] : '',
+                'to' => !empty($x['longcode']) ? $x['longcode'] : '',
+                'name' => !empty($x['mobile']) ? $x['mobile'] : '',
+                'recipient' => !empty($x['longcode']) ? $x['longcode'] : '',
+                'list_id' => !empty($x['list_id']) ? $x['list_id'] : '',
+                'user_id' => $user_id,
+                'countrycode' => '',
+                'from' => !empty($x['mobile']) ? $x['mobile'] : '',
+                'send_at' => !empty($x['datetime_entry']) ? $x['datetime_entry'] : NULL,
+                'dlr_callback' => '',
+                'cost' => isset($api_res['cost']) ? $api_res['cost'] : '',
+                'folder' => 'inbox',
+                'status' => 'received',
+                'local_status' => 'RECEIVED',
+            ]);
+            return response()->json($sms);
+        }
+        return response()->json(['message'=> 'message id and mobile number are missing'], 422);
     }
 }
