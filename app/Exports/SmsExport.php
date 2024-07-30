@@ -42,17 +42,11 @@ class SmsExport implements FromQuery, WithMapping, WithHeadings
             'user_email',
             'user_name',
             'send_at',
-            'cost',
         ];
     }
 
     public function map($item): array
     {
-        $groups_ids = [];
-        $groups = $item->groups?->pluck('id');
-        if (!empty($groups)) {
-            $groups_ids = $groups->toArray();
-        }
         return [
             $item->id,
             $item->folder,
@@ -68,7 +62,6 @@ class SmsExport implements FromQuery, WithMapping, WithHeadings
             $item->sender?->email,
             $item->sender?->name,
             $item->send_at,
-            $item->cost,
         ];
     }
 }

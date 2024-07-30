@@ -32,6 +32,10 @@ class ContactGroupController extends Controller
         $profile_id = $current_user->getActiveProfile();
         $profileIds = $current_user->allProfileIds();
 
+        if(!in_array($current_user->id, $profileIds)) {
+            $profileIds[] = $current_user->id;
+        }
+
         if ($req->ajax()) {
             $keyword = $req->keyword;
             $need_contacts = $req->need_contacts;
@@ -85,7 +89,7 @@ class ContactGroupController extends Controller
                 $contacts_obs = $contacts_obs_q->where('name', 'like', '%' . $keyword . '%')
                     ->orWhere('lastname', 'like', '%' . $keyword . '%')
                     ->orWhere('company', 'like', '%' . $keyword . '%')
-                    ->get(['id', 'name', 'lastname', 'profile_id', 'company', 'phone'])->take(5);
+                    ->get(['id', 'name', 'lastname', 'profile_id', 'company', 'phone'])->take(25);
                 if (!empty($contacts_obs)) {
                     foreach ($contacts_obs as $cnt) {
                         $cnt_name = $cnt->name . ' ' . $cnt->lastname;
@@ -115,6 +119,8 @@ class ContactGroupController extends Controller
                 'totalPages' => $totalPages,
                 'totalRows' => $totalRows,
                 'contacts' => $contacts,
+                'contacts_obs' => $contacts_obs,
+                'profileIds' => $profileIds,
             ]);
         } else {
             return view('contact-groups.index', []);

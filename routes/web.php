@@ -8,12 +8,15 @@ use App\Http\Controllers\SocialLoginController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SenderNumberController;
+use App\Http\Controllers\WebPushController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/welcome', function () {
+// Route::get('/welcome', function () {
     // return view('welcome');
-});
+// });
+
+Route::post('/web-push/subscribe', [WebPushController::class, 'subscribe']);
 
 Route::middleware('guest')->group(function () {
     Route::get('/login/redirect/google', [

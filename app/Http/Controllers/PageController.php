@@ -25,7 +25,7 @@ class PageController extends Controller
         $sender_numbers_unique = [];
 
         $profileIds = array_keys($profiles);
-        if( $current_user->isUser() ) {
+        if( $current_user->isUser() || $current_user->isAdmin() ) {
             $senderParents = $current_user->parents->pluck('id');
             if(!empty($senderParents)) {
                 $profileIds = array_merge($profileIds, $senderParents->toArray());

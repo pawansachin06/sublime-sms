@@ -341,6 +341,7 @@ document.addEventListener('alpine:init', function () {
                 newSmsModal.hide();
                 self.separateNumbers = [];
                 self.selectedContactGroups = [];
+                self.selectedContactGroupContacts = [];
                 self.showSmsEditExitForm = false;
                 self.$refs?.newSmsFormRef?.reset();
             },
@@ -467,12 +468,12 @@ document.addEventListener('alpine:init', function () {
                 setInterval(function () {
                     self.items = [];
                     self.loadItems(1)
-                    Toastify({
-                        text: 'Refreshing activity...',
-                        className: 'toast-success',
-                        position: 'center',
-                    }).showToast();
-                }, 15000);
+                    // Toastify({
+                    //     text: 'Refreshing activity...',
+                    //     className: 'toast-success',
+                    //     position: 'center',
+                    // }).showToast();
+                }, 30000);
 
 
                 window.addEventListener('scroll', function (e) {

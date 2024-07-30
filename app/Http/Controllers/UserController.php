@@ -73,9 +73,9 @@ class UserController extends Controller
 
         $query = $query->with('sender');
         if ($current_user->isSuperAdmin()) {
-            $items = $query->with('children:id,name,email')->paginate(10);
+            $items = $query->with('children:id,name,email')->paginate(50);
         } else {
-            $items = $current_user->children()->paginate(10);
+            $items = $current_user->children()->paginate(50);
         }
         return view('users.index', [
             'items' => $items,

@@ -123,6 +123,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'vapid_public' => 'BLUwHoGQ542khLboEeGHKlCxfPsrzDtiOEEkJdrCv6VcBXXAEmf8W3M7JrZfJnp6Q1I2yGDm661DA_JzZicVW9Q',
+    'vapid_private' => 'R9uE41dQDs89jbE8CrymgoFdlCtx0QJ8Zi3R_NIprP0',
+
     'sms_service'=> [
         'key'=> 'd90398b840c7c294b1bc46d5a7d98c53',
         'secret'=> env('SMS_SERVICE_SECRET'),

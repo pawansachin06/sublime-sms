@@ -16,10 +16,18 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Models\SenderNumber;
 use App\Imports\SmsImport;
+use App\Services\Appy;
 
 
 class SmsController extends Controller
 {
+    protected $appy;
+
+    function __construct(Appy $appy)
+    {
+        $this->appy = $appy;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -44,6 +52,7 @@ class SmsController extends Controller
                 'to',
                 'countrycode',
                 'from',
+                'from_name',
                 'name',
                 'user_id',
                 'recipient',
@@ -80,7 +89,7 @@ class SmsController extends Controller
             }
             $query = $query->orderBy('id', 'DESC');
 
-            if($is_export) {
+            if ($is_export) {
                 $query = $query->take(500);
                 $filename = 'activity-' . date('Y-m-d-H-i-s') . '.xlsx';
                 return (new SmsExport($query))->download($filename);
@@ -98,13 +107,17 @@ class SmsController extends Controller
             }
             if (!empty($data->items())) {
                 foreach ($data->items() as $row) {
+                    $from_name = $row->from_name;
+                    if(trim($from_name) == '') {
+                        $from_name = $row?->sender?->name;
+                    }
                     $items[] = [
                         'id' => $row->id,
                         'message' => $row->message,
                         'to' => $row->to,
                         'from_number' => $row->from,
                         'from' => $row?->sender?->email,
-                        'from_name' => $row?->sender?->name,
+                        'from_name' => $from_name,
                         'send_at' => $row?->send_at?->format('d/m/Y h:i A'),
                         'cost' => $row->cost,
                         'recipient' => !empty($row->recipient) ? $row->recipient : $row->name,
@@ -399,39 +412,78 @@ class SmsController extends Controller
 
     public function reply_callback(Request $req)
     {
-        $inputs = $req->all();
-        Log::info('Replay Callback: ');
-        Log::info(json_encode($inputs));
-        $x = $inputs;
-        if( !empty($x['message_id']) && !empty($x['mobile']) && !empty($x['longcode']) ) {
-            $user_id = 1;
-            $sender_number = SenderNumber::where('phone', $x['longcode'])->select('id')->first();
-            if(!empty($sender_number)) {
-                $user = User::where('sender_number', $sender_number->id)->where('role', 'ADMIN')->select('id')->first();
-                if(!empty($user)) {
-                    $user_id = $user->id;
+        try {
+
+
+            $inputs = $req->all();
+            Log::info('Replay Callback: ');
+            Log::info(json_encode($inputs));
+            $x = $inputs;
+            if (!empty($x['message_id']) && !empty($x['mobile']) && !empty($x['longcode'])) {
+                $user_id = 1;
+                $sender_number = SenderNumber::where('phone', $x['longcode'])->select('id')->first();
+                $children_ids = [];
+                $admin_name = '';
+                if (!empty($sender_number)) {
+                    $user = User::where('sender_number', $sender_number->id)->where('role', 'ADMIN')->select('id', 'name', 'lastname', 'company')->first();
+                    if (!empty($user)) {
+                        $user_id = $user->id;
+                        $admin_name = $user->name . ' ' . $user->lastname;
+                        if (trim($admin_name)) {
+                            $admin_name = $user->company;
+                        }
+                        $childrens = $user->children();
+                        if (!empty($childrens)) {
+                            $children_ids = $childrens->pluck('id');
+                        }
+                    }
                 }
+
+                $message = !empty($x['response']) ? $x['response'] : 'no text';
+                $sender_mobile = !empty($x['mobile']) ? $x['mobile'] : 'NA';
+                $admin_mobile = !empty($x['longcode']) ? $x['longcode'] : '';
+                if (empty($admin_name)) {
+                    $admin_name = $admin_mobile;
+                }
+                $sender_name = $sender_mobile;
+                if (!empty($sender_mobile)) {
+                    $sender = Contact::where('phone', 'like', '%' . $sender_mobile . '%')->first();
+                    if(!empty($sender)) {
+                        $sender_name = $sender->name . ' ' . $sender->lastname;
+                    }
+                }
+
+                $sms = Sms::create([
+                    'sms_job_id' => 0,
+                    'sms_id' => !empty($x['message_id']) ? $x['message_id'] : '',
+                    'message' => $message,
+                    'to' => $admin_mobile,
+                    'name' => $admin_name,
+                    'recipient' => $admin_name,
+                    'list_id' => !empty($x['list_id']) ? $x['list_id'] : '',
+                    'user_id' => $user_id,
+                    'countrycode' => '',
+                    'from' => $sender_mobile,
+                    'from_name' => $sender_name,
+                    'send_at' => !empty($x['datetime_entry']) ? $x['datetime_entry'] : NULL,
+                    'dlr_callback' => '',
+                    'cost' => isset($api_res['cost']) ? $api_res['cost'] : '',
+                    'folder' => 'inbox',
+                    'status' => 'received',
+                    'local_status' => 'RECEIVED',
+                ]);
+
+                if (!empty($children_ids)) {
+                    foreach ($children_ids as $child_id) {
+                        $this->appy->sendNotification($child_id, 'SMS from: ' . $sender_mobile, $message);
+                    }
+                }
+
+                return response()->json([$sms, $children_ids]);
             }
-            $sms = Sms::create([
-                'sms_job_id' => 0,
-                'sms_id' => !empty($x['message_id']) ? $x['message_id'] : '',
-                'message' => !empty($x['response']) ? $x['response'] : '',
-                'to' => !empty($x['longcode']) ? $x['longcode'] : '',
-                'name' => !empty($x['mobile']) ? $x['mobile'] : '',
-                'recipient' => !empty($x['longcode']) ? $x['longcode'] : '',
-                'list_id' => !empty($x['list_id']) ? $x['list_id'] : '',
-                'user_id' => $user_id,
-                'countrycode' => '',
-                'from' => !empty($x['mobile']) ? $x['mobile'] : '',
-                'send_at' => !empty($x['datetime_entry']) ? $x['datetime_entry'] : NULL,
-                'dlr_callback' => '',
-                'cost' => isset($api_res['cost']) ? $api_res['cost'] : '',
-                'folder' => 'inbox',
-                'status' => 'received',
-                'local_status' => 'RECEIVED',
-            ]);
-            return response()->json($sms);
+            return response()->json(['message' => 'message id and mobile number are missing'], 422);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-        return response()->json(['message'=> 'message id and mobile number are missing'], 422);
     }
 }
