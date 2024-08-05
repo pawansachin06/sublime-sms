@@ -119,7 +119,7 @@ class ContactGroupController extends Controller
                 'totalPages' => $totalPages,
                 'totalRows' => $totalRows,
                 'contacts' => $contacts,
-                'contacts_obs' => $contacts_obs,
+                // 'contacts_obs' => $contacts_obs,
                 'profileIds' => $profileIds,
             ]);
         } else {
