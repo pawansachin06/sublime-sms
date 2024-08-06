@@ -176,7 +176,34 @@
                                         <div>Title/subject</div>
                                         <input type="text" name="title" placeholder="Type Subject" class="py-2 text-sm w-full font-title rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
                                     </div> --}}
-                                    <div @click.away="isContactGroupDropdownOpen = false" class="w-full px-1 mb-3">
+                                    <div class="w-full px-1 mb-3">
+                                        <div class="flex gap-6">
+                                            <label class="inline-flex gap-2 items-center">
+                                                <input type="radio" name="sending" value="adhoc" x-model="sending" class="flex-none w-5 h-5 my-1 border-solid text-primary-500 focus:ring-primary-400 border-gray-500" />
+                                                <span class="leading-tight cursor-pointer">Send to Adhoc number</span>
+                                            </label>
+                                            <label class="inline-flex gap-2 items-center">
+                                                <input type="radio" name="sending" value="contact" x-model="sending" checked class="flex-none w-5 h-5 my-1 border-solid text-primary-500 focus:ring-primary-400 border-gray-500" />
+                                                <span class="leading-tight cursor-pointer">Send to contact</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div x-show="sending == 'adhoc'" class="w-full sm:w-6/12 lg:w-4/12 px-1 mb-3">
+                                        <div>Country</div>
+                                        <select name="country" :required="sending == 'adhoc'" class="w-full py-2 text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400">
+                                            <option value="">Select Country</option>
+                                            @if(!empty($countries) && is_array($countries))
+                                                @foreach($countries as $cntry_key => $cntry_value)
+                                                    <option value="{{ $cntry_key }}">{{ $cntry_value }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <div x-show="sending == 'adhoc'" class="w-full sm:w-6/12 lg:w-8/12 px-1 mb-3">
+                                        <div>Adhoc numbers <span class="text-sm">(with country code & separate by comma)</span></div>
+                                        <input type="text" name="adhoc_numbers" :required="sending == 'adhoc'" placeholder="61414375508, 61480088898" class="py-2 text-sm w-full font-title rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
+                                    </div>
+                                    <div x-show="sending == 'contact'" @click.away="isContactGroupDropdownOpen = false" class="w-full px-1 mb-3">
                                         <div>Recipient*</div>
                                         <div class="relative">
                                             <input type="text" x-model="contactGroupKeyword" @focus="handleContactGroupKeywordFocus()" @input.debounce.750ms="handleContactGroupKeywordChange()" @keydown.enter.prevent.stop="handleFormEnter()" @keyup.enter.debounce.750ms="handleContactGroupClickEnter()" spellcheck="false" placeholder="Type Recipient" class="py-2 pl-8 font-title w-full text-sm rounded border-gray-400 border-solid focus:border-primary-500 focus:ring-primary-400" />
@@ -185,7 +212,7 @@
                                                 <svg x-show="!isLoadingContactGroups" x-transition.opacity xmlns="http://www.w3.org/2000/svg" width="13" height="13" class="w-3 h-3" fill="none"><path fill="#515151" d="M10 5.067C10 2.273 7.757 0 5 0S0 2.273 0 5.067c0 2.793 2.243 5.066 5 5.066s5-2.273 5-5.066Zm-5 3.8c-2.068 0-3.75-1.705-3.75-3.8 0-2.096 1.682-3.8 3.75-3.8s3.75 1.704 3.75 3.8c0 2.095-1.682 3.8-3.75 3.8Zm7.317 3.614a.619.619 0 0 1-.884 0L8.507 9.516c.326-.265.623-.565.884-.896l2.926 2.966a.64.64 0 0 1 0 .895Z"/></svg>
                                             </span>
                                         </div>
-                                        <div class="relative mb-2">
+                                        <div class="relative">
                                             <div x-show="isContactGroupDropdownOpen" x-transition.scale.top class="absolute min-h-12 max-h-40 w-full max-w-sm overflow-y-auto bg-white rounded border border-solid border-gray-200 shadow-lg">
                                                 <div x-show="isLoadingContactGroups" class="absolute text-center py-2 top-0 bottom-0 left-0 right-0 backdrop-blur-sm">
                                                     <x-loader />
@@ -222,7 +249,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="flex flex-wrap gap-2">
+                                        <div class="flex flex-wrap gap-2" :class="{'mt-2' : (selectedContactGroups.length || selectedContactGroupContacts.length)}">
                                             <template x-for="selectedContactGroup in selectedContactGroups" :key="selectedContactGroup.id">
                                                 <div class="inline-flex max-w-56 truncate rounded pl-3 text-sm leading-tight text-gray-600 border border-solid border-gray-200 bg-gray-100">
                                                     <input type="hidden" name="contact_group_uid[]" :value="selectedContactGroup.uid" />

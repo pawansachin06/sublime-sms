@@ -65,10 +65,12 @@ class PageController extends Controller
         if (!empty($req->dev)) {
             dd($sender_numbers, $uniquePhones, $phoneNumbers, $sender_numbers_unique);
         }
+
         return view('dashboard', [
             'profiles' => $profiles,
             'phoneNumbers' => $phoneNumbers,
             'current_user' => $current_user,
+            'countries' => config('countries'),
         ]);
     }
 }

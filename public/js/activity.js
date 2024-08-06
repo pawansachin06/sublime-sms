@@ -48,6 +48,7 @@ document.addEventListener('alpine:init', function () {
             scheduled: true,
             resMessage: '',
             resMessage2: '',
+            sending: 'contact', // sending to contact or adhoc number
 
             contactGroupKeyword: '',
             contactGroups: [],
