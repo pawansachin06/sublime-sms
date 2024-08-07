@@ -107,7 +107,7 @@
                     </div>
                     <div class="flex justify-end items-center px-4 pb-6">
                         <div class="flex gap-1 items-center">
-                            <div x-show="currentTemplateId?.length" x-cloak :class="isOpenDeleteTemplateForm ? 'z-50 border-gray-400':'' " class="relative inline-flex items-center gap-2 px-4 py-3 border border-solid border-white rounded bg-white">
+                            <div x-show="currentTemplateId" x-cloak :class="isOpenDeleteTemplateForm ? 'z-50 border-gray-400':'' " class="relative inline-flex items-center gap-2 px-4 py-3 border border-solid border-white rounded bg-white">
                                 <div x-cloak x-show="isOpenDeleteTemplateForm" class="max-w-64 leading-tight text-sm text-gray-500">
                                     Are you sure you want to delete this template? This action cannot be undone
                                 </div>
@@ -123,10 +123,10 @@
                             </div>
                             <div class="py-3 border border-solid border-white">
                                 <button type="submit" x-show="isCreateFormOpen" :disabled="isSavingTemplate" class="inline-flex gap-2 font-title font-semibold rounded px-4 py-2 text-sm justify-center items-center leading-none no-underline border border-solid border-primary-500 text-white bg-primary-500 disabled:opacity-50">
-                                    <svg x-show="!currentTemplateId?.length" class="w-4 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/></svg>
-                                    <svg x-show="currentTemplateId?.length" xmlns="http://www.w3.org/2000/svg" x-cloak width="24" height="24" class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h261q20 0 30 12.5t10 27.5q0 15-10.5 27.5T460-760H200v560h560v-261q0-20 12.5-30t27.5-10q15 0 27.5 10t12.5 30v261q0 33-23.5 56.5T760-120H200Zm280-360Zm-120 80v-97q0-16 6-30.5t17-25.5l344-344q12-12 27-18t30-6q16 0 30.5 6t26.5 18l56 57q11 12 17 26.5t6 29.5q0 15-5.5 29.5T897-728L553-384q-11 11-25.5 17.5T497-360h-97q-17 0-28.5-11.5T360-400Zm481-384-56-56 56 56ZM440-440h56l232-232-28-28-29-28-231 231v57Zm260-260-29-28 29 28 28 28-28-28Z"/></svg>
-                                    <span x-show="!currentTemplateId?.length" x-text="isSavingTemplate ? 'SAVING...':'CREATE TEMPLATE'">CREATE TEMPLATE</span>
-                                    <span x-show="currentTemplateId?.length" x-cloak x-text="isSavingTemplate ? 'SAVING...':'SAVE'">SAVE</span>
+                                    <svg x-show="!currentTemplateId" class="w-4 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"/></svg>
+                                    <svg x-show="currentTemplateId" xmlns="http://www.w3.org/2000/svg" x-cloak width="24" height="24" class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h261q20 0 30 12.5t10 27.5q0 15-10.5 27.5T460-760H200v560h560v-261q0-20 12.5-30t27.5-10q15 0 27.5 10t12.5 30v261q0 33-23.5 56.5T760-120H200Zm280-360Zm-120 80v-97q0-16 6-30.5t17-25.5l344-344q12-12 27-18t30-6q16 0 30.5 6t26.5 18l56 57q11 12 17 26.5t6 29.5q0 15-5.5 29.5T897-728L553-384q-11 11-25.5 17.5T497-360h-97q-17 0-28.5-11.5T360-400Zm481-384-56-56 56 56ZM440-440h56l232-232-28-28-29-28-231 231v57Zm260-260-29-28 29 28 28 28-28-28Z"/></svg>
+                                    <span x-show="!currentTemplateId" x-text="isSavingTemplate ? 'SAVING...':'CREATE TEMPLATE'">CREATE TEMPLATE</span>
+                                    <span x-show="currentTemplateId" x-cloak x-text="isSavingTemplate ? 'SAVING...':'SAVE'">SAVE</span>
                                 </button>
                             </div>
                         </div>
@@ -146,7 +146,7 @@
                             </button>
                         </div>
                     </div>
-                    <button @click="handleClearSelectedTemplate()" x-show="currentTemplateId?.length" x-cloak type="button" title="Close" class="absolute -top-2 -right-2 w-7 h-7 px-0 py-0 border text-gray-500 border-solid border-gray-400 inline-flex items-center justify-center rounded-full bg-white">
+                    <button @click="handleClearSelectedTemplate()" x-show="currentTemplateId" x-cloak type="button" title="Close" class="absolute -top-2 -right-2 w-7 h-7 px-0 py-0 border text-gray-500 border-solid border-gray-400 inline-flex items-center justify-center rounded-full bg-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="w-5 h-5" fill="currentColor" viewBox="0 -960 960 960"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
                     </button>
                 </div>
