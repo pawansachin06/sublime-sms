@@ -89,6 +89,11 @@ Route::middleware([
         'name' => 'sender-numbers'
     ]);
 
+
+    Route::post('dashboard/activity-report-settings', [
+        UserController::class, 'activityReportSettings'
+    ])->name('activity-report-settings');
+
     Route::post('dashboard/mimic-login', [UserController::class, 'mimic_login'])->name('mimic-login');
 
 });

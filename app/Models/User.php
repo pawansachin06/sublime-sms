@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\Setting;
 use App\Enums\UserRoleEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -204,6 +205,16 @@ class User extends Authenticatable
     public function canBeImpersonated(): bool
     {
         return !$this->isSuperAdmin();
+    }
+
+    public function getActivityReportSettings() {
+        $settings = Setting::where('key', 'activity-report-settings')->first();
+        $settings = !empty($settings['value']) ? @json_decode($settings['value'], true) : [];
+        $data = [
+            'emails' => ( !empty($settings['emails']) && is_array($settings['emails']) ) ? implode(',', $settings['emails']) : '',
+            'times' => (!empty($settings['times'])) ? $settings['times'] : [],
+        ];
+        return $data;
     }
 
     public function profilePhotoUrl(): Attribute

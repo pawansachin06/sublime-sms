@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserRoleEnum;
 use App\Models\User;
+use App\Models\Setting;
 use Exception;
 use Illuminate\Http\Request;
 use App\Models\SenderNumber;
@@ -120,7 +121,7 @@ class UserController extends Controller
         if ($currentUser->isAdmin() && $input['role'] == UserRoleEnum::SUPERADMIN) {
             $input['role'] = UserRoleEnum::ADMIN;
         }
-        if($currentUser->isUser()) {
+        if ($currentUser->isUser()) {
             $input['role'] = UserRoleEnum::USER;
         }
 
@@ -184,7 +185,7 @@ class UserController extends Controller
             'parent_id.*' => ['nullable', Rule::exists(User::class, 'id')],
         ];
 
-        if(!$user->isUser()) {
+        if (!$user->isUser()) {
             $rules['sender_number'] = ['required', Rule::exists(SenderNumber::class, 'id')];
         }
 
@@ -219,7 +220,7 @@ class UserController extends Controller
             $user->parents()->sync($input['parent_id']);
             $user->update($input);
 
-            if( !empty($req->password) ) {
+            if (!empty($req->password)) {
                 $user->password = Hash::make($req->password);
                 $user->save();
             }
@@ -245,7 +246,8 @@ class UserController extends Controller
         return response()->json(['refresh' => true]);
     }
 
-    public function mimic_login(Request $req) {
+    public function mimic_login(Request $req)
+    {
         // $id = $req->id;
         // $current_user = $req->user();
         // if($current_user->isAdmin() || $current_user->isSuperAdmin()) {
@@ -256,6 +258,57 @@ class UserController extends Controller
         // }
         // return redirect('/user/profile');
     }
+
+
+    public function activityReportSettings(Request $req)
+    {
+        $user = $req->user();
+        if (empty($user)) {
+            return response()->json([
+                'message' => 'Please login to save settings'
+            ], 422);
+        }
+
+        if (!$user->isSuperAdmin()) {
+            return response()->json([
+                'message' => 'Only Super Admin can save settings'
+            ], 403);
+        }
+
+        $emails = $req->activity_report_emails;
+        $emails = !empty($emails) ? explode(',', $emails) : [];
+        $times = $req->activity_report_time;
+        $times = !empty($times) ? $times : [];
+
+        if (!empty($emails) && is_array($emails)) {
+            foreach ($emails as $email) {
+                if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    return response()->json([
+                        'message' => $email . ' is invalid email, please remove it or fix it',
+                    ], 422);
+                }
+            }
+        }
+
+        $data = [
+            'emails' => $emails,
+            'times' => $times,
+        ];
+
+        try {
+            Setting::updateOrCreate([
+                'key' => 'activity-report-settings'
+            ], ['value' => json_encode($data), 'tag' => 'sms-activity']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Settings saved successfully'
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
 
     /**
      * Remove the specified resource from storage.
