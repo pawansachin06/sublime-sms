@@ -5,12 +5,7 @@
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('send-sms')->everyThirtySeconds()->withoutOverlapping(1);
-
-// Schedule::command('send-activity-report')->everyThirtySeconds()->withoutOverlapping(1);
-
-// Schedule::command('send-activity-report')->daily()->withoutOverlapping(1);
-
-
+Schedule::command('send-activity-report')->dailyAt('00:00');
 
 
 // Artisan::command('inspire', function () {
