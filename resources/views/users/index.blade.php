@@ -48,7 +48,7 @@
                                     @if($current_user->isSuperAdmin() || $current_user->isAdmin())
                                         <div class="flex gap-3 items-center">
                                             <a href="{{ route('users.edit', $item->id) }}">Edit</a>
-                                            @if($current_user->id != $item->id)
+                                            @if(false && $current_user->id != $item->id)
                                                 <form method="post" action="{{ route('mimic-login') }}">
                                                     @csrf
                                                     <input type="hidden" name="id" value="{{ $item->id }}" />
