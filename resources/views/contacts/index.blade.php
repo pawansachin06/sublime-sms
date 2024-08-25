@@ -63,22 +63,53 @@
         <div class="relative pb-2">
             <div class="overflow-auto mb-3">
                 <table class="w-full bg-white shadow">
-                    <thead>
+                    <thead class="select-none">
                         <tr>
                             <th class="text-white bg-black"></th>
-                            <th class="px-4 py-2 font-semibold text-white bg-black">User</th>
-                            <th class="px-4 py-2 font-semibold text-white bg-black">Company</th>
-                            <th class="px-4 py-2 font-semibold text-white bg-black">Phone Number</th>
+                            <th @click.prevent="handleOrderClick('name')" class="px-4 py-2 font-semibold text-white bg-black cursor-pointer">
+                                <span>User</span>
+                                <svg x-show="orderColumn == 'name' && orderDirection == 'asc'" x-cloak xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi" viewBox="0 0 16 16">
+                                    <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                                </svg>
+                                <svg x-show="orderColumn == 'name' && orderDirection == 'desc'" x-cloak xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi" viewBox="0 0 16 16">
+                                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                </svg>
+                            </th>
+                            <th @click.prevent="handleOrderClick('company')" class="px-4 py-2 font-semibold text-white bg-black cursor-pointer">
+                                <span>Company</span>
+                                <svg x-show="orderColumn == 'company' && orderDirection == 'asc'" x-cloak xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi" viewBox="0 0 16 16">
+                                    <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                                </svg>
+                                <svg x-show="orderColumn == 'company' && orderDirection == 'desc'" x-cloak xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi" viewBox="0 0 16 16">
+                                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                </svg>
+                            </th>
+                            <th @click.prevent="handleOrderClick('phone')" class="px-4 py-2 font-semibold text-white bg-black cursor-pointer">
+                                <span>Phone Number</span>
+                                <svg x-show="orderColumn == 'phone' && orderDirection == 'asc'" x-cloak xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi" viewBox="0 0 16 16">
+                                    <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                                </svg>
+                                <svg x-show="orderColumn == 'phone' && orderDirection == 'desc'" x-cloak xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi" viewBox="0 0 16 16">
+                                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                </svg>
+                            </th>
                             {{-- <th class="px-4 py-2 font-semibold text-white bg-black">Alert</th> --}}
-                            <th class="px-4 py-2 font-semibold text-white bg-black">Group(s)</th>
+                            <th @click.prevent="handleOrderClick('group')" class="px-4 py-2 font-semibold text-white bg-black cursor-pointer">
+                                <span>Group(s)</span>
+                                <svg x-show="orderColumn == 'group' && orderDirection == 'asc'" x-cloak xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi" viewBox="0 0 16 16">
+                                    <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                                </svg>
+                                <svg x-show="orderColumn == 'group' && orderDirection == 'desc'" x-cloak xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi" viewBox="0 0 16 16">
+                                    <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                </svg>
+                            </th>
                             <th class="px-4 py-2 font-semibold text-white bg-black min-w-52"></th>
                         </tr>
                     </thead>
                     <tbody class="border border-t-0 border-solid border-gray-200">
                         <template x-for="contact in contacts" :key="contact.id">
                             <tr :class="[(currentDeleteContact?.id && currentDeleteContact.id == contact.id) ? 'z-50' : '']" class="group/tr bg-white hover:bg-gray-200 relative">
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm"></td>
-                                <td class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
+                                <td colspan="2" class="px-4 py-2 border-0 border-b border-solid border-gray-300 text-sm">
                                     <span x-text="contact.name"></span>
                                     <span x-text="contact.lastname"></span>
                                 </td>

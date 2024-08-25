@@ -35,6 +35,9 @@ document.addEventListener('alpine:init', function () {
             modalInputCompany: '',
             modalInputComments: '',
 
+            orderDirection: 'asc',
+            orderColumn: 'name',
+
             page: 1,
             perPage: 10,
             contacts: [],
@@ -61,6 +64,24 @@ document.addEventListener('alpine:init', function () {
             selectedContactGroups: [],
             isContactGroupDropdownOpen: false,
             isLoadingContactGroups: false,
+
+            flipOrderDirection() {
+                if(this.orderDirection == 'asc') {
+                    this.orderDirection = 'desc';
+                } else {
+                    this.orderDirection = 'asc';
+                }
+            },
+            handleOrderClick(column = 'name') {
+                if(this.orderColumn == column) {
+                    this.flipOrderDirection();
+                } else {
+                    this.orderColumn = column;
+                }
+                this.canAutoLoadItems = true;
+                this.contacts = [];
+                this.loadContacts(1);
+            },
 
             handleImportContactsFile(e) {
                 var self = this;
@@ -375,6 +396,8 @@ document.addEventListener('alpine:init', function () {
                     params: {
                         page: page,
                         phone: self.searchKeywordPhone,
+                        orderColumn: self.orderColumn,
+                        orderDirection: self.orderDirection,
                         keyword: self.searchKeywordName,
                     },
                     signal: contactAbortController.signal,

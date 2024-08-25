@@ -56,7 +56,7 @@ class ContactGroupController extends Controller
                 $query = $query->where('name', 'like', '%' . $keyword . '%');
             }
             $data = $query->with('author:id,name')
-                ->with('profile:id,name,company')->orderBy('id', 'desc')
+                ->with('profile:id,name,company')->orderBy('name', 'asc')
                 ->paginate(25);
             $items = [];
             $perPage = $data->perPage();

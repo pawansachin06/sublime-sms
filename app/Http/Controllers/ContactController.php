@@ -40,6 +40,16 @@ class ContactController extends Controller
             $phone = $req->phone;
             $contactGroupId = $req->contactGroupId;
 
+            $orderColumn = $req->orderColumn;
+            $orderDirection = $req->orderDirection;
+
+            if(!in_array($orderColumn, ['name', 'phone', 'company', 'group'])) {
+                $orderColumn = 'name';
+            }
+            if(!in_array($orderDirection, ['asc', 'desc'])) {
+                $orderDirection = 'asc';
+            }
+
             if (!empty($contactGroupId)) {
                 if($current_user->isSuperAdmin()) {
                     $contactGroup = ContactGroup::where('id', $contactGroupId)->first();
@@ -53,14 +63,14 @@ class ContactController extends Controller
                 if (!empty($contactGroup)) {
                     if (!empty($keyword)) {
                         $data = $contactGroup->contacts()
-                                ->orderBy('id', 'DESC')
+                                ->orderBy($orderColumn, $orderDirection)
                                 ->where('name', 'like', '%' . $keyword . '%')
                                 ->orWhere('lastname', 'like', '%' . $keyword . '%')
                                 ->orWhere('company', 'like', '%' . $keyword . '%')
                                 ->orWhere('phone', 'like', '%' . $keyword . '%')
                                 ->paginate(25);
                     } else {
-                        $data = $contactGroup->contacts()->paginate(25);
+                        $data = $contactGroup->contacts()->orderBy($orderColumn, $orderDirection)->paginate(25);
                     }
                     // $data = Contact::paginate(25); // for testing pagination
                     $totalPages = $data->lastPage();
@@ -96,7 +106,19 @@ class ContactController extends Controller
                 });
             }
 
-            $data = $query->orderBy('id', 'DESC')->with('groups:id,uid,name')->paginate(20);
+            if($orderColumn == 'group') {
+                $query->leftJoin('contact_pivot_contact_group', 'contacts.id', '=', 'contact_pivot_contact_group.contact_id')
+                    ->leftJoin('contact_groups', 'contact_pivot_contact_group.contact_group_id', '=', 'contact_groups.id');
+
+                // order by first group name
+                $query->orderBy('contact_groups.name', $orderDirection);
+                $query->select('contacts.*', 'contact_groups.name as group_name')->distinct();
+            } else {
+                $query->orderBy($orderColumn, $orderDirection);
+            }
+
+            $data = $query->with('groups:id,uid,name')->paginate(20);
+
             $items = [];
             $perPage = $data->perPage();
             $totalPages = $data->lastPage();

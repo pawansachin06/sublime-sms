@@ -32,7 +32,7 @@ class TemplateController extends Controller
             if(!empty($keyword)){
                 $query = $query->where('name', 'like', '%'. $keyword . '%');
             }
-            $items = $query->get(['id', 'name', 'profile_id', 'message']);
+            $items = $query->orderBy('name')->get(['id', 'name', 'profile_id', 'message']);
             return response()->json([
                 'success'=> true,
                 'items'=> $items,

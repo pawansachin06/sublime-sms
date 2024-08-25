@@ -20,6 +20,9 @@ document.addEventListener('alpine:init', function () {
             isDeletingContactGroup: false,
             isOpenDeleteContactGroupForm: false,
 
+            orderDirection: 'asc',
+            orderColumn: 'name',
+
             currentContactGroup: { id: 0, name: '', createdBy: '', createdOn: '', profile: '' },
 
             importContactsFilename: '',
@@ -47,6 +50,23 @@ document.addEventListener('alpine:init', function () {
             canAutoloadContacts: true,
 
 
+            flipOrderDirection() {
+                if(this.orderDirection == 'asc') {
+                    this.orderDirection = 'desc';
+                } else {
+                    this.orderDirection = 'asc';
+                }
+            },
+            handleOrderClick(column = 'name') {
+                if(this.orderColumn == column) {
+                    this.flipOrderDirection();
+                } else {
+                    this.orderColumn = column;
+                }
+                this.contacts = [];
+                this.canAutoloadContacts = true;
+                this.loadContacts(1);
+            },
             handleImportContactsFile(e) {
                 var self = this;
                 if (e.target.files?.length) {
@@ -213,6 +233,8 @@ document.addEventListener('alpine:init', function () {
                         page: page,
                         contactGroupId: self.currentContactGroup.id,
                         keyword: self.contactSearchKeyword,
+                        orderColumn: self.orderColumn,
+                        orderDirection: self.orderDirection,
                     }
                 }).then(function (res) {
                     dev && console.log(res.data);
