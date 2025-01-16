@@ -35,8 +35,11 @@ class SmsActivityReport extends Mailable
      */
     public function envelope(): Envelope
     {
+        $tz = new \DateTimeZone('Australia/Sydney');
+        $date = new \DateTime(date('Y-m-d H:i:s', strtotime('now')), $tz);
+        $dateString = $date->format('j F Y, h:i:s a e');
         return new Envelope(
-            subject: 'SMS activity '. $this->frequency .' report '. date('j F Y, h:i:s e'),
+            subject: 'SMS activity '. $this->frequency .' report '. $dateString,
         );
     }
 

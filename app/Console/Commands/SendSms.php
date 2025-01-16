@@ -41,19 +41,28 @@ class SendSms extends Command
 
             foreach ($smses as $sms) {
                 // $is_scheduled if false then keep send_at empty
+                $senderNumber = $sms->from;
+                if($sms->countrycode == 'SG' && $sms->from == 61480088898) {
+                    $senderNumber = 6583184436;
+                }
+                if($sms->countrycode == 'HK' && $sms->from == 61480088898) {
+                    $senderNumber = 'BGC Future';
+                }
+
                 $api_res = $smsApi->send_sms([
                     'to' => $sms->to,
                     'message' => $sms->message,
                     'countrycode' => $sms->countrycode,
                     'send_at' => !empty($sms->send_at) ? $sms->send_at : '',
                     'dlr_callback' => $dlr_callback,
-                    'from' => $sms->from,
+                    'from' => $senderNumber,
                 ]);
                 if (empty($sms->send_at)) {
                     $sms->send_at = date('Y-m-d H:i:s');
                 }
                 $sms->local_status = 'SENT';
                 $sms->sms_id = !empty($api_res['message_id']) ? $api_res['message_id'] : '';
+                $sms->part = !empty($api_res['sms']) ? $api_res['sms'] : '';
                 $sms->cost = isset($api_res['cost']) ? $api_res['cost'] : '';
                 $sms->save();
                 Log::info(json_encode($api_res));

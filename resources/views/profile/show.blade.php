@@ -68,6 +68,12 @@
                                             <button type="submit" data-js="app-form-btn" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition ease-in-out duration-150">Save Changes</button>
                                         </div>
                                     </form>
+                                    <div class="mt-2">
+                                        <form data-js="app-form" action="{{ route('sms.send-report') }}">
+                                            <p data-js="app-form-status" class="mb-1 hidden"></p>
+                                            <x-button type="submit" data-js="app-form-btn">Send Last 7 days email</x-button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>

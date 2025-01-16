@@ -8,6 +8,7 @@ use App\Models\Setting;
 use Exception;
 use Illuminate\Http\Request;
 use App\Models\SenderNumber;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Support\Facades\Hash;
@@ -248,15 +249,28 @@ class UserController extends Controller
 
     public function mimic_login(Request $req)
     {
-        // $id = $req->id;
         // $current_user = $req->user();
-        // if($current_user->isAdmin() || $current_user->isSuperAdmin()) {
-        //     Fortify::authenticateUsing(function (Request $req) {
-        //         $user = User::where('id', $req->id)->first();
-        //         return $user;
-        //     });
+        // if(empty($current_user)) {
+        //     return response()->json(['message'=> 'Please login']);
         // }
-        // return redirect('/user/profile');
+
+        // if(!$current_user->isSuperAdmin()) {
+        //     return response()->json(['message'=> 'Only Super Admins are allowed']);
+        // }
+
+        $user_id = $req->id;
+        if(empty($user_id)) {
+            return response()->json(['message'=> 'User ID is missing']);
+        }
+
+        try {
+            $user = User::where('id', $user_id)->first();
+            Auth::login($user);
+            return redirect('/user/profile');
+            // return response()->json($user);
+        } catch (Exception $e) {
+            dd($e);
+        }
     }
 
 

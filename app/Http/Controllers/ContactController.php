@@ -54,7 +54,7 @@ class ContactController extends Controller
                 if($current_user->isSuperAdmin()) {
                     $contactGroup = ContactGroup::where('id', $contactGroupId)->first();
                 } else {
-                    $contactGroup = ContactGroup::whereIn('profile_id', $profileIds)->where('id', $contactGroupId)->first();
+                    $contactGroup = ContactGroup::whereIn('contact_groups.profile_id', $profileIds)->where('id', $contactGroupId)->first();
                 }
                 $items = [];
                 $totalPages = 1;
@@ -93,7 +93,7 @@ class ContactController extends Controller
 
             $query = Contact::query();
             if(!$current_user->isSuperAdmin()) {
-                $query = $query->whereIn('profile_id', $profileIds);
+                $query = $query->whereIn('contacts.profile_id', $profileIds);
             }
             if (!empty($phone)) {
                 $query = $query->where('phone', 'like', '%' . $phone . '%');

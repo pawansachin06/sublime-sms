@@ -16,7 +16,7 @@ class Sms extends Model
         'countrycode', 'from', 'from_name', 'send_at', 'validity', 'replies_to_email',
         'tracked_link_url', 'link_hits_callback', 'dlr_callback',
         'reply_callback', 'status', 'delivered_at', 'local_status',
-        'name', 'recipient', 'direction', 'folder', 'cost',
+        'name', 'recipient', 'direction', 'folder', 'cost', 'part',
     ];
 
     protected function casts(): array

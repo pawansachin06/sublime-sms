@@ -21,7 +21,7 @@ class SendActivityReport extends Command
      *
      * @var string
      */
-    protected $signature = 'send-activity-report';
+    protected $signature = 'send-activity-report {type=unknown}';
 
     /**
      * The console command description.
@@ -43,22 +43,28 @@ class SendActivityReport extends Command
         $emails = (!empty($settings['emails']) && is_array($settings['emails'])) ? $settings['emails'] : [];
         $times = (!empty($settings['times']) && is_array($settings['times'])) ? $settings['times'] : [];
 
-        if (in_array('daily', $times)) {
-            // Send the CSV file daily
-            $this->sendCsv('daily', $emails);
-        }
+        $type = $this->argument('type');
 
-        if (in_array('weekly', $times)) {
-            // Send the CSV file weekly (e.g., every Monday, or Friday)
-            if ($now->isMonday()) {
-                $this->sendCsv('weekly', $emails);
+        if($type == 'recent-7-days') {
+            $this->sendCsv('recent-7-days', $emails);
+        } else {
+            if (in_array('daily', $times)) {
+                // Send the CSV file daily
+                $this->sendCsv('daily', $emails);
             }
-        }
 
-        if (in_array('monthly', $times)) {
-            // Send the CSV file monthly (e.g., on the 1st of every month)
-            if ($now->day == 1) {
-                $this->sendCsv('monthly', $emails);
+            if (in_array('weekly', $times)) {
+                // Send the CSV file weekly (e.g., every Monday, or Friday)
+                if ($now->isMonday()) {
+                    $this->sendCsv('weekly', $emails);
+                }
+            }
+
+            if (in_array('monthly', $times)) {
+                // Send the CSV file monthly (e.g., on the 1st of every month)
+                if ($now->day == 1) {
+                    $this->sendCsv('monthly', $emails);
+                }
             }
         }
     }
@@ -68,9 +74,9 @@ class SendActivityReport extends Command
         try {
             $csvFilePath = $this->generateCsv($frequency);
             Mail::to($emails)->send(new SmsActivityReport($csvFilePath, $frequency));
-            Log::info('SMS CSV ' . $frequency . ' mail sent');
+            Log::info('SMS Excel Report ' . $frequency . ' mail sent');
         } catch (Exception $e) {
-            Log::info('SMS CSV ' . $frequency . ': ' . $e->getMessage());
+            Log::info('SMS Excel Report ' . $frequency . ': ' . $e->getMessage());
         }
     }
 
@@ -109,6 +115,8 @@ class SendActivityReport extends Command
             $endOfWeek = Carbon::now()->startOfWeek()->subDay();
             // take between the dates of week
             $query = $query->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
+        } elseif($frequency == 'recent-7-days') {
+            $query = $query->whereDate('created_at', '>=', Carbon::now()->subDays(7));
         } else {
             $yesterday = Carbon::yesterday();
             $query = $query->whereDate('created_at', $yesterday);

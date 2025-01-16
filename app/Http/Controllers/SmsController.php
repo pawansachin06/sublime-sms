@@ -17,7 +17,7 @@ use Illuminate\Validation\Rule;
 use App\Models\SenderNumber;
 use App\Imports\SmsImport;
 use App\Services\Appy;
-
+use Illuminate\Support\Facades\Artisan;
 
 class SmsController extends Controller
 {
@@ -118,8 +118,9 @@ class SmsController extends Controller
                         'from_number' => $row->from,
                         'from' => $row?->sender?->email,
                         'from_name' => $from_name,
-                        'send_at' => $row?->send_at?->format('d/m/Y h:i A'),
+                        'send_at' => $row?->send_at?->setTimezone('Australia/Sydney')->format('d/m/Y h:i A'),
                         'cost' => $row->cost,
+                        'recipient_name' => $row->name,
                         'recipient' => !empty($row->recipient) ? $row->recipient : $row->name,
                         'status' => strtoupper($row->status),
                         'folder' => $row->folder,
@@ -435,6 +436,17 @@ class SmsController extends Controller
     public function destroy(Sms $sms)
     {
         //
+    }
+
+    public function send_report(Request $request)
+    {
+        Artisan::call('send-activity-report', [
+            'type'=> 'recent-7-days',
+        ]);
+        return response()->json([
+            'success'=> true,
+            'message'=> 'Email triggered, please check inbox'
+        ]);
     }
 
     public function dlr_callback(Request $req)

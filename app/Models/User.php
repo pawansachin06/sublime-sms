@@ -185,9 +185,11 @@ class User extends Authenticatable
             if(!empty($parentIds)) {
                 foreach ($parentIds as $pId) {
                     $parentUser = User::find($pId);
-                    $children = $parentUser->children?->pluck('id')->toArray();
-                    if(!empty($children)) {
-                        $profileIds = array_merge($profileIds, $children);
+                    if(!in_array($pId, [10])) {
+                        $children = $parentUser->children?->pluck('id')->toArray();
+                        if(!empty($children)) {
+                            $profileIds = array_merge($profileIds, $children);
+                        }
                     }
                 }
                 $profileIds = array_merge($profileIds, $parentIds->toArray());

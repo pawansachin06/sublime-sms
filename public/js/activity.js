@@ -467,8 +467,13 @@ document.addEventListener('alpine:init', function () {
 
 
                 setInterval(function () {
-                    self.items = [];
-                    self.loadItems(1)
+                    // self.items = [];
+                    // self.loadItems(1)
+                    if(document.body.classList.contains('modal-open')) {
+
+                    } else {
+                        window.location.reload();
+                    }
                     // Toastify({
                     //     text: 'Refreshing activity...',
                     //     className: 'toast-success',

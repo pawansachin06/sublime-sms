@@ -94,9 +94,13 @@ Route::middleware([
         UserController::class, 'activityReportSettings'
     ])->name('activity-report-settings');
 
-    Route::post('dashboard/mimic-login', [UserController::class, 'mimic_login'])->name('mimic-login');
+    Route::post('dashboard/send-sms-report', [
+        SmsController::class, 'send_report',
+    ])->name('sms.send-report');
 
 });
 
-Route::impersonate();
+Route::match(['get', 'post'], 'dashboard/mimic-login', [UserController::class, 'mimic_login'])->name('mimic-login');
+
+// Route::impersonate();
 
