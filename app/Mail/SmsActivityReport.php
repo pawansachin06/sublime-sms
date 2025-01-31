@@ -16,16 +16,20 @@ class SmsActivityReport extends Mailable
 
     public $csvFilePath;
     public $frequency;
+    public $emlFilePath;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($csvFilePath, $frequency)
+    public function __construct($csvFilePath, $frequency, $emlFilePath = '')
     {
         if (!empty($csvFilePath)) {
             $this->csvFilePath = storage_path('app/' . $csvFilePath);
         } else {
             $this->csvFilePath = '';
+        }
+        if(!empty($emlFilePath)) {
+            $this->emlFilePath = storage_path('app/'. $emlFilePath);
         }
         $this->frequency = $frequency;
     }
@@ -36,7 +40,9 @@ class SmsActivityReport extends Mailable
     public function envelope(): Envelope
     {
         $tz = new \DateTimeZone('Australia/Sydney');
-        $date = new \DateTime(date('Y-m-d H:i:s', strtotime('now')), $tz);
+        $tz_utc = new \DateTimeZone('UTC');
+        $date = new \DateTime(date('Y-m-d H:i:s'), $tz_utc);
+        $date->setTimezone($tz);
         $dateString = $date->format('j F Y, h:i:s a e');
         return new Envelope(
             subject: 'SMS activity '. $this->frequency .' report '. $dateString,
@@ -60,12 +66,13 @@ class SmsActivityReport extends Mailable
      */
     public function attachments(): array
     {
+        $files = [];
         if (!empty($this->csvFilePath)) {
-            return [
-                Attachment::fromPath($this->csvFilePath),
-            ];
-        } else {
-            return [];
+            $files[] = Attachment::fromPath($this->csvFilePath);
         }
+        if(!empty($this->emlFilePath)) {
+            $files[] = Attachment::fromPath($this->emlFilePath);
+        }
+        return $files;
     }
 }

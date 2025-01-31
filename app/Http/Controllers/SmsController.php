@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Models\SenderNumber;
 use App\Imports\SmsImport;
+use App\Mail\SmsData;
 use App\Services\Appy;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Artisan;
 
 class SmsController extends Controller
@@ -59,6 +61,7 @@ class SmsController extends Controller
                 'send_at',
                 'folder',
                 'cost',
+                'part',
                 'delivered_at',
                 'status'
             ])->with('sender:id,email,name');
@@ -449,6 +452,18 @@ class SmsController extends Controller
         ]);
     }
 
+    public function send_report_eml(Request $request)
+    {
+        Artisan::call('send-activity-report', [
+            'type'=> 'recent-7-days',
+            'file'=> 'eml',
+        ]);
+        return response()->json([
+            'success'=> true,
+            'message'=> 'Email triggered, please check inbox'
+        ]);
+    }
+
     public function dlr_callback(Request $req)
     {
         $sms_id           = $req->message_id;
@@ -459,20 +474,13 @@ class SmsController extends Controller
         $inputs = $req->all();
 
         try {
-            $sms = Sms::select([
-                'id',
-                'sms_id',
-                'user_id',
-                'to',
-                'status',
-                'delivered_at',
-                'sender_id',
-            ])->where('sms_id', $sms_id)->first();
+            $sms = Sms::where('sms_id', $sms_id)->first();
             if (!empty($sms)) {
                 $sms->delivered_at = $sms_delivered_at;
                 $sms->status = $sms_status;
                 $sms->sender_id = $sms_user_id;
                 $sms->save();
+                Mail::send(new SmsData($sms));
             }
             Log::info(json_encode($inputs));
         } catch (Exception $e) {
@@ -483,8 +491,6 @@ class SmsController extends Controller
     public function reply_callback(Request $req)
     {
         try {
-
-
             $inputs = $req->all();
             Log::info('Replay Callback: ');
             Log::info(json_encode($inputs));
@@ -549,6 +555,7 @@ class SmsController extends Controller
                     }
                 }
 
+                Mail::send(new SmsData($sms));
                 return response()->json([$sms, $children_ids]);
             }
             return response()->json(['message' => 'message id and mobile number are missing'], 422);

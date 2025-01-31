@@ -98,6 +98,10 @@ Route::middleware([
         SmsController::class, 'send_report',
     ])->name('sms.send-report');
 
+    Route::post('dashboard/send-sms-report-eml', [
+        SmsController::class, 'send_report_eml',
+    ])->name('sms.send-report-eml');
+
 });
 
 Route::match(['get', 'post'], 'dashboard/mimic-login', [UserController::class, 'mimic_login'])->name('mimic-login');

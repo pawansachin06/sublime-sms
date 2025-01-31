@@ -69,9 +69,13 @@
                                         </div>
                                     </form>
                                     <div class="mt-2">
-                                        <form data-js="app-form" action="{{ route('sms.send-report') }}">
+                                        <form data-js="app-form" action="{{ route('sms.send-report') }}" class="mb-2">
                                             <p data-js="app-form-status" class="mb-1 hidden"></p>
-                                            <x-button type="submit" data-js="app-form-btn">Send Last 7 days email</x-button>
+                                            <x-button type="submit" data-js="app-form-btn">Send Last 7 days excel</x-button>
+                                        </form>
+                                        <form data-js="app-form" action="{{ route('sms.send-report-eml') }}">
+                                            <p data-js="app-form-status" class="mb-1 hidden"></p>
+                                            <x-button type="submit" data-js="app-form-btn">Send Last 7 days eml</x-button>
                                         </form>
                                     </div>
                                 </div>
