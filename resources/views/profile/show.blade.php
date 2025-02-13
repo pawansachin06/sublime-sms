@@ -84,6 +84,37 @@
                     </div>
                 </div>
                 <x-section-border />
+
+                <div class="mt-10 sm:mt-0">
+                    <div class="md:grid md:grid-cols-3 md:gap-6">
+                        <div class="md:col-span-1 flex justify-between">
+                            <div class="px-4 sm:px-0">
+                                <h3 class="text-lg font-medium text-gray-900">SMS Relay</h3>
+                                <p class="mt-1 mb-0 text-sm text-gray-600">Specify sms relay emails</p>
+                            </div>
+                        </div>
+                        <div class="mt-5 md:mt-0 md:col-span-2">
+                            <div class="px-4 py-5 sm:p-6 bg-white shadow sm:rounded-lg">
+                                <div class="max-w-xl text-sm text-gray-600">
+                                    <?php $data = auth()->user()->getSmsRelaySettings(); ?>
+                                    <form data-js="app-form" action="{{ route('sms-relay-settings') }}">
+                                        <div class="mb-4">
+                                            <label class="block font-medium text-sm text-gray-700">
+                                                Enter the emails (separate by comma) sms relay
+                                            </label>
+                                            <input type="text" name="relayEmails" value="{{ !empty($data['emails']) ? $data['emails'] : '' }}" required class="border-gray-300 focus:border-primary-500 focus:ring-primary-400 rounded-md shadow-sm mt-1 block w-full" />
+                                        </div>
+                                        <div class="">
+                                            <p data-js="app-form-status" class="mb-1 hidden"></p>
+                                            <button type="submit" data-js="app-form-btn" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition ease-in-out duration-150">Save Changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <x-section-border />
             @endif
 
 

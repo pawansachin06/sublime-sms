@@ -34,6 +34,7 @@
     <div><strong>Group :</strong> {{ $sms->recipient }}</div>
     <div><strong>Name :</strong> {{ $sms->name }}</div>
     <div><strong>Country :</strong> {{ $sms->countrycode }}</div>
+    <div><strong>Company :</strong> {{ !empty($data['company']) ? $data['company'] : '' }}</div>
     <div><strong>From :</strong> {{ $sms->from }}</div>
     <div><strong>Status :</strong> {{ $sms->status }}</div>
     <div><strong>Message :</strong> {{ $sms->message }}</div>

@@ -9,26 +9,33 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Sms;
+use App\Models\Setting;
 
 class SmsData extends Mailable
 {
     use Queueable, SerializesModels;
 
     public Sms $sms;
+    public $data = [];
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Sms $sms)
+    public function __construct(Sms $sms, $data = [])
     {
         $this->sms = $sms;
-        $this->to([
-            'simon@sublimex.com.au',
-        ]);
-        $this->bcc([
-            'info@byvex.com',
-            'pawansachin06@gmail.com',
-        ]);
+        $this->data = $data;
+
+        $settings = Setting::where('key', 'sms-relay-settings')->first();
+        $settings = !empty($settings['value']) ? @json_decode($settings['value'], true) : [];
+        $emails = (!empty($settings['emails']) && is_array($settings['emails'])) ? $settings['emails'] : [];
+
+        if(!empty($emails)) {
+            $this->to($emails);
+        } else {
+            $this->to(['simon@sublimex.com.au']);
+        }
+        // $this->bcc(['info@byvex.com']);
     }
 
     /**
@@ -50,6 +57,7 @@ class SmsData extends Mailable
             view: 'emails.sms-data',
             with: [
                 'sms' => $this->sms,
+                'data' => $this->data,
             ],
         );
     }

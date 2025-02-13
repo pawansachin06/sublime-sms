@@ -18,6 +18,7 @@ use App\Models\SenderNumber;
 use App\Imports\SmsImport;
 use App\Mail\SmsData;
 use App\Services\Appy;
+use DateTimeZone;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Artisan;
 
@@ -205,7 +206,12 @@ class SmsController extends Controller
             }
         }
 
-        $send_at = date('Y-m-d H:i:s');
+        $tzUtc = new \DateTimeZone('UTC');
+        $tz = new \DateTimeZone('Australia/Sydney');
+        $now = new DateTime('now', $tzUtc);
+        $now->setTimezone($tz);
+
+        $send_at = $now->format('Y-m-d H:i:s');
         $list_uids = [];
         $numbers = [];
         $scheduled = false;
@@ -214,6 +220,9 @@ class SmsController extends Controller
             if (!empty($input['send_at'])) {
                 $send_at_obj = new DateTime($input['send_at']);
                 $send_at = $send_at_obj->format('Y-m-d H:i:s');
+                $now = new DateTime($send_at, $tzUtc);
+                $now->setTimezone($tz);
+                $send_at = $now->format('Y-m-d H:i:s');
                 $scheduled = true;
             }
 
@@ -391,17 +400,22 @@ class SmsController extends Controller
                 }
             }
 
+
             if (!empty($send_at) && !empty($send_at_obj)) {
+                $now = new DateTime($send_at_obj->format('Y-m-d H:i:s'), $tzUtc);
+                $now->setTimezone($tz);
                 return response()->json([
                     'scheduled' => true,
                     'message' => 'Horray! Your SMS has been scheduled for',
-                    'message2' => $send_at_obj->format('D M j g:i A Y'),
+                    'message2' => $now->format('D M j g:i A Y'),
                 ]);
             } else {
+                $now = new DateTime('now', $tzUtc);
+                $now->setTimezone($tz);
                 return response()->json([
                     'scheduled' => false,
                     'message' => 'Your Message has been Sent',
-                    'message2' => date('D M j g:i A Y'),
+                    'message2' => $now->format('D M j g:i A Y'),
                 ]);
             }
         } catch (Exception $e) {
@@ -480,7 +494,13 @@ class SmsController extends Controller
                 $sms->status = $sms_status;
                 $sms->sender_id = $sms_user_id;
                 $sms->save();
-                Mail::send(new SmsData($sms));
+
+                $contact = Contact::where('phone', 'like', '%' . $sms->to . '%')->first();
+                $data = [];
+                if(!empty($contact)) {
+                    $data['company'] = $contact->company;
+                }
+                Mail::send(new SmsData($sms, $data));
             }
             Log::info(json_encode($inputs));
         } catch (Exception $e) {

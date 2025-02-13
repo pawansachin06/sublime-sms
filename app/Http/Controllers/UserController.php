@@ -324,6 +324,46 @@ class UserController extends Controller
     }
 
 
+    public function smsRelaySettings(Request $req)
+    {
+        $user = $req->user();
+        if (empty($user)) {
+            return response()->json(['message' => 'Please login to save settings'], 422);
+        }
+
+        if (!$user->isSuperAdmin()) {
+            return response()->json(['message' => 'Only Super Admin can save settings'], 403);
+        }
+
+        $emails = $req->relayEmails;
+        $emails = !empty($emails) ? explode(',', $emails) : [];
+
+        if (!empty($emails) && is_array($emails)) {
+            foreach ($emails as $email) {
+                if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    return response()->json([
+                        'message' => $email . ' is invalid email, please remove it or fix it',
+                    ], 422);
+                }
+            }
+        }
+
+        $data = ['emails' => $emails,];
+        try {
+            Setting::updateOrCreate([
+                'key' => 'sms-relay-settings'
+            ], ['value' => json_encode($data), 'tag' => 'sms-relay']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Relay emails saved successfully'
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+
     /**
      * Remove the specified resource from storage.
      */

@@ -219,6 +219,15 @@ class User extends Authenticatable
         return $data;
     }
 
+    public function getSmsRelaySettings() {
+        $settings = Setting::where('key', 'sms-relay-settings')->first();
+        $settings = !empty($settings['value']) ? @json_decode($settings['value'], true) : [];
+        $data = [
+            'emails' => ( !empty($settings['emails']) && is_array($settings['emails']) ) ? implode(',', $settings['emails']) : '',
+        ];
+        return $data;
+    }
+
     public function profilePhotoUrl(): Attribute
     {
         return Attribute::get(function () {

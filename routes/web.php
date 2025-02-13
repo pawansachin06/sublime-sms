@@ -94,6 +94,10 @@ Route::middleware([
         UserController::class, 'activityReportSettings'
     ])->name('activity-report-settings');
 
+    Route::post('dashboard/sms-relay-settings', [
+        UserController::class, 'smsRelaySettings'
+    ])->name('sms-relay-settings');
+
     Route::post('dashboard/send-sms-report', [
         SmsController::class, 'send_report',
     ])->name('sms.send-report');
