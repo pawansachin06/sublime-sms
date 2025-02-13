@@ -300,10 +300,18 @@
                                         </div>
                                     </div>
                                     <div class="w-full px-2 mb-3">
-                                        <label class="inline-flex gap-2 cursor-pointer items-center">
-                                            <input type="checkbox" name="isTesting" value="YES" class="border-solid rounded bg-gray-200 text-primary-500 focus:ring-primary-400" />
-                                            <span class="select-none">Is Testing</span>
-                                        </label>
+                                        <div class="flex flex-wrap gap-6 items-center">
+                                            <label class="inline-flex gap-2 cursor-pointer items-center">
+                                                <input type="checkbox" name="isTesting" value="YES" class="border-solid rounded bg-gray-200 text-primary-500 focus:ring-primary-400" />
+                                                <span class="select-none">Is Testing</span>
+                                            </label>
+                                            <?php if (!empty($_GET['test-quick-send'])) { ?>
+                                                <label class="inline-flex gap-2 cursor-pointer items-center">
+                                                    <input type="checkbox" name="isQuick" value="YES" class="border-solid rounded bg-gray-200 text-primary-500 focus:ring-primary-400" />
+                                                    <span class="select-none">Quick Send</span>
+                                                </label>
+                                            <?php } ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

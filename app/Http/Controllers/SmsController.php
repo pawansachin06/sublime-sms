@@ -9,6 +9,7 @@ use App\Models\Sms;
 use App\Models\User;
 use App\Models\SmsJob;
 use App\Models\Template;
+use App\Services\SMSApi;
 use Exception;
 use DateTime;
 use Illuminate\Http\Request;
@@ -25,10 +26,12 @@ use Illuminate\Support\Facades\Artisan;
 class SmsController extends Controller
 {
     protected $appy;
+    protected $smsApi;
 
-    function __construct(Appy $appy)
+    function __construct(Appy $appy, SmsApi $smsApi)
     {
         $this->appy = $appy;
+        $this->smsApi = $smsApi;
     }
 
     /**
@@ -165,6 +168,7 @@ class SmsController extends Controller
             'message' => ['required', 'string'],
             'from' => ['required', Rule::exists(SenderNumber::class, 'phone')],
             'isTesting' => ['nullable'],
+            'isQuick' => ['nullable'],
             'sending' => ['required', 'in:adhoc,contact'],
             'adhoc_numbers' => ['nullable', 'string'],
             'country' => ['nullable', 'string'],
@@ -172,6 +176,7 @@ class SmsController extends Controller
 
         $input['title'] = 'No title';
         $isTesting = !empty($input['isTesting']) ? true : false;
+        $isQuick = (!empty($input['isQuick']) && $input['isQuick'] == 'YES');
 
         $is_adhoc = $input['sending'] == 'adhoc';
 
@@ -217,6 +222,9 @@ class SmsController extends Controller
         $scheduled = false;
         try {
 
+            $quick_job_id = null;
+            $quick_sms_ids = [];
+
             if (!empty($input['send_at'])) {
                 $send_at_obj = new DateTime($input['send_at']);
                 $send_at = $send_at_obj->format('Y-m-d H:i:s');
@@ -247,6 +255,7 @@ class SmsController extends Controller
                     'scheduled' => $scheduled,
                     'status' => $isTesting ? 'TESTING' : 'PENDING',
                 ]);
+                $quick_job_id = $job->id;
             }
 
             // generate all sms here
@@ -397,11 +406,31 @@ class SmsController extends Controller
                         'status' => 'pending',
                         'local_status' => !empty($is_teting) ? 'SENT' : 'PENDING',
                     ]);
+                    $quick_sms_ids[] = $sms->id;
                 }
             }
 
 
             if (!empty($send_at) && !empty($send_at_obj)) {
+                if($isQuick) {
+                    if(!empty($quick_job_id)) {
+                        $smses = Sms::where('local_status', 'PENDING')->where('sms_job_id', $quick_job_id)->take(250)->get();
+                        if(!empty($smses) && count($smses)) {
+                            foreach($smses as $sms) {
+                                $this->send_quick_sms($sms);
+                            }
+                        }
+                    }
+                    if(!empty($quick_sms_ids)) {
+                        foreach ($quick_sms_ids as $quick_sms_id) {
+                            $sms = Sms::where('local_status', 'PENDING')->where('id', $quick_sms_id)->first();
+                            if(!empty($sms)) {
+                                $this->send_quick_sms($sms);
+                            }
+                        }
+                    }
+                }
+
                 $now = new DateTime($send_at_obj->format('Y-m-d H:i:s'), $tzUtc);
                 $now->setTimezone($tz);
                 return response()->json([
@@ -410,6 +439,26 @@ class SmsController extends Controller
                     'message2' => $now->format('D M j g:i A Y'),
                 ]);
             } else {
+                if($isQuick) {
+                    if(!empty($quick_job_id)) {
+                        $smses = Sms::where('local_status', 'PENDING')->where('sms_job_id', $quick_job_id)->take(250)->get();
+                        if(!empty($smses) && count($smses)) {
+                            foreach($smses as $sms) {
+                                $this->send_quick_sms($sms);
+                            }
+                        }
+                    }
+                    if(!empty($quick_sms_ids)) {
+                        foreach ($quick_sms_ids as $quick_sms_id) {
+                            $sms = Sms::where('local_status', 'PENDING')->where('id', $quick_sms_id)->first();
+                            if(!empty($sms)) {
+                                $this->send_quick_sms($sms);
+                            }
+                        }
+                    }
+                }
+
+
                 $now = new DateTime('now', $tzUtc);
                 $now->setTimezone($tz);
                 return response()->json([
@@ -420,6 +469,41 @@ class SmsController extends Controller
             }
         } catch (Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function send_quick_sms($sms = null)
+    {
+        try {
+            $dlr_callback = route('api.sms.callback.dlr');
+            // $is_scheduled if false then keep send_at empty
+            $senderNumber = $sms->from;
+            if($sms->countrycode == 'SG' && $sms->from == 61480088898) {
+                $senderNumber = 6583184436;
+            }
+            if($sms->countrycode == 'HK' && $sms->from == 61480088898) {
+                $senderNumber = 'BGC Future';
+            }
+
+            $api_res = $this->smsApi->send_sms([
+                'to' => $sms->to,
+                'message' => $sms->message,
+                'countrycode' => $sms->countrycode,
+                'send_at' => !empty($sms->send_at) ? $sms->send_at : '',
+                'dlr_callback' => $dlr_callback,
+                'from' => $senderNumber,
+            ]);
+            if (empty($sms->send_at)) {
+                $sms->send_at = date('Y-m-d H:i:s');
+            }
+            $sms->local_status = 'SENT';
+            $sms->sms_id = !empty($api_res['message_id']) ? $api_res['message_id'] : '';
+            $sms->part = !empty($api_res['sms']) ? $api_res['sms'] : '';
+            $sms->cost = isset($api_res['cost']) ? $api_res['cost'] : '';
+            $sms->save();
+        } catch ( Exception $e ) {
+            info($e->getMessage());
         }
     }
 
